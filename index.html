@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mes Recettes</title>
+    <!-- Icône personnalisée pour l'écran d'accueil iPhone -->
+    <link rel="apple-touch-icon" href="icone.png">
     <style>
         /* MODE SOMBRE PAR DÉFAUT */
         :root {
@@ -44,20 +46,20 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        /* En-tête : Nom de l'app et bouton mode sombre/clair */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 20px 0 16px 0;
+            margin: 16px 0 12px 0;
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
-        /* Bouton Mode Sombre/Clair */
         .theme-toggle-btn {
             background: none;
             border: none;
@@ -69,6 +71,27 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
+        /* Barre de recherche positionnée directement sous l'en-tête */
+        .search-container {
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+        }
+
         /* Vues (Onglets) */
         .view-section {
             display: none;
@@ -77,7 +100,7 @@
             display: block;
         }
 
-        /* Grille des catégories / recettes */
+        /* Grille des cartes */
         .recipes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -91,7 +114,7 @@
             }
         }
 
-        /* Carte de catégorie / recette style Recipe Keeper */
+        /* Carte de recette / plat / source */
         .recipe-card {
             background-color: var(--card-bg);
             border-radius: 14px;
@@ -138,7 +161,7 @@
             font-size: 16px;
         }
 
-        /* Barre de navigation inférieure fixe */
+        /* Barre de navigation inférieure fixe (style Recipe Keeper) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -180,61 +203,64 @@
 </head>
 <body>
 
+    <!-- 1. En-tête : Nom de l'app (sans émoji) et bouton mode sombre/clair -->
     <header>
-        <h1 id="pageTitle">Catégories</h1>
+        <h1>Mes Recettes</h1>
         <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️</button>
     </header>
 
-    <!-- ONGLET 1 : ACCUEIL / CATÉGORIES -->
-    <div id="view-accueil" class="view-section active">
+    <!-- 2. Barre de recherche placée juste sous l'en-tête -->
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
+    </div>
+
+    <!-- ONGLET 1 : CLASSEMENT PAR PLAT / CATÉGORIES -->
+    <div id="view-plats" class="view-section active">
         <div class="recipes-grid">
-            <!-- Exemple de Catégorie 1 -->
-            <div class="recipe-card" onclick="ouvrirCategorie('Apéritifs')">
-                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Apéritifs" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Entrées')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Entrées" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Apéritifs</span>
-                    <span>1</span>
+                    <span>Entrées</span>
+                    <span>4</span>
                 </div>
             </div>
 
-            <!-- Exemple de Catégorie 2 -->
-            <div class="recipe-card" onclick="ouvrirCategorie('Dessert')">
-                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Dessert" class="recipe-img">
-                <div class="recipe-banner">
-                    <span>Dessert</span>
-                    <span>2</span>
-                </div>
-            </div>
-
-            <!-- Exemple de Catégorie 3 -->
-            <div class="recipe-card" onclick="ouvrirCategorie('Plat principal')">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plat principal" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Plats')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plats" class="recipe-img">
                 <div class="recipe-banner">
                     <span>Plats</span>
-                    <span>3</span>
+                    <span>15</span>
+                </div>
+            </div>
+
+            <div class="recipe-card" onclick="ouvrirFiltre('Desserts')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Desserts" class="recipe-img">
+                <div class="recipe-banner">
+                    <span>Desserts</span>
+                    <span>8</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ONGLET 2 : SOURCES -->
+    <!-- ONGLET 2 : CLASSEMENT PAR SOURCE -->
     <div id="view-sources" class="view-section">
         <div class="source-list">
-            <div class="source-item">📖 Livre : "Cuisine de Famille"</div>
-            <div class="source-item">🔗 Site Web : marmiton.org</div>
-            <div class="source-item">📝 Carnet de notes personnel</div>
+            <div class="source-item" onclick="ouvrirSource('Livre de famille')">📖 Livre : "Cuisine de Famille"</div>
+            <div class="source-item" onclick="ouvrirSource('Marmiton')">🔗 Site Web : marmiton.org</div>
+            <div class="source-item" onclick="ouvrirSource('Carnet personnel')">📝 Carnet de notes personnel</div>
         </div>
     </div>
 
-    <!-- BARRE DE NAVIGATION INFÉRIEURE -->
+    <!-- 3. Barre de navigation en bas (Style Recipe Keeper : Plats et Source) -->
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="changerOnglet('accueil', 'Catégories', this)">
+        <button class="nav-item active" onclick="changerOnglet('plats', this)">
             <span class="nav-icon">🍲</span>
-            <span>Accueil</span>
+            <span>Plats</span>
         </button>
-        <button class="nav-item" onclick="changerOnglet('sources', 'Sources', this)">
+        <button class="nav-item" onclick="changerOnglet('sources', this)">
             <span class="nav-icon">📖</span>
-            <span>Sources</span>
+            <span>Source</span>
         </button>
     </nav>
 
@@ -246,16 +272,13 @@
             btn.textContent = body.classList.contains('light-mode') ? '🌙' : '☀️';
         }
 
-        function changerOnglet(nomOnglet, titrePage, elementBtn) {
+        function changerOnglet(nomOnglet, elementBtn) {
             // Masquer toutes les vues
             document.querySelectorAll('.view-section').forEach(section => {
                 section.classList.remove('active');
             });
             // Afficher la vue ciblée
             document.getElementById('view-' + nomOnglet).classList.add('active');
-
-            // Mettre à jour le titre en haut
-            document.getElementById('pageTitle').textContent = titrePage;
 
             // Gérer l'état actif des boutons de la barre du bas
             document.querySelectorAll('.nav-item').forEach(btn => {
@@ -264,8 +287,12 @@
             elementBtn.classList.add('active');
         }
 
-        function ouvrirCategorie(nom) {
-            alert("Ouverture des recettes de la catégorie : " + nom);
+        function ouvrirFiltre(nom) {
+            alert("Affichage du plat : " + nom);
+        }
+
+        function ouvrirSource(nom) {
+            alert("Affichage des recettes de la source : " + nom);
         }
     </script>
 
