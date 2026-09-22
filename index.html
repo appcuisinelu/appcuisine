@@ -4,29 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mes Recettes</title>
-    <!-- Icône personnalisée pour l'écran d'accueil iPhone -->
-    <link rel="apple-touch-icon" href="icone.png">
     <style>
         /* MODE SOMBRE PAR DÉFAUT */
         :root {
             --primary-color: #ecf0f1;
-            --accent-color: #e67e22;
+            --accent-color: #27ae60; /* Vert style Recipe Keeper */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #fcfbfa;
             --text-muted: #a0a0a0;
             --border-color: #2c2c2c;
+            --nav-bg: #1a1a1a;
         }
 
         /* Variables pour le mode clair (quand activé) */
         body.light-mode {
             --primary-color: #2c3e50;
-            --accent-color: #e67e22;
+            --accent-color: #27ae60;
             --bg-color: #fcfbfa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --border-color: #e0e0e0;
+            --nav-bg: #ffffff;
         }
 
         * {
@@ -40,7 +40,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+            padding: env(safe-area-inset-top) 16px 100px 16px;
             transition: background-color 0.3s, color 0.3s;
         }
 
@@ -57,181 +57,215 @@
             letter-spacing: -0.5px;
         }
 
-        /* Style du bouton Mode Sombre/Clair */
+        /* Bouton Mode Sombre/Clair */
         .theme-toggle-btn {
             background: none;
             border: none;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
             background-color: var(--card-bg);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
         }
 
-        .theme-toggle-btn:active {
-            transform: scale(0.9);
+        /* Vues (Onglets) */
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
         }
 
-        /* Barre de recherche */
-        .search-container {
-            margin-bottom: 16px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-color);
-        }
-
-        /* Grille des recettes */
+        /* Grille des catégories / recettes */
         .recipes-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            padding-bottom: 80px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding-bottom: 20px;
         }
 
         @media (min-width: 600px) {
             .recipes-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        /* Carte de recette */
+        /* Carte de catégorie / recette style Recipe Keeper */
         .recipe-card {
             background-color: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            position: relative;
             cursor: pointer;
+            transition: transform 0.2s;
         }
 
         .recipe-card:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
         .recipe-img {
             width: 100%;
-            height: 180px;
+            height: 120px;
             object-fit: cover;
-            background-color: #2a2a2a;
         }
 
-        .recipe-info {
-            padding: 14px;
-        }
-
-        .recipe-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-main);
-        }
-
-        .recipe-meta {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* Bouton d'ajout flottant */
-        .fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
+        .recipe-banner {
             background-color: var(--accent-color);
             color: white;
-            border-radius: 50%;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 6px 16px rgba(230, 126, 34, 0.4);
-            cursor: pointer;
-            border: none;
-            transition: transform 0.2s;
         }
 
-        .fab:active {
-            transform: scale(0.9);
+        /* Liste des sources */
+        .source-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .source-item {
+            background-color: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+        }
+
+        /* Barre de navigation inférieure fixe */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 env(safe-area-inset-bottom) 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine.png">
+            <link rel="apple-touch-icon" href="icone_app_cuisine.png">
 </head>
 <body>
 
     <header>
-        <h1>Mes Recettes</h1>
-        <!-- Bouton pour basculer vers le mode clair (initialement affiché avec le soleil puisque le fond est sombre) -->
+        <h1 id="pageTitle">Catégories</h1>
         <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️</button>
     </header>
 
-    <div class="search-container">
-        <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
-    </div>
+    <!-- ONGLET 1 : ACCUEIL / CATÉGORIES -->
+    <div id="view-accueil" class="view-section active">
+        <div class="recipes-grid">
+            <!-- Exemple de Catégorie 1 -->
+            <div class="recipe-card" onclick="ouvrirCategorie('Apéritifs')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Apéritifs" class="recipe-img">
+                <div class="recipe-banner">
+                    <span>Apéritifs</span>
+                    <span>1</span>
+                </div>
+            </div>
 
-    <div class="recipes-grid" id="recipesGrid">
-        <div class="recipe-card" onclick="ouvrirRecette(1)">
-            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Salade fraîcheur" class="recipe-img">
-            <div class="recipe-info">
-                <div class="recipe-title">Salade Bol Vitamine</div>
-                <div class="recipe-meta">
-                    <span>⏱️ 20 min</span>
-                    <span>👥 4 personnes</span>
+            <!-- Exemple de Catégorie 2 -->
+            <div class="recipe-card" onclick="ouvrirCategorie('Dessert')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Dessert" class="recipe-img">
+                <div class="recipe-banner">
+                    <span>Dessert</span>
+                    <span>2</span>
+                </div>
+            </div>
+
+            <!-- Exemple de Catégorie 3 -->
+            <div class="recipe-card" onclick="ouvrirCategorie('Plat principal')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plat principal" class="recipe-img">
+                <div class="recipe-banner">
+                    <span>Plats</span>
+                    <span>3</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="recipe-card" onclick="ouvrirRecette(2)">
-            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Poulet rôti" class="recipe-img">
-            <div class="recipe-info">
-                <div class="recipe-title">Poulet aux Herbes du Jardin</div>
-                <div class="recipe-meta">
-                    <span>⏱️ 45 min</span>
-                    <span>👥 6 personnes</span>
-                </div>
-            </div>
+    <!-- ONGLET 2 : SOURCES -->
+    <div id="view-sources" class="view-section">
+        <div class="source-list">
+            <div class="source-item">📖 Livre : "Cuisine de Famille"</div>
+            <div class="source-item">🔗 Site Web : marmiton.org</div>
+            <div class="source-item">📝 Carnet de notes personnel</div>
         </div>
     </div>
 
-    <button class="fab" onclick="ajouterRecette()">+</button>
+    <!-- BARRE DE NAVIGATION INFÉRIEURE -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="changerOnglet('accueil', 'Catégories', this)">
+            <span class="nav-icon">🍲</span>
+            <span>Accueil</span>
+        </button>
+        <button class="nav-item" onclick="changerOnglet('sources', 'Sources', this)">
+            <span class="nav-icon">📖</span>
+            <span>Sources</span>
+        </button>
+    </nav>
 
     <script>
         function toggleTheme() {
             const body = document.body;
             body.classList.toggle('light-mode');
-            
             const btn = document.getElementById('themeToggleBtn');
-            // Change l'icône selon le mode actif
-            if (body.classList.contains('light-mode')) {
-                btn.textContent = '🌙'; // Si on passe en mode clair, on affiche la lune pour pouvoir revenir au sombre
-            } else {
-                btn.textContent = '☀️'; // Par défaut (sombre), on affiche le soleil
-            }
+            btn.textContent = body.classList.contains('light-mode') ? '🌙' : '☀️';
         }
 
-        function ouvrirRecette(id) {
-            alert("Ouverture de la recette ID : " + id);
+        function changerOnglet(nomOnglet, titrePage, elementBtn) {
+            // Masquer toutes les vues
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Afficher la vue ciblée
+            document.getElementById('view-' + nomOnglet).classList.add('active');
+
+            // Mettre à jour le titre en haut
+            document.getElementById('pageTitle').textContent = titrePage;
+
+            // Gérer l'état actif des boutons de la barre du bas
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            elementBtn.classList.add('active');
         }
 
-        function ajouterRecette() {
-            alert("Ouverture du formulaire d'ajout");
+        function ouvrirCategorie(nom) {
+            alert("Ouverture des recettes de la catégorie : " + nom);
         }
     </script>
 
