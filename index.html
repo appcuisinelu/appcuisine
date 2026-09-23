@@ -82,18 +82,28 @@
 
         .header-actions {
             display: flex;
-            gap: 16px;
+            gap: 10px;
             align-items: center;
         }
 
+        /* Boutons du haut encerclés */
         .header-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
             cursor: pointer;
             color: var(--accent-color);
-            padding: 4px;
-            transition: color 0.3s;
+            transition: all 0.2s;
+        }
+
+        .header-btn:active {
+            transform: scale(0.92);
         }
 
         /* Barre de recherche cachée par défaut */
@@ -243,7 +253,7 @@
             display: block;
         }
 
-        /* Barre de navigation inférieure fixe (3 éléments maintenant) */
+        /* Barre de navigation inférieure fixe avec éléments séparés par une barre */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -253,6 +263,7 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
+            align-items: center;
             padding: 10px 0 env(safe-area-inset-bottom) 0;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
             z-index: 1000;
@@ -270,6 +281,18 @@
             gap: 4px;
             cursor: pointer;
             flex: 1;
+            position: relative;
+        }
+
+        /* Ajout de la fine barre verticale de séparation entre les boutons du bas */
+        .nav-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background-color: var(--border-color);
         }
 
         .nav-item.active {
@@ -335,7 +358,7 @@
 </head>
 <body class="theme-orange">
 
-    <!-- 1. En-tête : Image icône PNG à gauche + Nom + Bouton + et Loupe -->
+    <!-- 1. En-tête : Image icône PNG à gauche + Nom + Boutons encerclés (+ et 🔍) -->
     <header>
         <div class="header-brand">
             <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img">
@@ -438,7 +461,7 @@
         </div>
     </div>
 
-    <!-- 5. Barre de navigation en bas (Accueil + Thème clair/sombre + Réglage couleurs) -->
+    <!-- 5. Barre de navigation en bas avec séparateurs -->
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="retourAccueil(this)">
             <span class="nav-icon">🏠</span>
@@ -472,9 +495,7 @@
 
         function changerCouleur(couleur) {
             const body = document.body;
-            // Supprimer tous les thèmes de couleur précédents
             body.classList.remove('theme-orange', 'theme-bleu', 'theme-vert', 'theme-mauve');
-            // Ajouter le nouveau thème
             body.classList.add('theme-' + couleur);
             fermerModalCouleurs();
         }
