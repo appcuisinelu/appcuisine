@@ -276,6 +276,29 @@
             transition: background-color 0.3s;
         }
 
+        /* Style spécifique pour l'onglet Famille (Liste déroulante sans photos) */
+        .famille-select-container {
+            margin-bottom: 16px;
+        }
+
+        .famille-select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .famille-select:focus {
+            border-color: var(--accent-color);
+        }
+
         /* Barre de navigation inférieure fixe remontée et aérée */
         .bottom-nav {
             position: fixed;
@@ -417,10 +440,16 @@
         <div class="recipe-list-container" id="recipeList-lucie"></div>
     </div>
 
-    <!-- 3. Vue Famille -->
+    <!-- 3. Vue Famille (Avec liste déroulante textuelle et affichage des photos liées) -->
     <div id="view-famille" class="view-section">
-        <div class="categories-grid" id="categoriesGrid-famille"></div>
-        <div class="recipe-list-container" id="recipeList-famille"></div>
+        <div class="famille-select-container">
+            <select class="famille-select" id="familleSelect" onchange="filtrerFamille(this.value)">
+                <option value="clem">Clem</option>
+                <option value="ade">Ade</option>
+                <option value="gwen">Gwen</option>
+            </select>
+        </div>
+        <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
     <!-- 4. Vue Technique -->
@@ -460,7 +489,7 @@
     </nav>
 
     <script>
-        // Base de données structurée par onglet et par catégorie
+        // Base de données structurée par onglet et par catégorie/personne
         const database = {
             incontournables: {
                 apero: [
@@ -498,13 +527,14 @@
                 ]
             },
             famille: {
-                plats: [
-                    { nom: "Tarte de Clem", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" }
+                clem: [
+                    { nom: "Tarte de Clem", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
+                    { nom: "Gratin de Clem", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" }
                 ],
-                apero: [
+                ade: [
                     { nom: "Verrines d'Ade", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" }
                 ],
-                desserts: [
+                gwen: [
                     { nom: "Crêpes de Gwen", img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d" }
                 ]
             },
@@ -519,35 +549,45 @@
         };
 
         const categoryMeta = {
-            apero: { nom: "Apero", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
+            apero: { nom: "Apéro", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
             plats: { nom: "Plats", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
             desserts: { nom: "Desserts", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
             boulangerie: { nom: "Boulangerie", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff" },
             basiques: { nom: "Basiques", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" },
             maison: { nom: "Maison", img: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba" },
-            cosmetiques: { nom: "Cosmetiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
+            cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
         };
 
         let currentTab = 'incontournables';
 
         function renderCategories(onglet) {
+            if (onglet === 'famille') {
+                filtrerFamille('clem');
+                return;
+            }
+
             const container = document.getElementById(`categoriesGrid-${onglet}`);
+            if (!container) return;
             container.innerHTML = '';
+            container.style.display = 'grid';
+            
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer) listContainer.classList.remove('active');
+
             const tabData = database[onglet] || {};
 
             for (const [catKey, meta] of Object.entries(categoryMeta)) {
                 const recipesInCat = tabData[catKey] || [];
                 const count = recipesInCat.length;
 
-                // Afficher la catégorie si elle contient des recettes (ou afficher toutes pour l'exemple)
                 const card = document.createElement('div');
                 card.className = 'category-card';
-                card.onclick = () =>ouvrirCategorie(onglet, catKey);
+                card.onclick = () => ouvrirCategorie(onglet, catKey);
                 card.innerHTML = `
                     <img src="${meta.img}" alt="${meta.nom}" class="category-img">
                     <div class="category-banner">
                         <span>${meta.nom}</span>
-                        <span>${count}</span>
+                        <span>(${count})</span>
                     </div>
                 `;
                 container.appendChild(card);
@@ -592,8 +632,39 @@
         }
 
         function fermerCategorie(onglet) {
-            document.getElementById(`recipeList-${onglet}`).classList.remove('active');
-            document.getElementById(`categoriesGrid-${onglet}`).style.display = 'grid';
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer) listContainer.classList.remove('active');
+            const grid = document.getElementById(`categoriesGrid-${onglet}`);
+            if (grid) grid.style.display = 'grid';
+        }
+
+        function filtrerFamille(personne) {
+            const listContainer = document.getElementById('recipeList-famille');
+            listContainer.innerHTML = '';
+
+            const recipes = (database.famille && database.famille[personne]) || [];
+
+            if (recipes.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-muted)';
+                emptyMsg.style.padding = '30px';
+                emptyMsg.textContent = 'Aucune recette pour cette personne.';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                recipes.forEach(recipe => {
+                    const row = document.createElement('div');
+                    row.className = 'recipe-row-card';
+                    row.onclick = () => alert("Affichage de : " + recipe.nom);
+                    row.innerHTML = `
+                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
+                        <div class="recipe-row-banner">
+                            <span>${recipe.nom}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
         }
 
         function changerOnglet(nomOnglet, elementBtn) {
@@ -608,7 +679,9 @@
             });
             if(elementBtn) elementBtn.classList.add('active');
 
-            fermerCategorie(nomOnglet);
+            if (nomOnglet !== 'famille') {
+                fermerCategorie(nomOnglet);
+            }
             renderCategories(nomOnglet);
         }
 
