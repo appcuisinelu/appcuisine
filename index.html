@@ -10,7 +10,7 @@
         /* MODE SOMBRE PAR DÉFAUT */
         :root {
             --primary-color: #ecf0f1;
-            --accent-color: #e67e22; /* Orange style Recipe Keeper */
+            --accent-color: #e67e22;
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #fcfbfa;
@@ -46,7 +46,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* En-tête supérieur : Logo + Nom + Actions */
+        /* En-tête supérieur : Logo image + Nom + Actions */
         header {
             display: flex;
             justify-content: space-between;
@@ -265,10 +265,10 @@
 </head>
 <body>
 
-    <!-- 1. En-tête : Logo application à gauche + Nom + Bouton + et Loupe -->
+    <!-- 1. En-tête : Image icône PNG à gauche + Nom + Bouton + et Loupe -->
     <header>
         <div class="header-brand">
-            <img src="icone.png" alt="Logo" class="header-logo-img" onerror="this.style.display='none'">
+            <img src="icone.png" alt="Logo" class="header-logo-img">
             <h1>Mes recettes</h1>
         </div>
         <div class="header-actions">
@@ -282,14 +282,14 @@
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- 3. Menu horizontal supérieur : Incontournable / Lucie / Famille (déroulant) -->
+    <!-- 3. Menu horizontal supérieur : Incontournables / Lucie / Famille -->
     <div class="top-menu">
-        <button class="menu-item active" onclick="changerOnglet('incontournable', this)">Incontournable</button>
+        <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
         <button class="menu-item" onclick="changerOnglet('lucie', this)">Lucie</button>
-        <button class="menu-item" onclick="changerOnglet('famille', this)">Autres membres</button>
+        <button class="menu-item" onclick="changerOnglet('famille', this)">Famille</button>
     </div>
 
-    <!-- 4. Liste déroulante pour le groupe (Clem, Ade, Gwen, Maman, Malo) -->
+    <!-- 4. Liste déroulante pour les membres (Clem, Ade, Gwen, Maman, Malo) -->
     <div id="filter-famille" class="family-filter-container">
         <select class="family-select" onchange="filtrerMembre(this.value)">
             <option value="tous">👥 Choisir un membre...</option>
@@ -302,10 +302,10 @@
     </div>
 
     <!-- VUES DES RECETTES -->
-    <div id="view-incontournable" class="view-section active">
+    <div id="view-incontournables" class="view-section active">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Incontournable')">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Incontournable" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Incontournables')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Incontournables" class="recipe-img">
                 <div class="recipe-banner">
                     <span>Incontournables</span>
                     <span>10</span>
@@ -388,7 +388,7 @@
 
         function retourAccueil(elementBtn) {
             const defaultBtn = document.querySelector('.menu-item');
-            if (defaultBtn) changerOnglet('incontournable', defaultBtn);
+            if (defaultBtn) changerOnglet('incontournables', defaultBtn);
             
             document.querySelectorAll('.nav-item').forEach(btn => {
                 if(btn !== document.getElementById('themeToggleBtn')) {
