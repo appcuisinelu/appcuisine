@@ -10,7 +10,7 @@
         /* MODE SOMBRE PAR DÉFAUT */
         :root {
             --primary-color: #ecf0f1;
-            --accent-color: #27ae60; /* Vert style Recipe Keeper */
+            --accent-color: #e67e22; /* Orange style Recipe Keeper */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #fcfbfa;
@@ -22,7 +22,7 @@
         /* Variables pour le mode clair (quand activé) */
         body.light-mode {
             --primary-color: #2c3e50;
-            --accent-color: #27ae60;
+            --accent-color: #e67e22;
             --bg-color: #fcfbfa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
@@ -46,18 +46,47 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* En-tête : Nom de l'app épuré */
+        /* En-tête supérieur style Recipe Keeper (Logo/Nom + Plus + Loupe) */
         header {
-            margin: 16px 0 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0 16px 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-logo {
+            font-size: 22px;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
+            color: var(--accent-color);
             letter-spacing: -0.5px;
         }
 
-        /* Barre de recherche cachée par défaut, s'affiche via la loupe */
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--accent-color);
+            padding: 4px;
+        }
+
+        /* Barre de recherche cachée par défaut, s'affiche via la loupe du haut */
         .search-container {
             display: none;
             margin-bottom: 16px;
@@ -83,7 +112,7 @@
             border-color: var(--accent-color);
         }
 
-        /* Menu horizontal supérieur */
+        /* Menu horizontal supérieur avec les prénoms/profils */
         .top-menu {
             display: flex;
             gap: 8px;
@@ -114,27 +143,6 @@
             background-color: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
-        }
-
-        /* Sous-menu : Liste déroulante pour les membres de la famille */
-        .family-filter-container {
-            display: none;
-            margin-bottom: 16px;
-        }
-
-        .family-filter-container.active {
-            display: block;
-        }
-
-        .family-select {
-            width: 100%;
-            padding: 10px 14px;
-            font-size: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            outline: none;
         }
 
         /* Vues (Onglets) */
@@ -233,9 +241,16 @@
 </head>
 <body>
 
-    <!-- 1. En-tête : Nom de l'app -->
+    <!-- 1. En-tête style Recipe Keeper (Logo, Nom, Bouton +, Bouton Loupe) -->
     <header>
-        <h1>Mes Recettes</h1>
+        <div class="header-brand">
+            <span class="header-logo">🍲</span>
+            <h1>Recipe Keeper</h1>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="ouvrirAjout()" title="Ajouter">+</button>
+            <button class="header-btn" onclick="toggleRecherche()" title="Rechercher">🔍</button>
+        </div>
     </header>
 
     <!-- 2. Barre de recherche masquable -->
@@ -243,148 +258,134 @@
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- 3. Menu horizontal supérieur -->
+    <!-- 3. Menu horizontal supérieur : Classic / Lucie / Clem / Ade / Gwen / Maman -->
     <div class="top-menu">
-        <button class="menu-item active" onclick="changerOnglet('plats', this)">Plats</button>
-        <button class="menu-item" onclick="changerOnglet('famille-immediate', this)">Famille Immédiate</button>
-        <button class="menu-item" onclick="changerOnglet('soeurs', this)">Mes Sœurs</button>
+        <button class="menu-item active" onclick="changerProfil('classic', this)">Classic</button>
+        <button class="menu-item" onclick="changerProfil('lucie', this)">Lucie</button>
+        <button class="menu-item" onclick="changerProfil('clem', this)">Clem</button>
+        <button class="menu-item" onclick="changerProfil('ade', this)">Ade</button>
+        <button class="menu-item" onclick="changerProfil('gwen', this)">Gwen</button>
+        <button class="menu-item" onclick="changerProfil('maman', this)">Maman</button>
     </div>
 
-    <!-- 4. Sélecteur de profil (Liste déroulante) pour la Famille Immédiate -->
-    <div id="filter-famille-immediate" class="family-filter-container">
-        <select class="family-select" onchange="filtrerMembre(this.value)">
-            <option value="tous">👥 Tous les membres (Famille Immédiate)</option>
-            <option value="maman">Maman</option>
-            <option value="papa">Papa</option>
-            <option value="moi">Moi</option>
-        </select>
-    </div>
-
-    <!-- Sélecteur de profil pour Mes Sœurs -->
-    <div id="filter-soeurs" class="family-filter-container">
-        <select class="family-select" onchange="filtrerMembre(this.value)">
-            <option value="tous">👥 Toutes les sœurs</option>
-            <option value="soeur1">Sœur 1</option>
-            <option value="soeur2">Sœur 2</option>
-        </select>
-    </div>
-
-    <!-- ONGLET 1 : PLATS / CATÉGORIES -->
-    <div id="view-plats" class="view-section active">
+    <!-- CONTENUS DES PROFILS -->
+    <div id="view-classic" class="view-section active">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Entrées')">
-                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Entrées" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Classic - Recettes')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Classic" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Entrées</span>
-                    <span>4</span>
+                    <span>Recettes Classic</span>
+                    <span>12</span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="recipe-card" onclick="ouvrirFiltre('Plats')">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plats" class="recipe-img">
+    <div id="view-lucie" class="view-section">
+        <div class="recipes-grid">
+            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Lucie')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Lucie" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Plats</span>
-                    <span>15</span>
+                    <span>Lucie</span>
+                    <span>5</span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="recipe-card" onclick="ouvrirFiltre('Desserts')">
-                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Desserts" class="recipe-img">
+    <div id="view-clem" class="view-section">
+        <div class="recipes-grid">
+            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Clem')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Clem" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Desserts</span>
+                    <span>Clem</span>
                     <span>8</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ONGLET 2 : FAMILLE IMMÉDIATE -->
-    <div id="view-famille-immediate" class="view-section">
+    <div id="view-ade" class="view-section">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Famille Immédiate')">
-                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Famille" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Recettes d\'Ade')">
+                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Ade" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Marmite Familiale</span>
-                    <span>10</span>
+                    <span>Ade</span>
+                    <span>3</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ONGLET 3 : MES SŒURS -->
-    <div id="view-soeurs" class="view-section">
+    <div id="view-gwen" class="view-section">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Recettes des Sœurs')">
-                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Sœurs" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Gwen')">
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Gwen" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Cuisine des Sœurs</span>
+                    <span>Gwen</span>
                     <span>6</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 5. Barre de navigation en bas (Accueil + Recherche + Mode Sombre/Clair) -->
+    <div id="view-maman" class="view-section">
+        <div class="recipes-grid">
+            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Maman')">
+                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Maman" class="recipe-img">
+                <div class="recipe-banner">
+                    <span>Maman</span>
+                    <span>15</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Barre de navigation en bas (Accueil + Mode Sombre/Clair) -->
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="retourAccueil(this)">
             <span class="nav-icon">🏠</span>
             <span>Accueil</span>
         </button>
-        <button class="nav-item" onclick="toggleRecherche(this)">
-            <span class="nav-icon">🔍</span>
-            <span>Recherche</span>
-        </button>
-        <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme(this)">
+        <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme()">
             <span class="nav-icon" id="themeIcon">☀️</span>
             <span id="themeText">Thème</span>
         </button>
     </nav>
 
     <script>
-        function toggleTheme(elementBtn) {
+        function toggleTheme() {
             const body = document.body;
             body.classList.toggle('light-mode');
             const isLight = body.classList.contains('light-mode');
-            
             document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
         }
 
-        function changerOnglet(nomOnglet, elementBtn) {
+        function changerProfil(nomProfil, elementBtn) {
             document.querySelectorAll('.view-section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById('view-' + nomOnglet).classList.add('active');
+            document.getElementById('view-' + nomProfil).classList.add('active');
 
             document.querySelectorAll('.menu-item').forEach(btn => {
                 btn.classList.remove('active');
             });
             elementBtn.classList.add('active');
-
-            document.querySelectorAll('.family-filter-container').forEach(filter => {
-                filter.classList.remove('active');
-            });
-            
-            const filtreAssocie = document.getElementById('filter-' + nomOnglet);
-            if (filtreAssocie) {
-                filtreAssocie.classList.add('active');
-            }
         }
 
-        function toggleRecherche(elementBtn) {
+        function toggleRecherche() {
             const searchContainer = document.getElementById('searchContainer');
             searchContainer.classList.toggle('active');
-            elementBtn.classList.toggle('active');
             if (searchContainer.classList.contains('active')) {
                 document.getElementById('searchInput').focus();
             }
         }
 
         function retourAccueil(elementBtn) {
-            const platBtn = document.querySelector('.menu-item');
-            if (platBtn) changerOnglet('plats', platBtn);
+            const classicBtn = document.querySelector('.menu-item');
+            if (classicBtn) changerProfil('classic', classicBtn);
             
             document.querySelectorAll('.nav-item').forEach(btn => {
-                // On ne retire pas la classe active du bouton thème s'il l'était, géré séparément si besoin
                 if(btn !== document.getElementById('themeToggleBtn')) {
                     btn.classList.remove('active');
                 }
@@ -392,8 +393,8 @@
             elementBtn.classList.add('active');
         }
 
-        function filtrerMembre(membre) {
-            console.log("Filtrage pour le membre : " + membre);
+        function ouvrirAjout() {
+            alert("Ouverture de l'écran d'ajout de recette !");
         }
 
         function ouvrirFiltre(nom) {
