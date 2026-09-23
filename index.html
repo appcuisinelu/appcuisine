@@ -7,10 +7,10 @@
     <!-- Icône personnalisée pour l'écran d'accueil iPhone -->
     <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
     <style>
-        /* MODE SOMBRE PAR DÉFAUT (Accent orange par défaut) */
+        /* MODE SOMBRE PAR DÉFAUT (Accent turquoise par défaut) */
         :root {
             --primary-color: #ecf0f1;
-            --accent-color: #e67e22; /* Orange */
+            --accent-color: #1abc9c; /* Turquoise par défaut */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #fcfbfa;
@@ -31,8 +31,7 @@
         }
 
         /* Thèmes de couleurs d'accents */
-        body.theme-orange { --accent-color: #e67e22; }
-        body.theme-bleu { --accent-color: #3498db; }
+        body.theme-turquoise { --accent-color: #1abc9c; }
         body.theme-vert { --accent-color: #2ecc71; }
         body.theme-mauve { --accent-color: #9b59b6; }
 
@@ -284,7 +283,7 @@
             position: relative;
         }
 
-        /* Ajout de la fine barre verticale de séparation entre les boutons du bas */
+        /* Fine barre verticale de séparation entre les boutons du bas */
         .nav-item:not(:last-child):after {
             content: '';
             position: absolute;
@@ -356,7 +355,7 @@
     </style>
     <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
-<body class="theme-orange">
+<body class="theme-turquoise">
 
     <!-- 1. En-tête : Image icône PNG à gauche + Nom + Boutons encerclés (+ et 🔍) -->
     <header>
@@ -447,13 +446,12 @@
         <div class="no-recipe-msg" id="noRecipeMsg">Aucune recette trouvée pour ce membre.</div>
     </div>
 
-    <!-- Fenêtre modale pour choisir la couleur -->
+    <!-- Fenêtre modale pour choisir la couleur (Turquoise, Vert, Mauve) -->
     <div class="color-modal" id="colorModal">
         <div class="color-modal-content">
             <h3>Choisir une couleur</h3>
             <div class="color-options">
-                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
-                <button class="color-circle" style="background-color: #3498db;" onclick="changerCouleur('bleu')"></button>
+                <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
                 <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
                 <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
             </div>
@@ -495,7 +493,7 @@
 
         function changerCouleur(couleur) {
             const body = document.body;
-            body.classList.remove('theme-orange', 'theme-bleu', 'theme-vert', 'theme-mauve');
+            body.classList.remove('theme-turquoise', 'theme-vert', 'theme-mauve');
             body.classList.add('theme-' + couleur);
             fermerModalCouleurs();
         }
