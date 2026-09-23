@@ -7,10 +7,10 @@
     <!-- Icône personnalisée pour l'écran d'accueil iPhone -->
     <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
     <style>
-        /* MODE SOMBRE PAR DÉFAUT */
+        /* MODE SOMBRE PAR DÉFAUT (Accent orange par défaut) */
         :root {
             --primary-color: #ecf0f1;
-            --accent-color: #e67e22;
+            --accent-color: #e67e22; /* Orange */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #fcfbfa;
@@ -19,10 +19,9 @@
             --nav-bg: #1a1a1a;
         }
 
-        /* Variables pour le mode clair (quand activé) */
+        /* Variables pour le mode clair */
         body.light-mode {
             --primary-color: #2c3e50;
-            --accent-color: #e67e22;
             --bg-color: #fcfbfa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
@@ -30,6 +29,12 @@
             --border-color: #e0e0e0;
             --nav-bg: #ffffff;
         }
+
+        /* Thèmes de couleurs d'accents */
+        body.theme-orange { --accent-color: #e67e22; }
+        body.theme-bleu { --accent-color: #3498db; }
+        body.theme-vert { --accent-color: #2ecc71; }
+        body.theme-mauve { --accent-color: #9b59b6; }
 
         * {
             box-sizing: border-box;
@@ -46,7 +51,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* En-tête supérieur : Logo image + Nom + Actions */
+        /* En-tête supérieur */
         header {
             display: flex;
             justify-content: space-between;
@@ -72,6 +77,7 @@
             font-weight: 700;
             color: var(--accent-color);
             letter-spacing: -0.5px;
+            transition: color 0.3s;
         }
 
         .header-actions {
@@ -87,6 +93,7 @@
             cursor: pointer;
             color: var(--accent-color);
             padding: 4px;
+            transition: color 0.3s;
         }
 
         /* Barre de recherche cachée par défaut */
@@ -148,7 +155,7 @@
             border-color: var(--accent-color);
         }
 
-        /* Sous-menu : Liste déroulante pour les autres membres */
+        /* Liste déroulante pour les membres */
         .family-filter-container {
             display: none;
             margin-bottom: 16px;
@@ -221,9 +228,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s;
         }
 
-        /* Barre de navigation inférieure fixe */
+        /* Message si aucune recette trouvée */
+        .no-recipe-msg {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+            font-size: 15px;
+            display: none;
+        }
+        .no-recipe-msg.active {
+            display: block;
+        }
+
+        /* Barre de navigation inférieure fixe (3 éléments maintenant) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -260,15 +280,65 @@
         .nav-icon {
             font-size: 20px;
         }
+
+        /* Modale de choix des couleurs */
+        .color-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .color-modal.active {
+            display: flex;
+        }
+        .color-modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .color-modal-content h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            color: var(--text-main);
+        }
+        .color-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .color-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .close-modal-btn {
+            background-color: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
     </style>
     <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
-<body>
+<body class="theme-orange">
 
     <!-- 1. En-tête : Image icône PNG à gauche + Nom + Bouton + et Loupe -->
     <header>
         <div class="header-brand">
-            <img src="icone.png" alt="Logo" class="header-logo-img">
+            <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img">
             <h1>Mes recettes</h1>
         </div>
         <div class="header-actions">
@@ -289,10 +359,10 @@
         <button class="menu-item" onclick="changerOnglet('famille', this)">Famille</button>
     </div>
 
-    <!-- 4. Liste déroulante pour les membres (Clem, Ade, Gwen, Maman, Malo) -->
+    <!-- 4. Liste déroulante pour les membres -->
     <div id="filter-famille" class="family-filter-container">
-        <select class="family-select" onchange="filtrerMembre(this.value)">
-            <option value="tous">👥 Choisir un membre...</option>
+        <select class="family-select" id="familySelect" onchange="filtrerMembre(this.value)">
+            <option value="tous">👥 Tous les membres de la famille</option>
             <option value="clem">Clem</option>
             <option value="ade">Ade</option>
             <option value="gwen">Gwen</option>
@@ -302,43 +372,73 @@
     </div>
 
     <!-- VUES DES RECETTES -->
+    
+    <!-- Incontournables -->
     <div id="view-incontournables" class="view-section active">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Incontournables')">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Incontournables" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Incontournable 1')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Recette" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Incontournables</span>
-                    <span>10</span>
+                    <span>Gratin dauphinois</span>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Lucie -->
     <div id="view-lucie" class="view-section">
         <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Recettes de Lucie')">
-                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Lucie" class="recipe-img">
+            <div class="recipe-card" onclick="ouvrirFiltre('Lucie 1')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Recette" class="recipe-img">
                 <div class="recipe-banner">
-                    <span>Lucie</span>
-                    <span>5</span>
+                    <span>Cookies de Lucie</span>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Famille -->
     <div id="view-famille" class="view-section">
-        <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Recettes Familiales')">
-                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Famille" class="recipe-img">
-                <div class="recipe-banner">
-                    <span>Membres de la famille</span>
-                    <span>12</span>
-                </div>
+        <div class="recipes-grid" id="familleGrid">
+            <div class="recipe-card" data-membre="clem" onclick="ouvrirFiltre('Recette Clem')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Clem" class="recipe-img">
+                <div class="recipe-banner"><span>Tarte de Clem</span></div>
             </div>
+            <div class="recipe-card" data-membre="ade" onclick="ouvrirFiltre('Recette Ade')">
+                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Ade" class="recipe-img">
+                <div class="recipe-banner"><span>Lasagnes d'Ade</span></div>
+            </div>
+            <div class="recipe-card" data-membre="gwen" onclick="ouvrirFiltre('Recette Gwen')">
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Gwen" class="recipe-img">
+                <div class="recipe-banner"><span>Crêpes de Gwen</span></div>
+            </div>
+            <div class="recipe-card" data-membre="maman" onclick="ouvrirFiltre('Recette Maman')">
+                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Maman" class="recipe-img">
+                <div class="recipe-banner"><span>Poulet rôti de Maman</span></div>
+            </div>
+            <div class="recipe-card" data-membre="malo" onclick="ouvrirFiltre('Recette Malo')">
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" alt="Malo" class="recipe-img">
+                <div class="recipe-banner"><span>Pizza de Malo</span></div>
+            </div>
+        </div>
+        <div class="no-recipe-msg" id="noRecipeMsg">Aucune recette trouvée pour ce membre.</div>
+    </div>
+
+    <!-- Fenêtre modale pour choisir la couleur -->
+    <div class="color-modal" id="colorModal">
+        <div class="color-modal-content">
+            <h3>Choisir une couleur</h3>
+            <div class="color-options">
+                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
+                <button class="color-circle" style="background-color: #3498db;" onclick="changerCouleur('bleu')"></button>
+                <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
+                <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
+            </div>
+            <button class="close-modal-btn" onclick="fermerModalCouleurs()">Fermer</button>
         </div>
     </div>
 
-    <!-- 5. Barre de navigation en bas (Accueil + Mode Sombre/Clair) -->
+    <!-- 5. Barre de navigation en bas (Accueil + Thème clair/sombre + Réglage couleurs) -->
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="retourAccueil(this)">
             <span class="nav-icon">🏠</span>
@@ -346,7 +446,11 @@
         </button>
         <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme()">
             <span class="nav-icon" id="themeIcon">☀️</span>
-            <span id="themeText">Thème</span>
+            <span>Mode</span>
+        </button>
+        <button class="nav-item" onclick="ouvrirModalCouleurs()">
+            <span class="nav-icon">🎨</span>
+            <span>Couleurs</span>
         </button>
     </nav>
 
@@ -356,6 +460,23 @@
             body.classList.toggle('light-mode');
             const isLight = body.classList.contains('light-mode');
             document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
+        }
+
+        function ouvrirModalCouleurs() {
+            document.getElementById('colorModal').classList.add('active');
+        }
+
+        function fermerModalCouleurs() {
+            document.getElementById('colorModal').classList.remove('active');
+        }
+
+        function changerCouleur(couleur) {
+            const body = document.body;
+            // Supprimer tous les thèmes de couleur précédents
+            body.classList.remove('theme-orange', 'theme-bleu', 'theme-vert', 'theme-mauve');
+            // Ajouter le nouveau thème
+            body.classList.add('theme-' + couleur);
+            fermerModalCouleurs();
         }
 
         function changerOnglet(nomOnglet, elementBtn) {
@@ -369,12 +490,34 @@
             });
             elementBtn.classList.add('active');
 
-            // Gérer l'affichage de la liste déroulante
-            document.querySelectorAll('.family-filter-container').forEach(filter => {
-                filter.classList.remove('active');
-            });
+            const familyFilter = document.getElementById('filter-famille');
             if (nomOnglet === 'famille') {
-                document.getElementById('filter-famille').classList.add('active');
+                familyFilter.classList.add('active');
+            } else {
+                familyFilter.classList.remove('active');
+                document.getElementById('familySelect').value = "tous";
+                filtrerMembre("tous");
+            }
+        }
+
+        function filtrerMembre(membre) {
+            const cartes = document.querySelectorAll('#familleGrid .recipe-card');
+            let visibles = 0;
+
+            cartes.forEach(carte => {
+                if (membre === 'tous' || carte.getAttribute('data-membre') === membre) {
+                    carte.style.display = 'block';
+                    visibles++;
+                } else {
+                    carte.style.display = 'none';
+                }
+            });
+
+            const msg = document.getElementById('noRecipeMsg');
+            if (visibles === 0) {
+                msg.classList.add('active');
+            } else {
+                msg.classList.remove('active');
             }
         }
 
@@ -391,15 +534,11 @@
             if (defaultBtn) changerOnglet('incontournables', defaultBtn);
             
             document.querySelectorAll('.nav-item').forEach(btn => {
-                if(btn !== document.getElementById('themeToggleBtn')) {
+                if(btn !== document.getElementById('themeToggleBtn') && !btn.getAttribute('onclick').includes('ouvrirModalCouleurs')) {
                     btn.classList.remove('active');
                 }
             });
             elementBtn.classList.add('active');
-        }
-
-        function filtrerMembre(membre) {
-            console.log("Membre sélectionné : " + membre);
         }
 
         function ouvrirAjout() {
