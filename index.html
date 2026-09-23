@@ -30,8 +30,9 @@
             --nav-bg: #ffffff;
         }
 
-        /* Thèmes de couleurs d'accents */
+        /* Thèmes de couleurs d'accents (Ordre : Turquoise, Orange, Vert, Mauve) */
         body.theme-turquoise { --accent-color: #1abc9c; }
+        body.theme-orange { --accent-color: #e67e22; }
         body.theme-vert { --accent-color: #2ecc71; }
         body.theme-mauve { --accent-color: #9b59b6; }
 
@@ -85,7 +86,7 @@
             align-items: center;
         }
 
-        /* Boutons du haut encerclés */
+        /* Boutons du haut encerclés avec couleur du thème */
         .header-btn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -269,11 +270,13 @@
             transition: background-color 0.3s;
         }
 
+        /* Tous les éléments du bas ont maintenant la couleur du thème par défaut */
         .nav-item {
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--accent-color);
             font-size: 12px;
+            font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -281,6 +284,7 @@
             cursor: pointer;
             flex: 1;
             position: relative;
+            transition: color 0.3s;
         }
 
         /* Fine barre verticale de séparation entre les boutons du bas */
@@ -292,11 +296,6 @@
             height: 60%;
             width: 1px;
             background-color: var(--border-color);
-        }
-
-        .nav-item.active {
-            color: var(--accent-color);
-            font-weight: 600;
         }
 
         .nav-icon {
@@ -446,12 +445,13 @@
         <div class="no-recipe-msg" id="noRecipeMsg">Aucune recette trouvée pour ce membre.</div>
     </div>
 
-    <!-- Fenêtre modale pour choisir la couleur (Turquoise, Vert, Mauve) -->
+    <!-- Fenêtre modale pour choisir la couleur (Ordre : Turquoise, Orange, Vert, Mauve) -->
     <div class="color-modal" id="colorModal">
         <div class="color-modal-content">
             <h3>Choisir une couleur</h3>
             <div class="color-options">
                 <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
+                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
                 <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
                 <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
             </div>
@@ -459,9 +459,9 @@
         </div>
     </div>
 
-    <!-- 5. Barre de navigation en bas avec séparateurs -->
+    <!-- 5. Barre de navigation en bas avec séparateurs et icônes colorées -->
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="retourAccueil(this)">
+        <button class="nav-item" onclick="retourAccueil(this)">
             <span class="nav-icon">🏠</span>
             <span>Accueil</span>
         </button>
@@ -493,7 +493,7 @@
 
         function changerCouleur(couleur) {
             const body = document.body;
-            body.classList.remove('theme-turquoise', 'theme-vert', 'theme-mauve');
+            body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
             body.classList.add('theme-' + couleur);
             fermerModalCouleurs();
         }
@@ -551,13 +551,6 @@
         function retourAccueil(elementBtn) {
             const defaultBtn = document.querySelector('.menu-item');
             if (defaultBtn) changerOnglet('incontournables', defaultBtn);
-            
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                if(btn !== document.getElementById('themeToggleBtn') && !btn.getAttribute('onclick').includes('ouvrirModalCouleurs')) {
-                    btn.classList.remove('active');
-                }
-            });
-            elementBtn.classList.add('active');
         }
 
         function ouvrirAjout() {
