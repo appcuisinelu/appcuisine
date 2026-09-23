@@ -165,17 +165,12 @@
             border-color: var(--accent-color);
         }
 
-        /* Liste déroulante pour les membres */
-        .family-filter-container {
-            display: none;
+        /* Liste déroulante pour les sous-catégories (Apéro, Plats, etc.) */
+        .sub-filter-container {
             margin-bottom: 16px;
         }
 
-        .family-filter-container.active {
-            display: block;
-        }
-
-        .family-select {
+        .sub-select {
             width: 100%;
             padding: 10px 14px;
             font-size: 15px;
@@ -270,7 +265,6 @@
             transition: background-color 0.3s;
         }
 
-        /* Tous les éléments du bas ont maintenant la couleur du thème par défaut */
         .nav-item {
             background: none;
             border: none;
@@ -287,7 +281,6 @@
             transition: color 0.3s;
         }
 
-        /* Fine barre verticale de séparation entre les boutons du bas */
         .nav-item:not(:last-child):after {
             content: '';
             position: absolute;
@@ -373,22 +366,23 @@
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- 3. Menu horizontal supérieur : Incontournables / Lucie / Famille -->
+    <!-- 3. Menu horizontal supérieur : Incontournables / Lucie / Famille / Technique -->
     <div class="top-menu">
         <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
         <button class="menu-item" onclick="changerOnglet('lucie', this)">Lucie</button>
         <button class="menu-item" onclick="changerOnglet('famille', this)">Famille</button>
+        <button class="menu-item" onclick="changerOnglet('technique', this)">Technique</button>
     </div>
 
-    <!-- 4. Liste déroulante pour les membres -->
-    <div id="filter-famille" class="family-filter-container">
-        <select class="family-select" id="familySelect" onchange="filtrerMembre(this.value)">
-            <option value="tous">👥 Tous les membres de la famille</option>
-            <option value="clem">Clem</option>
-            <option value="ade">Ade</option>
-            <option value="gwen">Gwen</option>
-            <option value="maman">Maman</option>
-            <option value="malo">Malo</option>
+    <!-- 4. Liste déroulante des catégories (Apéro, Plats, Desserts, Boulangerie, Basiques) -->
+    <div class="sub-filter-container">
+        <select class="sub-select" id="subSelect" onchange="filtrerCategorie(this.value)">
+            <option value="toutes">✨ Toutes les catégories</option>
+            <option value="apero">🥂 Apéro</option>
+            <option value="plats">🍲 Plats</option>
+            <option value="desserts">🍰 Desserts</option>
+            <option value="boulangerie">🥖 Boulangerie</option>
+            <option value="basiques">🧂 Basiques</option>
         </select>
     </div>
 
@@ -396,56 +390,79 @@
     
     <!-- Incontournables -->
     <div id="view-incontournables" class="view-section active">
-        <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Incontournable 1')">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Recette" class="recipe-img">
-                <div class="recipe-banner">
-                    <span>Gratin dauphinois</span>
-                </div>
+        <div class="recipes-grid" data-category-grid>
+            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Apéro Incontournable')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Apéro" class="recipe-img">
+                <div class="recipe-banner"><span>Cake salé</span></div>
+            </div>
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Incontournable')">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plat" class="recipe-img">
+                <div class="recipe-banner"><span>Gratin dauphinois</span></div>
+            </div>
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Incontournable')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Dessert" class="recipe-img">
+                <div class="recipe-banner"><span>Tarte aux pommes</span></div>
+            </div>
+            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Boulangerie Incontournable')">
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff" alt="Boulangerie" class="recipe-img">
+                <div class="recipe-banner"><span>Pain maison</span></div>
+            </div>
+            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Basique Incontournable')">
+                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Basique" class="recipe-img">
+                <div class="recipe-banner"><span>Pâte à crêpes</span></div>
             </div>
         </div>
     </div>
 
     <!-- Lucie -->
     <div id="view-lucie" class="view-section">
-        <div class="recipes-grid">
-            <div class="recipe-card" onclick="ouvrirFiltre('Lucie 1')">
-                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Recette" class="recipe-img">
-                <div class="recipe-banner">
-                    <span>Cookies de Lucie</span>
-                </div>
+        <div class="recipes-grid" data-category-grid>
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Lucie')">
+                <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Dessert" class="recipe-img">
+                <div class="recipe-banner"><span>Cookies de Lucie</span></div>
+            </div>
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Lucie')">
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" alt="Plat" class="recipe-img">
+                <div class="recipe-banner"><span>Quiche de Lucie</span></div>
             </div>
         </div>
     </div>
 
     <!-- Famille -->
     <div id="view-famille" class="view-section">
-        <div class="recipes-grid" id="familleGrid">
-            <div class="recipe-card" data-membre="clem" onclick="ouvrirFiltre('Recette Clem')">
-                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Clem" class="recipe-img">
+        <div class="recipes-grid" data-category-grid>
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Famille')">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Plat" class="recipe-img">
                 <div class="recipe-banner"><span>Tarte de Clem</span></div>
             </div>
-            <div class="recipe-card" data-membre="ade" onclick="ouvrirFiltre('Recette Ade')">
-                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Ade" class="recipe-img">
-                <div class="recipe-banner"><span>Lasagnes d'Ade</span></div>
+            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Apéro Famille')">
+                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Apéro" class="recipe-img">
+                <div class="recipe-banner"><span>Verrines d'Ade</span></div>
             </div>
-            <div class="recipe-card" data-membre="gwen" onclick="ouvrirFiltre('Recette Gwen')">
-                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Gwen" class="recipe-img">
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Famille')">
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Dessert" class="recipe-img">
                 <div class="recipe-banner"><span>Crêpes de Gwen</span></div>
             </div>
-            <div class="recipe-card" data-membre="maman" onclick="ouvrirFiltre('Recette Maman')">
-                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Maman" class="recipe-img">
-                <div class="recipe-banner"><span>Poulet rôti de Maman</span></div>
-            </div>
-            <div class="recipe-card" data-membre="malo" onclick="ouvrirFiltre('Recette Malo')">
-                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" alt="Malo" class="recipe-img">
-                <div class="recipe-banner"><span>Pizza de Malo</span></div>
-            </div>
         </div>
-        <div class="no-recipe-msg" id="noRecipeMsg">Aucune recette trouvée pour ce membre.</div>
     </div>
 
-    <!-- Fenêtre modale pour choisir la couleur (Ordre : Turquoise, Orange, Vert, Mauve) -->
+    <!-- Technique (Nouvel onglet demandé) -->
+    <div id="view-technique" class="view-section">
+        <div class="recipes-grid" data-category-grid>
+            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Technique Basique')">
+                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Technique" class="recipe-img">
+                <div class="recipe-banner"><span>Tailler des légumes</span></div>
+            </div>
+            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Technique Boulangerie')">
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff" alt="Pétrissage" class="recipe-img">
+                <div class="recipe-banner"><span>Pétrir la brioche</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-recipe-msg" id="noRecipeMsg">Aucune recette trouvée pour cette catégorie.</div>
+
+    <!-- Fenêtre modale pour choisir la couleur -->
     <div class="color-modal" id="colorModal">
         <div class="color-modal-content">
             <h3>Choisir une couleur</h3>
@@ -509,22 +526,19 @@
             });
             elementBtn.classList.add('active');
 
-            const familyFilter = document.getElementById('filter-famille');
-            if (nomOnglet === 'famille') {
-                familyFilter.classList.add('active');
-            } else {
-                familyFilter.classList.remove('active');
-                document.getElementById('familySelect').value = "tous";
-                filtrerMembre("tous");
-            }
+            // Réinitialiser le filtre de catégorie à "toutes" lors du changement d'onglet
+            document.getElementById('subSelect').value = "toutes";
+            filtrerCategorie("toutes");
         }
 
-        function filtrerMembre(membre) {
-            const cartes = document.querySelectorAll('#familleGrid .recipe-card');
+        function filtrerCategorie(cat) {
+            // Cible la section active en cours
+            const activeSection = document.querySelector('.view-section.active');
+            const cartes = activeSection.querySelectorAll('.recipe-card');
             let visibles = 0;
 
             cartes.forEach(carte => {
-                if (membre === 'tous' || carte.getAttribute('data-membre') === membre) {
+                if (cat === 'toutes' || carte.getAttribute('data-cat') === cat) {
                     carte.style.display = 'block';
                     visibles++;
                 } else {
