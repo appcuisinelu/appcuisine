@@ -47,7 +47,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: env(safe-area-inset-top) 16px 90px 16px;
+            padding: env(safe-area-inset-top) 16px 80px 16px;
             transition: background-color 0.3s, color 0.3s;
         }
 
@@ -56,7 +56,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 16px 0 16px 0;
+            margin: 12px 0 12px 0;
         }
 
         .header-brand {
@@ -109,7 +109,7 @@
         /* Barre de recherche cachée par défaut */
         .search-container {
             display: none;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .search-container.active {
@@ -118,8 +118,8 @@
 
         .search-input {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
+            padding: 10px 14px;
+            font-size: 15px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             background-color: var(--card-bg);
@@ -132,13 +132,13 @@
             border-color: var(--accent-color);
         }
 
-        /* Menu horizontal supérieur */
+        /* Menu horizontal supérieur (Onglets principaux) */
         .top-menu {
             display: flex;
             gap: 8px;
             overflow-x: auto;
-            padding-bottom: 8px;
-            margin-bottom: 16px;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
             scrollbar-width: none;
         }
 
@@ -150,9 +150,9 @@
             background-color: var(--card-bg);
             color: var(--text-muted);
             border: 1px solid var(--border-color);
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
@@ -165,20 +165,38 @@
             border-color: var(--accent-color);
         }
 
-        /* Liste déroulante pour les sous-catégories (Apéro, Plats, etc.) */
-        .sub-filter-container {
-            margin-bottom: 16px;
+        /* Barre horizontale des catégories (style pastilles de l'image de gauche) */
+        .categories-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            scrollbar-width: none;
         }
 
-        .sub-select {
-            width: 100%;
-            padding: 10px 14px;
-            font-size: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+        .categories-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-chip {
             background-color: var(--card-bg);
-            color: var(--text-main);
-            outline: none;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cat-chip.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            font-weight: 600;
         }
 
         /* Vues (Onglets) */
@@ -189,7 +207,7 @@
             display: block;
         }
 
-        /* Grille des cartes */
+        /* Grille des cartes de recettes */
         .recipes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -206,9 +224,9 @@
         /* Carte de recette */
         .recipe-card {
             background-color: var(--card-bg);
-            border-radius: 14px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             position: relative;
             cursor: pointer;
             transition: transform 0.2s;
@@ -227,8 +245,8 @@
         .recipe-banner {
             background-color: var(--accent-color);
             color: white;
-            padding: 8px 12px;
-            font-size: 14px;
+            padding: 8px 10px;
+            font-size: 13px;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
@@ -241,26 +259,27 @@
             text-align: center;
             color: var(--text-muted);
             padding: 30px;
-            font-size: 15px;
+            font-size: 14px;
             display: none;
         }
         .no-recipe-msg.active {
             display: block;
         }
 
-        /* Barre de navigation inférieure fixe avec éléments séparés par une barre */
+        /* Barre de navigation inférieure fixe remontée et aérée */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 8px;
+            left: 12px;
+            right: 12px;
             background-color: var(--nav-bg);
-            border-top: 1px solid var(--border-color);
+            border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 10px 0 env(safe-area-inset-bottom) 0;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            padding: 8px 0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
             z-index: 1000;
             transition: background-color 0.3s;
         }
@@ -269,12 +288,12 @@
             background: none;
             border: none;
             color: var(--accent-color);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             cursor: pointer;
             flex: 1;
             position: relative;
@@ -292,7 +311,7 @@
         }
 
         .nav-icon {
-            font-size: 20px;
+            font-size: 18px;
         }
 
         /* Modale de choix des couleurs */
@@ -366,7 +385,7 @@
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- 3. Menu horizontal supérieur : Incontournables / Lucie / Famille / Technique -->
+    <!-- 3. Menu horizontal supérieur (Onglets principaux) -->
     <div class="top-menu">
         <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
         <button class="menu-item" onclick="changerOnglet('lucie', this)">Lucie</button>
@@ -374,54 +393,62 @@
         <button class="menu-item" onclick="changerOnglet('technique', this)">Technique</button>
     </div>
 
-    <!-- 4. Liste déroulante des catégories (Apéro, Plats, Desserts, Boulangerie, Basiques) -->
-    <div class="sub-filter-container">
-        <select class="sub-select" id="subSelect" onchange="filtrerCategorie(this.value)">
-            <option value="toutes">✨ Toutes les catégories</option>
-            <option value="apero">🥂 Apéro</option>
-            <option value="plats">🍲 Plats</option>
-            <option value="desserts">🍰 Desserts</option>
-            <option value="boulangerie">🥖 Boulangerie</option>
-            <option value="basiques">🧂 Basiques</option>
-        </select>
+    <!-- 4. Barre de sélection des catégories (Style boutons horizontaux au lieu d'un menu déroulant) -->
+    <div class="categories-scroll">
+        <button class="cat-chip active" onclick="filtrerCategorie('toutes', this)">✨ Toutes</button>
+        <button class="cat-chip" onclick="filtrerCategorie('apero', this)">🥂 Apéro</button>
+        <button class="cat-chip" onclick="filtrerCategorie('plats', this)">🍲 Plats</button>
+        <button class="cat-chip" onclick="filtrerCategorie('desserts', this)">🍰 Desserts</button>
+        <button class="cat-chip" onclick="filtrerCategorie('boulangerie', this)">🥖 Boulangerie</button>
+        <button class="cat-chip" onclick="filtrerCategorie('basiques', this)">🧂 Basiques</button>
+        <button class="cat-chip" onclick="filtrerCategorie('maison', this)">🏡 Maison</button>
+        <button class="cat-chip" onclick="filtrerCategorie('cosmetiques', this)">🧴 Cosmétiques</button>
     </div>
 
     <!-- VUES DES RECETTES -->
     
     <!-- Incontournables -->
     <div id="view-incontournables" class="view-section active">
-        <div class="recipes-grid" data-category-grid>
-            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Apéro Incontournable')">
+        <div class="recipes-grid">
+            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Cake salé')">
                 <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Apéro" class="recipe-img">
                 <div class="recipe-banner"><span>Cake salé</span></div>
             </div>
-            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Incontournable')">
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Gratin dauphinois')">
                 <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Plat" class="recipe-img">
                 <div class="recipe-banner"><span>Gratin dauphinois</span></div>
             </div>
-            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Incontournable')">
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Tarte aux pommes')">
                 <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Dessert" class="recipe-img">
                 <div class="recipe-banner"><span>Tarte aux pommes</span></div>
             </div>
-            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Boulangerie Incontournable')">
+            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Pain maison')">
                 <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff" alt="Boulangerie" class="recipe-img">
                 <div class="recipe-banner"><span>Pain maison</span></div>
             </div>
-            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Basique Incontournable')">
+            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Pâte à crêpes')">
                 <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Basique" class="recipe-img">
                 <div class="recipe-banner"><span>Pâte à crêpes</span></div>
+            </div>
+            <div class="recipe-card" data-cat="maison" onclick="ouvrirFiltre('Lessive maison')">
+                <img src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba" alt="Maison" class="recipe-img">
+                <div class="recipe-banner"><span>Lessive maison</span></div>
+            </div>
+            <div class="recipe-card" data-cat="cosmetiques" onclick="ouvrirFiltre('Baume à lèvres')">
+                <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03" alt="Cosmétiques" class="recipe-img">
+                <div class="recipe-banner"><span>Baume à lèvres</span></div>
             </div>
         </div>
     </div>
 
     <!-- Lucie -->
     <div id="view-lucie" class="view-section">
-        <div class="recipes-grid" data-category-grid>
-            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Lucie')">
+        <div class="recipes-grid">
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Cookies de Lucie')">
                 <img src="https://images.unsplash.com/photo-1541529086526-db283c563270" alt="Dessert" class="recipe-img">
                 <div class="recipe-banner"><span>Cookies de Lucie</span></div>
             </div>
-            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Lucie')">
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Quiche de Lucie')">
                 <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" alt="Plat" class="recipe-img">
                 <div class="recipe-banner"><span>Quiche de Lucie</span></div>
             </div>
@@ -430,30 +457,30 @@
 
     <!-- Famille -->
     <div id="view-famille" class="view-section">
-        <div class="recipes-grid" data-category-grid>
-            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Plat Famille')">
+        <div class="recipes-grid">
+            <div class="recipe-card" data-cat="plats" onclick="ouvrirFiltre('Tarte de Clem')">
                 <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87" alt="Plat" class="recipe-img">
                 <div class="recipe-banner"><span>Tarte de Clem</span></div>
             </div>
-            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Apéro Famille')">
+            <div class="recipe-card" data-cat="apero" onclick="ouvrirFiltre('Verrines d\'Ade')">
                 <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352" alt="Apéro" class="recipe-img">
                 <div class="recipe-banner"><span>Verrines d'Ade</span></div>
             </div>
-            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Dessert Famille')">
+            <div class="recipe-card" data-cat="desserts" onclick="ouvrirFiltre('Crêpes de Gwen')">
                 <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d" alt="Dessert" class="recipe-img">
                 <div class="recipe-banner"><span>Crêpes de Gwen</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Technique (Nouvel onglet demandé) -->
+    <!-- Technique -->
     <div id="view-technique" class="view-section">
-        <div class="recipes-grid" data-category-grid>
-            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Technique Basique')">
+        <div class="recipes-grid">
+            <div class="recipe-card" data-cat="basiques" onclick="ouvrirFiltre('Tailler des légumes')">
                 <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Technique" class="recipe-img">
                 <div class="recipe-banner"><span>Tailler des légumes</span></div>
             </div>
-            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Technique Boulangerie')">
+            <div class="recipe-card" data-cat="boulangerie" onclick="ouvrirFiltre('Pétrir la brioche')">
                 <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff" alt="Pétrissage" class="recipe-img">
                 <div class="recipe-banner"><span>Pétrir la brioche</span></div>
             </div>
@@ -476,7 +503,7 @@
         </div>
     </div>
 
-    <!-- 5. Barre de navigation en bas avec séparateurs et icônes colorées -->
+    <!-- 5. Barre de navigation en bas remontée et aérée -->
     <nav class="bottom-nav">
         <button class="nav-item" onclick="retourAccueil(this)">
             <span class="nav-icon">🏠</span>
@@ -521,18 +548,26 @@
             });
             document.getElementById('view-' + nomOnglet).classList.add('active');
 
-            document.querySelectorAll('.menu-item').forEach(btn => {
+            document.querySelectorAll('.top-menu .menu-item').forEach(btn => {
                 btn.classList.remove('active');
             });
             elementBtn.classList.add('active');
 
-            // Réinitialiser le filtre de catégorie à "toutes" lors du changement d'onglet
-            document.getElementById('subSelect').value = "toutes";
-            filtrerCategorie("toutes");
+            // Réinitialiser la sélection de catégorie sur "Toutes"
+            const firstChip = document.querySelector('.cat-chip');
+            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+            if(firstChip) firstChip.classList.add('active');
+            filtrerCategorie('toutes', firstChip);
         }
 
-        function filtrerCategorie(cat) {
-            // Cible la section active en cours
+        function filtrerCategorie(cat, elementChip) {
+            if (elementChip) {
+                document.querySelectorAll('.cat-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                elementChip.classList.add('active');
+            }
+
             const activeSection = document.querySelector('.view-section.active');
             const cartes = activeSection.querySelectorAll('.recipe-card');
             let visibles = 0;
@@ -563,7 +598,7 @@
         }
 
         function retourAccueil(elementBtn) {
-            const defaultBtn = document.querySelector('.menu-item');
+            const defaultBtn = document.querySelector('.top-menu .menu-item');
             if (defaultBtn) changerOnglet('incontournables', defaultBtn);
         }
 
