@@ -842,3 +842,431 @@
 
 </body>
 </html>
+/* Styles pour la modale grand format du formulaire */
+.modal-content-large {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    text-align: left;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.form-header h3 {
+    font-size: 18px;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Navigation par onglets du formulaire */
+.form-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+    scrollbar-width: none;
+}
+
+.form-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.form-tab-btn {
+    background-color: var(--bg-color);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.form-tab-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+/* Corps du formulaire (volets) */
+.form-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 14px;
+}
+
+.form-volet {
+    display: none;
+}
+
+.form-volet.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-muted);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    outline: none;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 8px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Gestion des 3 colonnes pour les Ingrédients */
+.ingredient-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.ing-qty {
+    width: 65px !important;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.ing-unit {
+    width: 95px !important;
+    flex-shrink: 0;
+}
+
+.ing-name {
+    flex-grow: 1;
+}
+
+/* Lignes de préparation numérotées */
+.etape-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+}
+
+.etape-num {
+    background-color: var(--accent-color);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+.etape-row textarea {
+    flex-grow: 1;
+    resize: vertical;
+    min-height: 50px;
+}
+
+/* Boutons secondaires d'ajout */
+.secondary-btn {
+    background-color: var(--bg-color);
+    color: var(--accent-color);
+    border: 1px dashed var(--accent-color);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 6px;
+    text-align: center;
+}
+
+.photo-preview {
+    width: 100%;
+    height: 120px;
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 6px;
+    object-fit: cover;
+}
+
+.form-footer {
+    display: flex;
+    gap: 10px;
+}
+
+.primary-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    flex: 1;
+}<!-- Fenêtre Modale du Formulaire Complet (5 Volets) -->
+<div class="modal" id="recipeFormModal">
+    <div class="modal-content-large">
+        
+        <div class="form-header">
+            <h3>Nouvelle Recette</h3>
+            <button onclick="fermerFormulaireAjout()" class="close-btn">&times;</button>
+        </div>
+
+        <!-- Navigation des 5 Volets -->
+        <div class="form-tabs">
+            <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
+        </div>
+
+        <!-- CONTENU DES VOLETS -->
+        <div class="form-body">
+            
+            <!-- VOLET 1 : APERÇU -->
+            <div class="form-volet active" id="volet-1">
+                <div class="form-group">
+                    <label>Titre de la recette</label>
+                    <input type="text" id="recipeTitle" placeholder="Ex: Gâteau au chocolat">
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="recipeCategory">
+                        <option value="apero">Apéro</option>
+                        <option value="plats">Plats</option>
+                        <option value="desserts">Desserts</option>
+                        <option value="boulangerie">Boulangerie</option>
+                        <option value="basiques">Basiques</option>
+                        <option value="maison">Maison</option>
+                        <option value="cosmetiques">Cosmétiques</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Portions</label>
+                        <input type="number" id="recipePortions" value="4">
+                    </div>
+                    <div class="form-group">
+                        <label>Prépa (min)</label>
+                        <input type="number" id="recipePrepTime" value="15">
+                    </div>
+                    <div class="form-group">
+                        <label>Cuisson (min)</label>
+                        <input type="number" id="recipeCookTime" value="30">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <input type="text" id="recipeSource" placeholder="Ex: Livre de famille, Site web...">
+                </div>
+            </div>
+
+            <!-- VOLET 2 : INGRÉDIENTS -->
+            <div class="form-volet" id="volet-2">
+                <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Détail des ingrédients</label>
+                <div id="ingredientsContainer">
+                    <div class="ingredient-row">
+                        <input type="text" placeholder="Qté" class="ing-qty">
+                        <select class="ing-unit">
+                            <option value="">(unité)</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="cl">cl</option>
+                            <option value="L">L</option>
+                            <option value="c.à.s">c. à s.</option>
+                            <option value="c.à.c">c. à c.</option>
+                            <option value="pincée">pincée</option>
+                            <option value="pièce">pièce(s)</option>
+                        </select>
+                        <input type="text" placeholder="Ingrédient" class="ing-name">
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
+            </div>
+
+            <!-- VOLET 3 : PRÉPARATION -->
+            <div class="form-volet" id="volet-3">
+                <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Étapes de la recette</label>
+                <div id="etapesContainer">
+                    <div class="etape-row">
+                        <span class="etape-num">1</span>
+                        <textarea placeholder="Décrivez l'étape..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
+            </div>
+
+            <!-- VOLET 4 : NOTES -->
+            <div class="form-volet" id="volet-4">
+                <div class="form-group">
+                    <label>Notes, astuces et variantes</label>
+                    <textarea id="recipeNotes" rows="6" placeholder="Conseils de conservation, variantes..."></textarea>
+                </div>
+            </div>
+
+            <!-- VOLET 5 : PHOTOS -->
+            <div class="form-volet" id="volet-5">
+                <div class="form-group" style="text-align: center;">
+                    <label>Illustration</label>
+                    <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
+                    <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir une photo</button>
+                    <div class="photo-preview" id="photoPreviewContainer">Aucune photo sélectionnée</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-footer">
+            <button class="close-modal-btn" onclick="fermerFormulaireAjout()">Annuler</button>
+            <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
+        </div>
+
+    </div>
+</div>
+// --- GESTION DU FORMULAIRE DE CRÉATION DE RECETTE ---
+
+// Navigation entre les 5 volets
+function changerVoletForm(numeroVolet) {
+    document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById('volet-' + numeroVolet).classList.add('active');
+    document.querySelectorAll('.form-tab-btn')[numeroVolet - 1].classList.add('active');
+}
+
+// Ouvrir le formulaire depuis le choix d'ajout manuel
+function choixAjout(type) {
+    fermerMenuAjout();
+    if (type === 'manuel') {
+        document.getElementById('recipeFormModal').classList.add('active');
+        changerVoletForm(1); // Revenir au premier volet par défaut
+    } else if (type === 'site') {
+        alert("Importation depuis un site web en cours de développement.");
+    } else if (type === 'photo') {
+        alert("Numérisation photo en cours de développement.");
+    }
+}
+
+function fermerFormulaireAjout() {
+    document.getElementById('recipeFormModal').classList.remove('active');
+}
+
+// Ajouter dynamiquement une ligne d'ingrédient (3 colonnes)
+function ajouterLigneIngredient() {
+    const container = document.getElementById('ingredientsContainer');
+    const row = document.createElement('div');
+    row.className = 'ingredient-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Qté" class="ing-qty">
+        <select class="ing-unit">
+            <option value="">(unité)</option>
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="cl">cl</option>
+            <option value="L">L</option>
+            <option value="c.à.s">c. à s.</option>
+            <option value="c.à.c">c. à c.</option>
+            <option value="pincée">pincée</option>
+            <option value="pièce">pièce(s)</option>
+        </select>
+        <input type="text" placeholder="Ingrédient" class="ing-name">
+    `;
+    container.appendChild(row);
+}
+
+// Ajouter dynamiquement une étape de préparation numérotée
+function ajouterLigneEtape() {
+    const container = document.getElementById('etapesContainer');
+    const count = container.querySelectorAll('.etape-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'etape-row';
+    row.innerHTML = `
+        <span class="etape-num">${count}</span>
+        <textarea placeholder="Décrivez l'étape..."></textarea>
+    `;
+    container.appendChild(row);
+}
+
+// Aperçu de la photo sélectionnée
+function chargerApercuPhoto(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Enregistrement final (vous pourrez y lier l'ajout dans votre objet 'database')
+function sauvegarderRecetteComprehensive() {
+    const titre = document.getElementById('recipeTitle').value;
+    if (!titre.trim()) {
+        alert("Veuillez renseigner au moins un titre pour la recette.");
+        changerVoletForm(1);
+        return;
+    }
+    alert("Recette '" + titre + "' enregistrée avec succès !");
+    fermerFormulaireAjout();
+}
