@@ -191,13 +191,12 @@
         }
 
         .category-banner {
-            background-color: var(--card-bg);
-            color: var(--text-main);
+            background-color: var(--accent-color);
+            color: white;
             padding: 6px 8px;
             font-size: 11px;
             font-weight: 600;
             text-align: center;
-            border-top: 1px solid var(--border-color);
         }
 
         .recipe-list-container {
@@ -240,8 +239,8 @@
         }
 
         .recipe-row-banner {
-            background-color: var(--card-bg);
-            color: var(--text-main);
+            background-color: var(--accent-color);
+            color: white;
             flex-grow: 1;
             height: 75px;
             padding: 0 14px;
@@ -342,7 +341,7 @@
         .fullscreen-body {
             flex-grow: 1;
             overflow-y: auto;
-            padding-bottom: 30px;
+            padding-bottom: 20px;
         }
 
         .fullscreen-footer {
@@ -356,7 +355,7 @@
         .recipe-detail-img-container {
             position: relative;
             width: 100%;
-            height: 260px;
+            height: 250px;
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 14px;
@@ -366,28 +365,11 @@
             height: 100%;
             object-fit: cover;
         }
-        .recipe-detail-close-overlay {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 10;
-        }
         .recipe-detail-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-            padding: 18px 14px 12px 14px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 16px 14px 10px 14px;
             color: white;
         }
         .recipe-detail-title-overlay {
@@ -519,47 +501,53 @@
             line-height: 1.4;
         }
 
-        /* Bandeau d'options fixe en bas pour la vue détaillée */
-        .recipe-bottom-action-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--nav-bg);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px 0 env(safe-area-inset-bottom, 10px) 0;
-            z-index: 100;
+        /* Bottom Action Sheet (Options menu) */
+        .action-sheet-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 3000;
+            align-items: flex-end;
+            padding: 16px;
         }
-        .recipe-action-item {
-            background: none;
-            border: none;
-            color: var(--accent-color);
-            font-size: 10px;
-            font-weight: 600;
+        .action-sheet-modal.active {
+            display: flex;
+        }
+        .action-sheet-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 3px;
+            gap: 8px;
+        }
+        .action-sheet-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            padding: 12px;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            flex: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .recipe-action-item svg {
-            width: 20px;
-            height: 20px;
-            stroke: var(--accent-color);
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .action-sheet-btn:hover {
+            background-color: var(--border-color);
         }
-        .recipe-action-item.danger {
+        .action-sheet-btn.danger {
             color: #e74c3c;
         }
-        .recipe-action-item.danger svg {
-            stroke: #e74c3c;
+        .divider-line {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 4px 0;
         }
 
         /* Formulaire interne des volets */
@@ -806,7 +794,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -852,7 +839,7 @@
         <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
-    <!-- POPUP DE SÉLECTION INITIALE (EN CLIQUANT SUR +) -->
+    <!-- 1. POPUP DE SÉLECTION INITIALE (EN CLIQUANT SUR +) -->
     <div class="popup-modal" id="addChoiceModal">
         <div class="popup-content">
             <div class="popup-header">
@@ -886,7 +873,7 @@
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterImportPhotoRecette(event)">
     <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="traiterImportPhotoRecette(event)">
 
-    <!-- MODALES D'IMPORTATION -->
+    <!-- 2. MODALES D'IMPORTATION -->
     <div class="fullscreen-modal" id="photoImportPageModal">
         <div class="fullscreen-header">
             <h3>Importer à partir d'une photo</h3>
@@ -940,7 +927,7 @@
         </div>
     </div>
 
-    <!-- FORMULAIRE DE CRÉATION -->
+    <!-- 4. FORMULAIRE DE CRÉATION -->
     <div class="fullscreen-modal" id="recipeFormModal">
         <div class="fullscreen-header">
             <h3>Nouvelle Recette</h3>
@@ -1035,45 +1022,41 @@
         </div>
     </div>
 
-    <!-- VUE DÉTAILLÉE D'UNE RECETTE (AVEC BANDEAU FIXE EN BAS & CROIX EN SURIMPRESSION) -->
-    <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
-        <div class="fullscreen-body" id="detailRecipeBody" style="padding-bottom: 20px;">
-            <!-- Rempli dynamiquement -->
+    <!-- 6. MODALE DE LA VUE DÉTAILLÉE D'UNE RECETTE -->
+    <div class="fullscreen-modal" id="recipeDetailModal">
+        <div class="fullscreen-header">
+            <h3>Détails de la recette</h3>
+            <div style="display:flex; gap:8px;">
+                <button class="header-btn" style="width:36px; height:36px;" onclick="ouvrirActionSheet()" title="Options">
+                    <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                </button>
+                <button class="popup-close-btn" onclick="fermerDetailRecette()" style="font-size:24px; margin-left:4px;">&times;</button>
+            </div>
         </div>
-        
-        <!-- BANDEAU D'OPTIONS FIXE EN BAS -->
-        <div class="recipe-bottom-action-bar">
-            <button class="recipe-action-item" onclick="ouvrirMenuTaillePolice()">
-                <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"></path></svg>
-                <span>Police</span>
-            </button>
-            <button class="recipe-action-item" onclick="actionModifierRecette()">
-                <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                <span>Modifier</span>
-            </button>
-            <button class="recipe-action-item" onclick="actionPartagerRecette()">
-                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                <span>Partager</span>
-            </button>
-            <button class="recipe-action-item danger" onclick="actionSupprimerRecette()">
-                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                <span>Supprimer</span>
-            </button>
+        <div class="fullscreen-body" id="detailRecipeBody">
+            <!-- Rempli dynamiquement -->
         </div>
     </div>
 
-    <!-- MODALE DE CHOIX DE TAILLE DE POLICE -->
-    <div class="popup-modal" id="fontSizeModal">
-        <div class="popup-content" style="max-width: 300px; text-align: center;">
-            <div class="popup-header">
-                <h3>Taille de police</h3>
-                <button class="popup-close-btn" onclick="fermerMenuTaillePolice()">&times;</button>
+    <!-- ACTION SHEET (OPTIONS EN BAS) -->
+    <div class="action-sheet-modal" id="actionSheetModal" onclick="fermerActionSheetExterieur(event)">
+        <div class="action-sheet-content">
+            <div style="font-size:13px; font-weight:700; color:var(--text-muted); text-align:center; margin-bottom:4px;">Options de lecture</div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; font-size: 14px; font-weight: 600;">
+                <span>Taille de police</span>
+                <div style="display: flex; gap: 6px;">
+                    <button class="menu-item" style="padding: 4px 8px; font-size: 11px;" onclick="changerTaillePolice('0.85rem')">Petite</button>
+                    <button class="menu-item active" style="padding: 4px 8px; font-size: 11px;" onclick="changerTaillePolice('1rem')">Normale</button>
+                    <button class="menu-item" style="padding: 4px 8px; font-size: 11px;" onclick="changerTaillePolice('1.2rem')">Grande</button>
+                </div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                <button class="menu-item" style="padding: 10px; text-align: center;" onclick="changerTaillePolice('0.85rem')">Petite</button>
-                <button class="menu-item active" style="padding: 10px; text-align: center;" onclick="changerTaillePolice('1rem')">Normale</button>
-                <button class="menu-item" style="padding: 10px; text-align: center;" onclick="changerTaillePolice('1.2rem')">Grande</button>
-            </div>
+
+            <div class="divider-line"></div>
+            <button class="action-sheet-btn" onclick="actionModifierRecette()">Modifier la recette ✏️</button>
+            <button class="action-sheet-btn" onclick="actionPartagerRecette()">Partager la recette 🔗</button>
+            <div class="divider-line"></div>
+            <button class="action-sheet-btn danger" onclick="actionSupprimerRecette()">Supprimer la recette 🗑️</button>
         </div>
     </div>
 
@@ -1150,7 +1133,7 @@
                         categorie: "Apéro",
                         membre: "Incontournables",
                         img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
-                        portions: 4, prepTime: 15, cookTime: 45,
+                        portions: 6, prepTime: 15, cookTime: 45,
                         ingredients: [
                             { qte: "150", unit: "g", nom: "de farine" },
                             { qte: "3", unit: "pièce(s)", nom: "d'œufs" },
@@ -1164,7 +1147,7 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se déguste tiède ou froid à l'apéro."
+                        notes: "Se déguise tiède ou froid à l'apéro."
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1177,7 +1160,7 @@
                         categorie: "Desserts",
                         membre: "Lucie",
                         img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
-                        portions: 4, prepTime: 15, cookTime: 10,
+                        portions: 8, prepTime: 15, cookTime: 10,
                         ingredients: [
                             { qte: "200", unit: "g", nom: "de pépites de chocolat" },
                             { qte: "250", unit: "g", nom: "de farine" },
@@ -1208,7 +1191,6 @@
         let imageRecetteActuelle = "";
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
-        let facteurMultiplicateur = 1; // 1, 1.25, 1.5, 1.75, 2... jusqu'à 5
 
         function renderCategories(onglet) {
             if (onglet === 'famille') {
@@ -1325,11 +1307,10 @@
             }
         }
 
-        /* VUE DÉTAILLÉE DE LA RECETTE */
+        /* VUE DÉTAILLÉE AVEC NOM EN BAS À GAUCHE DE LA PHOTO & GESTION PORTIONS */
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseInt(recipe.portions) || 4;
-            facteurMultiplicateur = 1; // Remise à 1 par défaut
             construireContenuDetailRecette();
             document.getElementById('recipeDetailModal').classList.add('active');
         }
@@ -1338,10 +1319,9 @@
             const recipe = recetteActiveEnCours;
             const bodyContainer = document.getElementById('detailRecipeBody');
             
-            // Calcul des portions selon le chiffre initial multiplié par le facteur (x0.25, x0.5, x0.75, x1, x1.25, ...)
-            const basePortions = parseInt(recipe.portions) || 4;
-            portionsActuelles = Math.round(basePortions * facteurMultiplicateur * 10) / 10;
-            const ratio = facteurMultiplicateur;
+            // Calcul du ratio pour les ingrédients en fonction des portions initiales
+            const basePortions = recipe.portions || 4;
+            const ratio = portionsActuelles / basePortions;
 
             let ingredientsHtml = '';
             if (recipe.ingredients && recipe.ingredients.length > 0) {
@@ -1374,7 +1354,6 @@
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
                     <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
-                    <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()">&times;</button>
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-overlay">${recipe.nom}</div>
                         <div class="recipe-detail-sub-overlay">
@@ -1392,11 +1371,11 @@
                     </div>
                     
                     <div class="portions-control-row">
-                        <span>Portions : <strong>${basePortions}</strong> (actuel : <strong>${portionsActuelles}</strong>)</span>
+                        <span>Portions : <strong>${portionsActuelles}</strong></span>
                         <div class="portions-stepper">
-                            <button class="stepper-btn" onclick="modifierFacteurPortions(-1)">-</button>
-                            <button class="stepper-btn" onclick="modifierFacteurPortions(1)">+</button>
-                            <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette</button>
+                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
+                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
+                            <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
                         </div>
                     </div>
                 </div>
@@ -1418,18 +1397,10 @@
             `;
         }
 
-        // Paliers successifs : 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, ..., jusqu'à 5
-        const paliersFacteur = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 4.75, 5.0];
-
-        function modifierFacteurPortions(delta) {
-            let indexActuel = paliersFacteur.findIndex(p => Math.abs(p - facteurMultiplicateur) < 0.01);
-            if (indexActuel === -1) indexActuel = 3; // Par défaut sur 1.0 si non trouvé
-            
-            let nouveauIndex = indexActuel + delta;
-            if (nouveauIndex < 0) nouveauIndex = 0;
-            if (nouveauIndex >= paliersFacteur.length) nouveauIndex = paliersFacteur.length - 1;
-
-            facteurMultiplicateur = paliersFacteur[nouveauIndex];
+        function modifierPortions(delta) {
+            portionsActuelles += delta;
+            if (portionsActuelles < 1) portionsActuelles = 1;
+            if (portionsActuelles > 30) portionsActuelles = 30;
             construireContenuDetailRecette();
         }
 
@@ -1437,24 +1408,29 @@
             document.getElementById('recipeDetailModal').classList.remove('active');
         }
 
-        /* GESTION DU BANDEAU D'OPTIONS DU BAS POUR LA RECETTE */
-        function ouvrirMenuTaillePolice() {
-            document.getElementById('fontSizeModal').classList.add('active');
+        /* GESTION DU MENU D'OPTIONS DU HAUT (ACTION SHEET EN BAS) */
+        function ouvrirActionSheet() {
+            document.getElementById('actionSheetModal').classList.add('active');
         }
-        function fermerMenuTaillePolice() {
-            document.getElementById('fontSizeModal').classList.remove('active');
+        function fermerActionSheet() {
+            document.getElementById('actionSheetModal').classList.remove('active');
+        }
+        function fermerActionSheetExterieur(e) {
+            if (e.target.id === 'actionSheetModal') fermerActionSheet();
         }
 
         function changerTaillePolice(taille) {
             document.documentElement.style.setProperty('--font-scale', taille);
-            fermerMenuTaillePolice();
+            fermerActionSheet();
         }
 
         function actionModifierRecette() {
+            fermerActionSheet();
             alert("Mode modification de la recette en cours de développement.");
         }
 
         function actionPartagerRecette() {
+            fermerActionSheet();
             if (navigator.share && recetteActiveEnCours) {
                 navigator.share({ title: recetteActiveEnCours.nom, text: "Découvre cette recette !", url: window.location.href }).catch(() => {});
             } else {
@@ -1463,6 +1439,7 @@
         }
 
         function actionSupprimerRecette() {
+            fermerActionSheet();
             if (confirm("Voulez-vous vraiment supprimer cette recette ?")) {
                 fermerDetailRecette();
                 alert("Recette supprimée.");
@@ -1502,10 +1479,10 @@
                 return;
             }
 
-            // Calcul du nouveau facteur proportionnel exact
-            facteurMultiplicateur = nouvelleQteSaisie / qteInitialeNum;
-            if (facteurMultiplicateur > 5) facteurMultiplicateur = 5;
-            if (facteurMultiplicateur < 0.25) facteurMultiplicateur = 0.25;
+            // Calcul du ratio d'adaptation
+            const ratio = nouvelleQteSaisie / qteInitialeNum;
+            portionsActuelles = Math.round((recetteActiveEnCours.portions || 4) * ratio);
+            if (portionsActuelles < 1) portionsActuelles = 1;
 
             fermerCalculateur();
             construireContenuDetailRecette();
