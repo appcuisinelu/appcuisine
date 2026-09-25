@@ -686,14 +686,13 @@
             transition: stroke 0.3s;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
     <!-- En-tête -->
     <header>
         <div class="header-brand">
-            <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img">
+            <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img" onerror="this.style.display='none'">
             <h1>Mes recettes</h1>
         </div>
         <div class="header-actions">
@@ -762,6 +761,9 @@
             <button class="close-modal-btn" onclick="fermerMenuAjout()">Annuler</button>
         </div>
     </div>
+
+    <!-- INPUT FILE CACHÉ GLOBAL POUR LA NUMÉRISATION PAR PHOTO -->
+    <input type="file" id="globalPhotoScanInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterPhotoScan(event)">
 
     <!-- MODALE D'IMPORTATION DE SITE WEB -->
     <div class="modal" id="siteImportModal">
@@ -1257,7 +1259,33 @@
             } else if (type === 'site') {
                 document.getElementById('siteImportModal').classList.add('active');
             } else if (type === 'photo') {
-                alert("Numérisation photo en cours de développement.");
+                // Déclenche l'explorateur de fichiers / appareil photo pour la numérisation
+                document.getElementById('globalPhotoScanInput').click();
+            }
+        }
+
+        // --- FONCTION DE NUMÉRISATION PAR PHOTO ---
+        function traiterPhotoScan(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageRecetteActuelle = e.target.result;
+                    
+                    // Ouvre automatiquement le formulaire de création de recette
+                    document.getElementById('recipeFormModal').classList.add('active');
+                    changerVoletForm(5); // Se place directement sur le volet Photos pour voir le résultat
+                    
+                    // Met à jour l'aperçu dans le volet 5
+                    const previewContainer = document.getElementById('photoPreviewContainer');
+                    if (previewContainer) {
+                        previewContainer.innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-exit:cover;">`;
+                    }
+                    
+                    // Titre par défaut suggéré suite à la numérisation
+                    document.getElementById('recipeTitle').value = "Recette numérisée";
+                }
+                reader.readAsDataURL(file);
             }
         }
 
@@ -1388,18 +1416,44 @@
                 return;
             }
 
+            const cible = document.getElementById('recipeTargetSection').value;
+            const categorie = document.getElementById('recipeCategory').value;
+
             const nouvelleRecette = {
                 nom: titre,
-                img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c" // Image par défaut si aucune photo
+                img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
             };
+
+            // Ajout dynamique dans la structure de données locale selon la destination
+            if (cible === 'incontournables') {
+                if (!database.incontournables[categorie]) {
+                    database.incontournables[categorie] = [];
+                }
+                database.incontournables[categorie].push(nouvelleRecette);
+            } else {
+                const membre = document.getElementById('recipeProfilSelect').value;
+                if (!database.famille[membre]) {
+                    database.famille[membre] = [];
+                }
+                database.famille[membre].push(nouvelleRecette);
+            }
 
             alert("Recette '" + titre + "' enregistrée avec succès !");
             fermerFormulaireAjout();
             
-            // Réinitialisation photo
+            // Réinitialisation photo et formulaire
             imageRecetteActuelle = "";
             document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
             document.getElementById('recipePhotoUrl').value = "";
+            document.getElementById('globalPhotoScanInput').value = "";
+
+            // Rafraîchir l'affichage de la vue active
+            const ongletActif = document.querySelector('.top-menu .menu-item.active');
+            if (ongletActif && ongletActif.textContent.includes('Profil')) {
+                renderCategories('famille');
+            } else {
+                renderCategories('incontournables');
+            }
         }
 
         function exporterRecettes() {
