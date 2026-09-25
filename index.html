@@ -86,7 +86,6 @@
             align-items: center;
         }
 
-        /* Boutons + et loupe de même taille agrandie */
         .header-btn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -459,12 +458,22 @@
             flex: 1;
         }
 
-        /* Gestion des 3 colonnes pour les Ingrédients */
+        /* Gestion des 3 colonnes pour les Ingrédients (fonds uniformes) */
         .ingredient-row {
             display: flex;
             gap: 6px;
             margin-bottom: 8px;
             align-items: center;
+        }
+
+        .ingredient-row input, .ingredient-row select {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 14px;
+            outline: none;
         }
 
         .ing-qty {
@@ -482,7 +491,7 @@
             flex-grow: 1;
         }
 
-        /* Lignes de préparation numérotées */
+        /* Lignes de préparation numérotées (fonds uniformes) */
         .etape-row {
             display: flex;
             gap: 8px;
@@ -509,6 +518,12 @@
             flex-grow: 1;
             resize: vertical;
             min-height: 50px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            outline: none;
         }
 
         /* Boutons secondaires d'ajout */
@@ -538,6 +553,7 @@
             font-size: 13px;
             margin-top: 6px;
             object-fit: cover;
+            background-color: var(--bg-color);
         }
 
         .form-footer {
@@ -556,7 +572,6 @@
             flex: 1;
         }
 
-        /* Boutons d'options d'ajout avec icônes monochromes */
         .add-option-btn {
             width: 100%;
             background-color: var(--bg-color);
@@ -672,7 +687,7 @@
             transition: stroke 0.3s;
         }
     </style>
-  <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -683,7 +698,6 @@
             <h1>Mes recettes</h1>
         </div>
         <div class="header-actions">
-            <!-- Bouton + ouvre le choix d'ajout -->
             <button class="header-btn btn-plus" onclick="ouvrirMenuAjout()" title="Ajouter">+</button>
             <button class="header-btn" onclick="toggleRecherche()" title="Rechercher">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -771,14 +785,21 @@
             <!-- CONTENU DES VOLETS -->
             <div class="form-body">
                 
-                <!-- VOLET 1 : APERÇU -->
+                <!-- VOLET 1 : APERÇU (Avec ajout du champ Profil/Destination) -->
                 <div class="form-volet active" id="volet-1">
                     <div class="form-group">
                         <label>Titre de la recette</label>
                         <input type="text" id="recipeTitle" placeholder="Ex: Tarte aux pommes">
                     </div>
                     <div class="form-group">
-                        <label>Catégorie</label>
+                        <label>Enregistrer dans :</label>
+                        <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
+                            <option value="incontournables">Incontournables (Catégories générales)</option>
+                            <option value="famille">Profil Familial / Membre</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="recipeCategoryGroup">
+                        <label>Catégorie (Incontournables)</label>
                         <select id="recipeCategory">
                             <option value="apero">Apéro</option>
                             <option value="plats">Plats</option>
@@ -787,6 +808,18 @@
                             <option value="basiques">Basiques</option>
                             <option value="maison">Maison</option>
                             <option value="cosmetiques">Cosmétiques</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="recipeProfilGroup" style="display: none;">
+                        <label>Profil concerné</label>
+                        <select id="recipeProfilSelect">
+                            <option value="Lucie">Lucie</option>
+                            <option value="Clémence">Clémence</option>
+                            <option value="Adeline">Adeline</option>
+                            <option value="Gwenaëlle">Gwenaëlle</option>
+                            <option value="Maman">Maman</option>
+                            <option value="Malo">Malo</option>
+                            <option value="Invité">Invité</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -809,7 +842,7 @@
                     </div>
                 </div>
 
-                <!-- VOLET 2 : INGRÉDIENTS (3 colonnes) -->
+                <!-- VOLET 2 : INGRÉDIENTS (3 colonnes avec fond sombre en mode sombre) -->
                 <div class="form-volet" id="volet-2">
                     <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Détail des ingrédients</label>
                     <div id="ingredientsContainer">
@@ -833,7 +866,7 @@
                     <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
                 </div>
 
-                <!-- VOLET 3 : PRÉPARATION -->
+                <!-- VOLET 3 : PRÉPARATION (Étapes avec fond sombre en mode sombre) -->
                 <div class="form-volet" id="volet-3">
                     <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Étapes de la recette</label>
                     <div id="etapesContainer">
@@ -1152,7 +1185,6 @@
         }
 
         function fermerMenuAjout() {
-            document.getElementById('addChoiceModal').classList.add('active');
             document.getElementById('addChoiceModal').classList.remove('active');
         }
 
@@ -1160,7 +1192,17 @@
             document.getElementById('recipeFormModal').classList.remove('active');
         }
 
-        // --- GESTION DU FORMULAIRE DE CRÉATION DE RECETTE (5 VOLETS) ---
+        function gererVisibiliteProfil(valeur) {
+            const catGroup = document.getElementById('recipeCategoryGroup');
+            const profilGroup = document.getElementById('recipeProfilGroup');
+            if (valeur === 'famille') {
+                catGroup.style.display = 'none';
+                profilGroup.style.display = 'block';
+            } else {
+                catGroup.style.display = 'block';
+                profilGroup.style.display = 'none';
+            }
+        }
 
         function changerVoletForm(numeroVolet) {
             document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
