@@ -2,12 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mes Recettes</title>
-    <!-- Icône personnalisée pour l'écran d'accueil iPhone -->
     <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
     <style>
-        /* MODE SOMBRE PAR DÉFAUT (Accent turquoise par défaut) */
         :root {
             --primary-color: #ecf0f1;
             --accent-color: #1abc9c;
@@ -19,7 +17,6 @@
             --nav-bg: #1a1a1a;
         }
 
-        /* Variables pour le mode clair */
         body.light-mode {
             --primary-color: #2c3e50;
             --bg-color: #fcfbfa;
@@ -30,7 +27,6 @@
             --nav-bg: #ffffff;
         }
 
-        /* Thèmes de couleurs d'accents */
         body.theme-turquoise { --accent-color: #1abc9c; }
         body.theme-orange { --accent-color: #e67e22; }
         body.theme-vert { --accent-color: #2ecc71; }
@@ -51,12 +47,11 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* En-tête supérieur */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 12px 0 12px 0;
+            margin: 12px 0;
         }
 
         .header-brand {
@@ -77,7 +72,6 @@
             font-weight: 700;
             color: var(--accent-color);
             letter-spacing: -0.5px;
-            transition: color 0.3s;
         }
 
         .header-actions {
@@ -97,7 +91,6 @@
             align-items: center;
             cursor: pointer;
             color: var(--accent-color);
-            transition: all 0.2s;
         }
 
         .header-btn.btn-plus {
@@ -115,11 +108,6 @@
             stroke-linejoin: round;
         }
 
-        .header-btn:active {
-            transform: scale(0.92);
-        }
-
-        /* Barre de recherche cachée par défaut */
         .search-container {
             display: none;
             margin-bottom: 12px;
@@ -138,14 +126,8 @@
             background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        .search-input:focus {
-            border-color: var(--accent-color);
-        }
-
-        /* Menu principal supérieur (Onglets) */
         .top-menu {
             display: flex;
             gap: 8px;
@@ -170,7 +152,6 @@
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .menu-item.active {
@@ -179,7 +160,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Vues (Onglets) */
         .view-section {
             display: none;
         }
@@ -187,7 +167,6 @@
             display: block;
         }
 
-        /* Grille des catégories */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -201,11 +180,6 @@
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .category-card:active {
-            transform: scale(0.97);
         }
 
         .category-img {
@@ -221,7 +195,6 @@
             font-size: 11px;
             font-weight: 600;
             text-align: center;
-            transition: background-color 0.3s;
         }
 
         .recipe-list-container {
@@ -252,14 +225,8 @@
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
             border: 1px solid var(--border-color);
-            transition: transform 0.2s;
-        }
-
-        .recipe-row-card:active {
-            transform: scale(0.98);
+            cursor: pointer;
         }
 
         .recipe-row-img {
@@ -279,7 +246,6 @@
             font-weight: 600;
             display: flex;
             align-items: center;
-            transition: background-color 0.3s;
         }
 
         .famille-select-container {
@@ -296,314 +262,240 @@
             background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
-            transition: border-color 0.2s;
-            cursor: pointer;
         }
 
-        .famille-select:focus {
-            border-color: var(--accent-color);
-        }
-
-        /* Fenêtre modale générale */
-        .modal {
+        /* MODALE PLEIN ÉCRAN POUR IPHONE */
+        .fullscreen-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.6);
+            background-color: var(--bg-color);
             z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
         }
-        .modal.active {
+        .fullscreen-modal.active {
             display: flex;
         }
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 340px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-        .modal-content h3 {
+
+        .fullscreen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 16px;
+        }
+
+        .fullscreen-header h3 {
             font-size: 18px;
             color: var(--text-main);
         }
 
-        /* FORMULAIRE ÉPURÉ ET SIMPLIFIÉ (Modale Grand Format) */
-        .modal-content-large {
-            background-color: var(--card-bg);
-            padding: 18px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 480px;
-            max-height: 88vh;
-            display: flex;
-            flex-direction: column;
+        .close-fullscreen-btn {
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            text-align: left;
-        }
-
-        .form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .form-header h3 {
-            font-size: 17px;
             color: var(--text-main);
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 22px;
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
         }
 
-        /* Onglets du formulaire plus discrets et épurés */
+        .fullscreen-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .fullscreen-footer {
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Formulaire interne des volets */
         .form-tabs {
             display: flex;
             gap: 4px;
             overflow-x: auto;
             padding-bottom: 6px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             border-bottom: 1px solid var(--border-color);
             scrollbar-width: none;
         }
-
-        .form-tabs::-webkit-scrollbar {
-            display: none;
-        }
+        .form-tabs::-webkit-scrollbar { display: none; }
 
         .form-tab-btn {
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--text-muted);
             border: 1px solid var(--border-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.2s;
         }
-
         .form-tab-btn.active {
             background-color: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
         }
 
-        .form-body {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 2px;
-            margin-bottom: 12px;
-        }
-
-        .form-volet {
-            display: none;
-        }
-
-        .form-volet.active {
-            display: block;
-        }
+        .form-volet { display: none; }
+        .form-volet.active { display: block; }
 
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
-
         .form-group label {
             display: block;
             font-size: 12px;
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             color: var(--text-muted);
         }
-
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 9px 10px;
-            font-size: 13px;
+            padding: 11px 12px;
+            font-size: 14px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color);
+            border-radius: 10px;
+            background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: var(--accent-color);
         }
 
         .form-row {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
+        .form-row .form-group { flex: 1; }
 
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        /* Ingrédients */
         .ingredient-row {
             display: flex;
             gap: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             align-items: center;
         }
-
         .ingredient-row input, .ingredient-row select {
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 8px;
+            padding: 9px;
             font-size: 13px;
-            outline: none;
         }
+        .ing-qty { width: 65px !important; text-align: center; }
+        .ing-unit { width: 95px !important; }
+        .ing-name { flex-grow: 1; }
 
-        .ing-qty {
-            width: 60px !important;
-            flex-shrink: 0;
-            text-align: center;
-        }
-
-        .ing-unit {
-            width: 90px !important;
-            flex-shrink: 0;
-        }
-
-        .ing-name {
-            flex-grow: 1;
-        }
-
-        /* Étapes de préparation */
         .etape-row {
             display: flex;
             gap: 8px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             align-items: flex-start;
         }
-
         .etape-num {
             background-color: var(--accent-color);
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             flex-shrink: 0;
-            margin-top: 5px;
+            margin-top: 6px;
         }
-
         .etape-row textarea {
             flex-grow: 1;
             resize: vertical;
-            min-height: 45px;
-            background-color: var(--bg-color);
+            min-height: 55px;
+            background-color: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 8px;
+            padding: 9px;
             outline: none;
-            font-size: 13px;
         }
 
         .secondary-btn {
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--accent-color);
             border: 1px dashed var(--accent-color);
-            padding: 7px 10px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 4px;
+            margin-top: 6px;
             text-align: center;
         }
 
         .photo-preview {
             width: 100%;
-            height: 140px;
+            height: 180px;
             border: 2px dashed var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 13px;
             margin-top: 8px;
             object-fit: cover;
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             overflow: hidden;
-        }
-
-        .form-footer {
-            display: flex;
-            gap: 8px;
         }
 
         .primary-btn {
             background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 9px 14px;
+            padding: 12px;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
             flex: 1;
+            text-align: center;
         }
 
         .add-option-btn {
             width: 100%;
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            padding: 12px 14px;
+            padding: 16px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 10px;
-            transition: all 0.2s;
-            text-align: left;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .add-option-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             stroke: var(--accent-color);
             fill: none;
             stroke-width: 2;
             stroke-linecap: round;
             stroke-linejoin: round;
             flex-shrink: 0;
-            transition: stroke 0.3s;
-        }
-
-        .add-option-btn:active {
-            transform: scale(0.98);
-            border-color: var(--accent-color);
         }
 
         .color-options {
@@ -612,26 +504,14 @@
             margin-bottom: 20px;
         }
         .color-circle {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
-        .close-modal-btn {
-            background-color: var(--border-color);
-            color: var(--text-main);
-            border: none;
-            padding: 9px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            width: 100%;
-        }
 
-        /* Barre de navigation inférieure fixe */
         .bottom-nav {
             position: fixed;
             bottom: 8px;
@@ -646,7 +526,6 @@
             border-radius: 16px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
             z-index: 1000;
-            transition: background-color 0.3s;
         }
 
         .nav-item {
@@ -662,7 +541,6 @@
             cursor: pointer;
             flex: 1;
             position: relative;
-            transition: color 0.3s;
         }
 
         .nav-item:not(:last-child):after {
@@ -683,14 +561,12 @@
             stroke-width: 2;
             stroke-linecap: round;
             stroke-linejoin: round;
-            transition: stroke 0.3s;
         }
     </style>
         <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
-    <!-- En-tête -->
     <header>
         <div class="header-brand">
             <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img" onerror="this.style.display='none'">
@@ -704,26 +580,20 @@
         </div>
     </header>
 
-    <!-- Barre de recherche -->
     <div class="search-container" id="searchContainer">
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- Menu principal supérieur -->
     <div class="top-menu" id="topMenuContainer">
         <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
         <button class="menu-item" id="profilTabBtn" onclick="changerOnglet('famille', this)">Profil : Lucie</button>
     </div>
 
-    <!-- CONTENEUR DES VUES -->
-    
-    <!-- 1. Vue Incontournables -->
     <div id="view-incontournables" class="view-section active">
         <div class="categories-grid" id="categoriesGrid-incontournables"></div>
         <div class="recipe-list-container" id="recipeList-incontournables"></div>
     </div>
 
-    <!-- 2. Vue Profil (Famille) -->
     <div id="view-famille" class="view-section">
         <div class="famille-select-container">
             <select class="famille-select" id="familleSelect" onchange="changerFamilleSelection(this.value)">
@@ -739,11 +609,13 @@
         <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
-    <!-- Modale de choix d'ajout de recette -->
-    <div class="modal" id="addChoiceModal">
-        <div class="modal-content">
+    <!-- 1. MENU PLEIN ÉCRAN POUR CHOISIR L'AJOUT -->
+    <div class="fullscreen-modal" id="addChoiceModal">
+        <div class="fullscreen-header">
             <h3>Ajouter une recette</h3>
-            
+            <button class="close-fullscreen-btn" onclick="fermerMenuAjout()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="padding-top: 10px;">
             <button class="add-option-btn" onclick="choixAjout('manuel')">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                 Ajouter une nouvelle recette
@@ -754,209 +626,210 @@
                 Importer une recette d'un site
             </button>
             
-            <button class="add-option-btn" onclick="choixAjout('photo')">
+            <button class="add-option-btn" onclick="choixAjout('camera')">
                 <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                Numériser recette à partir photo
+                Prendre une photo (Appareil photo)
             </button>
 
-            <button class="close-modal-btn" onclick="fermerMenuAjout()">Annuler</button>
+            <button class="add-option-btn" onclick="choixAjout('gallery')">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                Choisir une photo (Album)
+            </button>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerMenuAjout()">Annuler</button>
         </div>
     </div>
 
-    <!-- INPUT FILE CACHÉ GLOBAL POUR LA NUMÉRISATION PAR PHOTO -->
-    <input type="file" id="globalPhotoScanInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterPhotoScan(event)">
+    <!-- INPUTS FICHIERS CACHÉS POUR APPAREIL PHOTO OU GALERIE -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterPhotoScan(event)">
+    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="traiterPhotoScan(event)">
 
-    <!-- MODALE D'IMPORTATION DE SITE WEB -->
-    <div class="modal" id="siteImportModal">
-        <div class="modal-content-large" style="max-width: 400px; max-height: auto;">
-            <div class="form-header">
-                <h3>Importer depuis un site web</h3>
-                <button onclick="fermerModalSite()" class="close-btn">&times;</button>
+    <!-- 2. MODALE PLEIN ÉCRAN POUR IMPORTATION DE SITE WEB -->
+    <div class="fullscreen-modal" id="siteImportModal">
+        <div class="fullscreen-header">
+            <h3>Importer depuis un site web</h3>
+            <button class="close-fullscreen-btn" onclick="fermerModalSite()">&times;</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-group">
+                <label>Collez le lien (URL) de la recette</label>
+                <input type="url" id="recipeUrlInput" placeholder="https://www.exemple.com/recette...">
             </div>
-            <div class="form-body" style="overflow: visible;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                L'application va analyser la page web pour récupérer automatiquement le titre, les ingrédients et les étapes.
+            </p>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSite()">Annuler</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Importer et remplir</button>
+        </div>
+    </div>
+
+    <!-- 3. FORMULAIRE DE CRÉATION PLEIN ÉCRAN -->
+    <div class="fullscreen-modal" id="recipeFormModal">
+        <div class="fullscreen-header">
+            <h3>Nouvelle Recette</h3>
+            <button class="close-fullscreen-btn" onclick="fermerFormulaireAjout()">&times;</button>
+        </div>
+
+        <div class="form-tabs">
+            <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
+        </div>
+
+        <div class="fullscreen-body">
+            <!-- VOLET 1 -->
+            <div class="form-volet active" id="volet-1">
                 <div class="form-group">
-                    <label>Collez le lien (URL) de la recette</label>
-                    <input type="url" id="recipeUrlInput" placeholder="https://www.exemple.com/recette...">
+                    <label>Titre de la recette</label>
+                    <input type="text" id="recipeTitle" placeholder="Ex: Tarte aux pommes">
                 </div>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
-                    L'application va analyser la page web pour récupérer automatiquement le titre, les ingrédients et les étapes.
-                </p>
-            </div>
-            <div class="form-footer" style="margin-top: 10px;">
-                <button class="close-modal-btn" onclick="fermerModalSite()">Annuler</button>
-                <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Importer et remplir</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FENÊTRE MODALE DU FORMULAIRE DE CRÉATION (5 VOLETS) -->
-    <div class="modal" id="recipeFormModal">
-        <div class="modal-content-large">
-            
-            <div class="form-header">
-                <h3>Nouvelle Recette</h3>
-                <button onclick="fermerFormulaireAjout()" class="close-btn">&times;</button>
-            </div>
-
-            <!-- Navigation des 5 Volets -->
-            <div class="form-tabs">
-                <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
-                <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
-                <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
-                <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
-                <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
-            </div>
-
-            <!-- CONTENU DES VOLETS -->
-            <div class="form-body">
-                
-                <!-- VOLET 1 : APERÇU -->
-                <div class="form-volet active" id="volet-1">
+                <div class="form-row">
                     <div class="form-group">
-                        <label>Titre de la recette</label>
-                        <input type="text" id="recipeTitle" placeholder="Ex: Tarte aux pommes">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Destination</label>
-                            <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
-                                <option value="incontournables">Incontournables</option>
-                                <option value="famille">Profil / Membre</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="recipeProfilGroup" style="display: none;">
-                            <label>Membre</label>
-                            <select id="recipeProfilSelect">
-                                <option value="Lucie">Lucie</option>
-                                <option value="Clémence">Clémence</option>
-                                <option value="Adeline">Adeline</option>
-                                <option value="Gwenaëlle">Gwenaëlle</option>
-                                <option value="Maman">Maman</option>
-                                <option value="Malo">Malo</option>
-                                <option value="Invité">Invité</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Catégorie</label>
-                        <select id="recipeCategory">
-                            <option value="apero">Apéro</option>
-                            <option value="plats">Plats</option>
-                            <option value="desserts">Desserts</option>
-                            <option value="boulangerie">Boulangerie</option>
-                            <option value="basiques">Basiques</option>
-                            <option value="maison">Maison</option>
-                            <option value="cosmetiques">Cosmétiques</option>
+                        <label>Destination</label>
+                        <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
+                            <option value="incontournables">Incontournables</option>
+                            <option value="famille">Profil / Membre</option>
                         </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Portions</label>
-                            <input type="number" id="recipePortions" value="4">
-                        </div>
-                        <div class="form-group">
-                            <label>Prépa (m)</label>
-                            <input type="number" id="recipePrepTime" value="15">
-                        </div>
-                        <div class="form-group">
-                            <label>Cuisson (m)</label>
-                            <input type="number" id="recipeCookTime" value="30">
-                        </div>
+                    <div class="form-group" id="recipeProfilGroup" style="display: none;">
+                        <label>Membre</label>
+                        <select id="recipeProfilSelect">
+                            <option value="Lucie">Lucie</option>
+                            <option value="Clémence">Clémence</option>
+                            <option value="Adeline">Adeline</option>
+                            <option value="Gwenaëlle">Gwenaëlle</option>
+                            <option value="Maman">Maman</option>
+                            <option value="Malo">Malo</option>
+                            <option value="Invité">Invité</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="recipeCategory">
+                        <option value="apero">Apéro</option>
+                        <option value="plats">Plats</option>
+                        <option value="desserts">Desserts</option>
+                        <option value="boulangerie">Boulangerie</option>
+                        <option value="basiques">Basiques</option>
+                        <option value="maison">Maison</option>
+                        <option value="cosmetiques">Cosmétiques</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Portions</label>
+                        <input type="number" id="recipePortions" value="4">
                     </div>
                     <div class="form-group">
-                        <label>Source</label>
-                        <input type="text" id="recipeSource" placeholder="Ex: Livre, site...">
+                        <label>Prépa (m)</label>
+                        <input type="number" id="recipePrepTime" value="15">
                     </div>
-                </div>
-
-                <!-- VOLET 2 : INGRÉDIENTS -->
-                <div class="form-volet" id="volet-2">
-                    <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Liste des ingrédients</label>
-                    <div id="ingredientsContainer">
-                        <div class="ingredient-row">
-                            <input type="text" placeholder="Qté" class="ing-qty">
-                            <select class="ing-unit">
-                                <option value="">(unité)</option>
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="ml">ml</option>
-                                <option value="cl">cl</option>
-                                <option value="L">L</option>
-                                <option value="c.à.s">c. à s.</option>
-                                <option value="c.à.c">c. à c.</option>
-                                <option value="pincée">pincée</option>
-                                <option value="pièce">pièce(s)</option>
-                            </select>
-                            <input type="text" placeholder="Ingrédient" class="ing-name">
-                        </div>
-                    </div>
-                    <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
-                </div>
-
-                <!-- VOLET 3 : PRÉPARATION -->
-                <div class="form-volet" id="volet-3">
-                    <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Étapes de préparation</label>
-                    <div id="etapesContainer">
-                        <div class="etape-row">
-                            <span class="etape-num">1</span>
-                            <textarea placeholder="Décrivez l'étape..."></textarea>
-                        </div>
-                    </div>
-                    <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
-                </div>
-
-                <!-- VOLET 4 : NOTES -->
-                <div class="form-volet" id="volet-4">
                     <div class="form-group">
-                        <label>Notes & Astuces</label>
-                        <textarea id="recipeNotes" rows="5" placeholder="Conseils, conservation, variantes..."></textarea>
+                        <label>Cuisson (m)</label>
+                        <input type="number" id="recipeCookTime" value="30">
                     </div>
                 </div>
-
-                <!-- VOLET 5 : PHOTOS -->
-                <div class="form-volet" id="volet-5">
-                    <div class="form-group">
-                        <label>Photo de la recette (Fichier local)</label>
-                        <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
-                        <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir une image sur l'appareil</button>
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Ou via un lien Web (URL)</label>
-                        <input type="url" id="recipePhotoUrl" placeholder="https://exemple.com/image.jpg" oninput="chargerApercuUrl(this.value)">
-                    </div>
-
-                    <div class="form-group" style="text-align: center; margin-top: 10px;">
-                        <label>Aperçu de la photo</label>
-                        <div class="photo-preview" id="photoPreviewContainer">Aucune photo sélectionnée</div>
-                    </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <input type="text" id="recipeSource" placeholder="Ex: Livre, site...">
                 </div>
-
             </div>
 
-            <div class="form-footer">
-                <button class="close-modal-btn" onclick="fermerFormulaireAjout()">Annuler</button>
-                <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
+            <!-- VOLET 2 -->
+            <div class="form-volet" id="volet-2">
+                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Liste des ingrédients</label>
+                <div id="ingredientsContainer">
+                    <div class="ingredient-row">
+                        <input type="text" placeholder="Qté" class="ing-qty">
+                        <select class="ing-unit">
+                            <option value="">(unité)</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="cl">cl</option>
+                            <option value="L">L</option>
+                            <option value="c.à.s">c. à s.</option>
+                            <option value="c.à.c">c. à c.</option>
+                            <option value="pincée">pincée</option>
+                            <option value="pièce">pièce(s)</option>
+                        </select>
+                        <input type="text" placeholder="Ingrédient" class="ing-name">
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
             </div>
 
+            <!-- VOLET 3 -->
+            <div class="form-volet" id="volet-3">
+                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Étapes de préparation</label>
+                <div id="etapesContainer">
+                    <div class="etape-row">
+                        <span class="etape-num">1</span>
+                        <textarea placeholder="Décrivez l'étape..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
+            </div>
+
+            <!-- VOLET 4 -->
+            <div class="form-volet" id="volet-4">
+                <div class="form-group">
+                    <label>Notes & Astuces</label>
+                    <textarea id="recipeNotes" rows="6" placeholder="Conseils, conservation, variantes..."></textarea>
+                </div>
+            </div>
+
+            <!-- VOLET 5 -->
+            <div class="form-volet" id="volet-5">
+                <div class="form-group">
+                    <label>Photo de la recette (Fichier local)</label>
+                    <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
+                    <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir une image sur l'appareil</button>
+                </div>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Ou via un lien Web (URL)</label>
+                    <input type="url" id="recipePhotoUrl" placeholder="https://exemple.com/image.jpg" oninput="chargerApercuUrl(this.value)">
+                </div>
+
+                <div class="form-group" style="text-align: center; margin-top: 10px;">
+                    <label>Aperçu de la photo</label>
+                    <div class="photo-preview" id="photoPreviewContainer">Aucune photo sélectionnée</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerFormulaireAjout()">Annuler</button>
+            <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
         </div>
     </div>
 
-    <!-- Fenêtre modale pour choisir la couleur -->
-    <div class="modal" id="colorModal">
-        <div class="modal-content">
+    <!-- MODALE COULEURS PLEIN ÉCRAN -->
+    <div class="fullscreen-modal" id="colorModal">
+        <div class="fullscreen-header">
             <h3>Choisir une couleur</h3>
-            <div class="color-options">
+            <button class="close-fullscreen-btn" onclick="fermerModalCouleurs()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
+            <div class="color-options" style="width: 100%; max-width: 300px;">
                 <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
                 <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
                 <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
                 <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
             </div>
-            <button class="close-modal-btn" onclick="fermerModalCouleurs()">Fermer</button>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalCouleurs()">Fermer</button>
         </div>
     </div>
 
-    <!-- Barre de navigation en bas -->
     <nav class="bottom-nav">
         <button class="nav-item" onclick="retourAccueil()">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -980,54 +853,19 @@
         const database = {
             incontournables: {
                 apero: [
-                    { nom: "Cake salé aux olives", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
-                    { nom: "Mini feuilletés fromage", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" }
+                    { nom: "Cake salé aux olives", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }
                 ],
                 plats: [
-                    { nom: "Gratin dauphinois", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
                     { nom: "Poulet rôti du dimanche", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c" }
                 ],
                 desserts: [
-                    { nom: "Tarte aux pommes", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
-                    { nom: "Mousse au chocolat", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }
+                    { nom: "Tarte aux pommes", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" }
                 ],
-                boulangerie: [
-                    { nom: "Pain maison croustillant", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff" }
-                ],
-                basiques: [
-                    { nom: "Pâte à crêpes", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" },
-                    { nom: "Mayonnaise maison", img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d" }
-                ],
-                maison: [
-                    { nom: "Lessive liquide écolo", img: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba" }
-                ],
-                cosmetiques: [
-                    { nom: "Baume à lèvres protecteur", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
-                ]
+                boulangerie: [], basiques: [], maison: [], cosmetiques: []
             },
             famille: {
-                Lucie: [
-                    { nom: "Cookies moelleux", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }
-                ],
-                Clémence: [
-                    { nom: "Tarte aux fruits", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
-                    { nom: "Gratin spécial", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" }
-                ],
-                Adeline: [
-                    { nom: "Verrines d'Adeline", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" }
-                ],
-                Gwenaëlle: [
-                    { nom: "Crêpes bretonnes", img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d" }
-                ],
-                Maman: [
-                    { nom: "Pot-au-feu traditionnel", img: "https://images.unsplash.com/photo-1547592180-85f173990554" }
-                ],
-                Malo: [
-                    { nom: "Gâteau au yaourt", img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587" }
-                ],
-                Invité: [
-                    { nom: "Amuse-bouches festifs", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }
-                ]
+                Lucie: [{ nom: "Cookies moelleux", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }],
+                Clémence: [], Adeline: [], Gwenaëlle: [], Maman: [], Malo: [], Invité: []
             }
         };
 
@@ -1041,7 +879,6 @@
             cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
         };
 
-        // Variable globale pour stocker l'image active (fichier ou URL)
         let imageRecetteActuelle = "";
 
         function renderCategories(onglet) {
@@ -1088,7 +925,6 @@
             listContainer.appendChild(backBtn);
 
             const recipes = (database[onglet] && database[onglet][catKey]) || [];
-
             if (recipes.length === 0) {
                 const emptyMsg = document.createElement('div');
                 emptyMsg.style.textAlign = 'center';
@@ -1121,9 +957,7 @@
 
         function MettreAJourTexteBoutonProfil(personne) {
             const profilBtn = document.getElementById('profilTabBtn');
-            if (profilBtn) {
-                profilBtn.textContent = `Profil : ${personne}`;
-            }
+            if (profilBtn) profilBtn.textContent = `Profil : ${personne}`;
         }
 
         function changerFamilleSelection(personne) {
@@ -1135,9 +969,7 @@
         function filtrerFamille(personne) {
             const listContainer = document.getElementById('recipeList-famille');
             listContainer.innerHTML = '';
-
             const recipes = (database.famille && database.famille[personne]) || [];
-
             if (recipes.length === 0) {
                 const emptyMsg = document.createElement('div');
                 emptyMsg.style.textAlign = 'center';
@@ -1162,32 +994,21 @@
         }
 
         function changerOnglet(nomOnglet, elementBtn) {
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.classList.remove('active');
-            });
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
             document.getElementById('view-' + nomOnglet).classList.add('active');
-
-            document.querySelectorAll('.top-menu .menu-item').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.top-menu .menu-item').forEach(btn => btn.classList.remove('active'));
             if(elementBtn) elementBtn.classList.add('active');
-
-            if (nomOnglet !== 'famille') {
-                fermerCategorie(nomOnglet);
-            }
+            if (nomOnglet !== 'famille') fermerCategorie(nomOnglet);
             renderCategories(nomOnglet);
         }
 
         function retourAccueil() {
-            const firstMenuBtn = document.querySelector('.top-menu .menu-item');
-            changerOnglet('incontournables', firstMenuBtn);
+            changerOnglet('incontournables', document.querySelector('.top-menu .menu-item'));
         }
 
         function toggleTheme() {
-            const body = document.body;
-            body.classList.toggle('light-mode');
-            const isLight = body.classList.contains('light-mode');
-            
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
             const iconSvg = document.getElementById('themeIconSvg');
             if (isLight) {
                 iconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
@@ -1196,60 +1017,35 @@
             }
         }
 
-        function ouvrirModalCouleurs() {
-            document.getElementById('colorModal').classList.add('active');
-        }
-
-        function fermerModalCouleurs() {
-            document.getElementById('colorModal').classList.remove('active');
-        }
+        function ouvrirModalCouleurs() { document.getElementById('colorModal').classList.add('active'); }
+        function fermerModalCouleurs() { document.getElementById('colorModal').classList.remove('active'); }
 
         function changerCouleur(couleur) {
-            const body = document.body;
-            body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
-            body.classList.add('theme-' + couleur);
+            document.body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
+            document.body.classList.add('theme-' + couleur);
             fermerModalCouleurs();
         }
 
         function toggleRecherche() {
-            const searchContainer = document.getElementById('searchContainer');
-            searchContainer.classList.toggle('active');
-            if (searchContainer.classList.contains('active')) {
-                document.getElementById('searchInput').focus();
-            }
+            const sc = document.getElementById('searchContainer');
+            sc.classList.toggle('active');
+            if (sc.classList.contains('active')) document.getElementById('searchInput').focus();
         }
 
-        function ouvrirMenuAjout() {
-            document.getElementById('addChoiceModal').classList.add('active');
-        }
-
-        function fermerMenuAjout() {
-            document.getElementById('addChoiceModal').classList.remove('active');
-        }
-
-        function fermerFormulaireAjout() {
-            document.getElementById('recipeFormModal').classList.remove('active');
-        }
-
-        function fermerModalSite() {
-            document.getElementById('siteImportModal').classList.remove('active');
-        }
+        function ouvrirMenuAjout() { document.getElementById('addChoiceModal').classList.add('active'); }
+        function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
+        function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
+        function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
 
         function gererVisibiliteProfil(valeur) {
-            const profilGroup = document.getElementById('recipeProfilGroup');
-            if (valeur === 'famille') {
-                profilGroup.style.display = 'block';
-            } else {
-                profilGroup.style.display = 'none';
-            }
+            document.getElementById('recipeProfilGroup').style.display = (valeur === 'famille') ? 'block' : 'none';
         }
 
-        function changerVoletForm(numeroVolet) {
+        function changerVoletForm(num) {
             document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById('volet-' + numeroVolet).classList.add('active');
-            document.querySelectorAll('.form-tab-btn')[numeroVolet - 1].classList.add('active');
+            document.getElementById('volet-' + num).classList.add('active');
+            document.querySelectorAll('.form-tab-btn')[num - 1].classList.add('active');
         }
 
         function choixAjout(type) {
@@ -1259,31 +1055,22 @@
                 changerVoletForm(1);
             } else if (type === 'site') {
                 document.getElementById('siteImportModal').classList.add('active');
-            } else if (type === 'photo') {
-                // Déclenche l'explorateur de fichiers / appareil photo pour la numérisation
-                document.getElementById('globalPhotoScanInput').click();
+            } else if (type === 'camera') {
+                document.getElementById('cameraInput').click();
+            } else if (type === 'gallery') {
+                document.getElementById('galleryInput').click();
             }
         }
 
-        // --- FONCTION DE NUMÉRISATION PAR PHOTO ---
         function traiterPhotoScan(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imageRecetteActuelle = e.target.result;
-                    
-                    // Ouvre automatiquement le formulaire de création de recette
                     document.getElementById('recipeFormModal').classList.add('active');
-                    changerVoletForm(5); // Se place directement sur le volet Photos pour voir le résultat
-                    
-                    // Met à jour l'aperçu dans le volet 5
-                    const previewContainer = document.getElementById('photoPreviewContainer');
-                    if (previewContainer) {
-                        previewContainer.innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-exit:cover;">`;
-                    }
-                    
-                    // Titre par défaut suggéré suite à la numérisation
+                    changerVoletForm(5);
+                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
                     document.getElementById('recipeTitle').value = "Recette numérisée";
                 }
                 reader.readAsDataURL(file);
@@ -1292,45 +1079,10 @@
 
         function importerRecetteDepuisUrl() {
             const url = document.getElementById('recipeUrlInput').value.trim();
-            if (!url) {
-                alert("Veuillez entrer un lien URL valide.");
-                return;
-            }
-
+            if (!url) { alert("Veuillez entrer un lien URL valide."); return; }
             fermerModalSite();
-
             document.getElementById('recipeTitle').value = "Recette importée du web";
             document.getElementById('recipeSource').value = url;
-            document.getElementById('recipePortions').value = 4;
-            document.getElementById('recipePrepTime').value = 20;
-            document.getElementById('recipeCookTime').value = 35;
-
-            const ingContainer = document.getElementById('ingredientsContainer');
-            ingContainer.innerHTML = `
-                <div class="ingredient-row">
-                    <input type="text" value="200" class="ing-qty">
-                    <select class="ing-unit"><option value="g">g</option></select>
-                    <input type="text" value="Farine de blé" class="ing-name">
-                </div>
-                <div class="ingredient-row">
-                    <input type="text" value="100" class="ing-qty">
-                    <select class="ing-unit"><option value="g">g</option></select>
-                    <input type="text" value="Sucre en poudre" class="ing-name">
-                </div>
-            `;
-
-            const etapeContainer = document.getElementById('etapesContainer');
-            etapeContainer.innerHTML = `
-                <div class="etape-row">
-                    <span class="etape-num">1</span>
-                    <textarea>Préchauffer le four à 180°C.</textarea>
-                </div>
-                <div class="etape-row">
-                    <span class="etape-num">2</span>
-                    <textarea>Mélanger la farine et le sucre dans un grand bol.</textarea>
-                </div>
-            `;
-
             document.getElementById('recipeFormModal').classList.add('active');
             changerVoletForm(1);
         }
@@ -1343,15 +1095,9 @@
                 <input type="text" placeholder="Qté" class="ing-qty">
                 <select class="ing-unit">
                     <option value="">(unité)</option>
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="ml">ml</option>
-                    <option value="cl">cl</option>
-                    <option value="L">L</option>
-                    <option value="c.à.s">c. à s.</option>
-                    <option value="c.à.c">c. à c.</option>
-                    <option value="pincée">pincée</option>
-                    <option value="pièce">pièce(s)</option>
+                    <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option>
+                    <option value="cl">cl</option><option value="L">L</option><option value="c.à.s">c. à s.</option>
+                    <option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                 </select>
                 <input type="text" placeholder="Ingrédient" class="ing-name">
             `;
@@ -1363,112 +1109,72 @@
             const count = container.querySelectorAll('.etape-row').length + 1;
             const row = document.createElement('div');
             row.className = 'etape-row';
-            row.innerHTML = `
-                <span class="etape-num">${count}</span>
-                <textarea placeholder="Décrivez l'étape..."></textarea>
-            `;
+            row.innerHTML = `<span class="etape-num">${count}</span><textarea placeholder="Décrivez l'étape..."></textarea>`;
             container.appendChild(row);
         }
 
-        // --- GESTION ROBUSTE DES PHOTOS ---
         function chargerApercuPhoto(event) {
             const file = event.target.files[0];
-            const previewContainer = document.getElementById('photoPreviewContainer');
-            const urlInput = document.getElementById('recipePhotoUrl');
-            
             if (file) {
-                urlInput.value = ""; // Vider l'URL pour éviter les conflits
+                document.getElementById('recipePhotoUrl').value = "";
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imageRecetteActuelle = e.target.result;
-                    previewContainer.innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
                 }
                 reader.readAsDataURL(file);
             }
         }
 
         function chargerApercuUrl(url) {
-            const previewContainer = document.getElementById('photoPreviewContainer');
-            const fileInput = document.getElementById('recipePhotoFile');
-            
-            if (fileInput) fileInput.value = ""; // Vider l'input fichier pour éviter les conflits
-            
+            document.getElementById('recipePhotoFile').value = "";
             const cleanUrl = url.trim();
             if (cleanUrl !== "") {
                 imageRecetteActuelle = cleanUrl;
-                previewContainer.innerHTML = `<img src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="gererErreurImage()">`;
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;">`;
             } else {
                 imageRecetteActuelle = "";
-                previewContainer.innerHTML = "Aucune photo sélectionnée";
+                document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
             }
-        }
-
-        function gererErreurImage() {
-            const previewContainer = document.getElementById('photoPreviewContainer');
-            previewContainer.innerHTML = "Erreur de chargement de l'image";
-            imageRecetteActuelle = "";
         }
 
         function sauvegarderRecetteComprehensive() {
             const titre = document.getElementById('recipeTitle').value;
-            if (!titre.trim()) {
-                alert("Veuillez renseigner au moins un titre pour la recette.");
-                changerVoletForm(1);
-                return;
-            }
+            if (!titre.trim()) { alert("Veuillez renseigner au moins un titre."); changerVoletForm(1); return; }
 
             const cible = document.getElementById('recipeTargetSection').value;
             const categorie = document.getElementById('recipeCategory').value;
-
             const nouvelleRecette = {
                 nom: titre,
                 img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
             };
 
-            // Ajout dynamique dans la structure de données locale selon la destination
             if (cible === 'incontournables') {
-                if (!database.incontournables[categorie]) {
-                    database.incontournables[categorie] = [];
-                }
+                if (!database.incontournables[categorie]) database.incontournables[categorie] = [];
                 database.incontournables[categorie].push(nouvelleRecette);
             } else {
                 const membre = document.getElementById('recipeProfilSelect').value;
-                if (!database.famille[membre]) {
-                    database.famille[membre] = [];
-                }
+                if (!database.famille[membre]) database.famille[membre] = [];
                 database.famille[membre].push(nouvelleRecette);
             }
 
-            alert("Recette '" + titre + "' enregistrée avec succès !");
+            alert("Recette '" + titre + "' enregistrée !");
             fermerFormulaireAjout();
-            
-            // Réinitialisation photo et formulaire
             imageRecetteActuelle = "";
             document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
-            document.getElementById('recipePhotoUrl').value = "";
-            document.getElementById('globalPhotoScanInput').value = "";
-
-            // Rafraîchir l'affichage de la vue active
+            
             const ongletActif = document.querySelector('.top-menu .menu-item.active');
-            if (ongletActif && ongletActif.textContent.includes('Profil')) {
-                renderCategories('famille');
-            } else {
-                renderCategories('incontournables');
-            }
+            renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
         }
 
-        function exporterRecettes() {
-            alert("Fonction d'exportation des recettes déclenchée !");
-        }
+        function exporterRecettes() { alert("Fonction d'exportation déclenchée !"); }
 
         window.addEventListener('DOMContentLoaded', () => {
             const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
-            const selectElement = document.getElementById('familleSelect');
-            if (selectElement) selectElement.value = profilEnregistre;
+            document.getElementById('familleSelect').value = profilEnregistre;
             MettreAJourTexteBoutonProfil(profilEnregistre);
             renderCategories('incontournables');
         });
     </script>
-
 </body>
 </html>
