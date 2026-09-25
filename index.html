@@ -296,7 +296,7 @@
         }
         .popup-header h3 {
             font-size: 16px;
-            color: var(--accent-color); /* Le titre s'adapte au thème */
+            color: var(--accent-color);
         }
         
         .popup-close-btn {
@@ -664,7 +664,7 @@
 
             <button class="add-option-btn" onclick="choixAjout('video')">
                 <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                Importer depuis une vidéo (FB / Insta)
+                Importer depuis une vidéo
             </button>
         </div>
     </div>
@@ -727,7 +727,7 @@
         </div>
     </div>
 
-    <!-- 5. MODALE PLEIN ÉCRAN POUR IMPORTATION DE VIDÉO (FB / INSTA) -->
+    <!-- 5. MODALE PLEIN ÉCRAN POUR IMPORTATION DE VIDÉO -->
     <div class="fullscreen-modal" id="videoImportModal">
         <div class="fullscreen-header">
             <h3>Importer depuis une vidéo</h3>
@@ -735,8 +735,8 @@
         </div>
         <div class="fullscreen-body">
             <div class="form-group">
-                <label>Lien de la vidéo (Facebook ou Instagram)</label>
-                <input type="url" id="recipeVideoUrlInput" placeholder="https://www.instagram.com/reel/... ou https://fb.watch/...">
+                <label>Lien de la vidéo</label>
+                <input type="url" id="recipeVideoUrlInput" placeholder="https://...">
             </div>
             <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
                 Collez le lien de la publication vidéo pour en extraire la recette.
@@ -1181,7 +1181,7 @@
 
         function importerRecetteDepuisVideo() {
             const url = document.getElementById('recipeVideoUrlInput').value.trim();
-            if (!url) { alert("Veuillez entrer un lien vidéo valide (FB/Insta)."); return; }
+            if (!url) { alert("Veuillez entrer un lien vidéo valide."); return; }
             fermerModalVideo();
             document.getElementById('recipeTitle').value = "Recette importée de vidéo";
             document.getElementById('recipeSource').value = url;
