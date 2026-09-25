@@ -298,7 +298,7 @@
             color: var(--text-main);
         }
 
-        /* MODALE PLEIN ÉCRAN POUR IPHONE */
+        /* MODALE PLEIN ÉCRAN */
         .fullscreen-modal {
             display: none;
             position: fixed;
@@ -324,20 +324,6 @@
         .fullscreen-header h3 {
             font-size: 18px;
             color: var(--text-main);
-        }
-
-        .close-fullscreen-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            font-size: 20px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
         }
 
         .fullscreen-body {
@@ -532,6 +518,16 @@
             flex-shrink: 0;
         }
 
+        /* Bouton dynamique selon le thème */
+        .btn-theme-colored {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+            border-color: var(--accent-color) !important;
+        }
+        .btn-theme-colored svg {
+            stroke: white !important;
+        }
+
         .color-options {
             display: flex;
             justify-content: space-around;
@@ -648,10 +644,9 @@
         <div class="popup-content">
             <div class="popup-header">
                 <h3>Ajouter une recette</h3>
-                <button class="close-fullscreen-btn" style="width:30px; height:30px; font-size:16px;" onclick="fermerMenuAjout()">&times;</button>
             </div>
             
-            <button class="add-option-btn" onclick="choixAjout('manuel')">
+            <button class="add-option-btn btn-theme-colored" onclick="choixAjout('manuel')">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                 Ajouter une nouvelle recette
             </button>
@@ -666,28 +661,37 @@
                 Importer une recette à partir d'une photo
             </button>
 
-            <button class="add-option-btn" onclick="choixAjout('camera')">
-                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                Prendre une photo (Appareil photo)
-            </button>
-
-            <button class="add-option-btn" onclick="choixAjout('gallery')">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                Choisir une photo (Album)
-            </button>
+            <button class="secondary-btn" style="margin-top: 10px;" onclick="fermerMenuAjout()">Annuler</button>
         </div>
     </div>
 
-    <!-- INPUTS FICHIERS CACHÉS POUR APPAREIL PHOTO OU GALERIE -->
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterPhotoDirecte(event)">
-    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="traiterPhotoDirecte(event)">
+    <!-- INPUTS FICHIERS CACHÉS POUR PHOTO -->
     <input type="file" id="scanPhotoInput" accept="image/*" style="display:none;" onchange="traiterImportPhotoRecette(event)">
 
-    <!-- 2. MODALE PLEIN ÉCRAN POUR IMPORTATION DE SITE WEB -->
+    <!-- 2. MODALE PLEIN ÉCRAN POUR IMPORTATION DE PHOTO -->
+    <div class="fullscreen-modal" id="photoImportPageModal">
+        <div class="fullscreen-header">
+            <h3>Importer à partir d'une photo</h3>
+        </div>
+        <div class="fullscreen-body" style="text-align: center; padding-top: 20px;">
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+                Sélectionnez ou prenez une photo de votre recette pour l'importer.
+            </p>
+            <div class="photo-preview" id="photoImportPreview" style="height: 250px; margin-bottom: 20px;">
+                Aucune photo sélectionnée
+            </div>
+            <button class="primary-btn" style="width: 100%; margin-bottom: 10px;" onclick="document.getElementById('scanPhotoInput').click()">Choisir / Prendre une photo</button>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalPhotoImport()">Annuler</button>
+            <button class="primary-btn" onclick="validerImportPhotoPage()">Continuer</button>
+        </div>
+    </div>
+
+    <!-- 3. MODALE PLEIN ÉCRAN POUR IMPORTATION DE SITE WEB -->
     <div class="fullscreen-modal" id="siteImportModal">
         <div class="fullscreen-header">
             <h3>Importer depuis un site web</h3>
-            <button class="close-fullscreen-btn" onclick="fermerModalSite()">&times;</button>
         </div>
         <div class="fullscreen-body">
             <div class="form-group">
@@ -704,11 +708,10 @@
         </div>
     </div>
 
-    <!-- 3. FORMULAIRE DE CRÉATION PLEIN ÉCRAN -->
+    <!-- 4. FORMULAIRE DE CRÉATION PLEIN ÉCRAN -->
     <div class="fullscreen-modal" id="recipeFormModal">
         <div class="fullscreen-header">
             <h3>Nouvelle Recette</h3>
-            <button class="close-fullscreen-btn" onclick="fermerFormulaireAjout()">&times;</button>
         </div>
 
         <div class="form-tabs">
@@ -853,7 +856,6 @@
     <div class="fullscreen-modal" id="colorModal">
         <div class="fullscreen-header">
             <h3>Choisir une couleur</h3>
-            <button class="close-fullscreen-btn" onclick="fermerModalCouleurs()">&times;</button>
         </div>
         <div class="fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
             <div class="color-options" style="width: 100%; max-width: 300px;">
@@ -1074,6 +1076,7 @@
         function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
         function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
         function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
+        function fermerModalPhotoImport() { document.getElementById('photoImportPageModal').classList.remove('active'); }
 
         function gererVisibiliteProfil(valeur) {
             document.getElementById('recipeProfilGroup').style.display = (valeur === 'famille') ? 'block' : 'none';
@@ -1094,25 +1097,7 @@
             } else if (type === 'site') {
                 document.getElementById('siteImportModal').classList.add('active');
             } else if (type === 'scanPhoto') {
-                document.getElementById('scanPhotoInput').click();
-            } else if (type === 'camera') {
-                document.getElementById('cameraInput').click();
-            } else if (type === 'gallery') {
-                document.getElementById('galleryInput').click();
-            }
-        }
-
-        function traiterPhotoDirecte(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageRecetteActuelle = e.target.result;
-                    document.getElementById('recipeFormModal').classList.add('active');
-                    changerVoletForm(5);
-                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
-                }
-                reader.readAsDataURL(file);
+                document.getElementById('photoImportPageModal').classList.add('active');
             }
         }
 
@@ -1122,13 +1107,20 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imageRecetteActuelle = e.target.result;
-                    document.getElementById('recipeFormModal').classList.add('active');
-                    changerVoletForm(1);
-                    document.getElementById('recipeTitle').value = "Recette importée par photo";
-                    document.getElementById('recipeSource').value = "Photo de recette";
-                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                    document.getElementById('photoImportPreview').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
                 }
                 reader.readAsDataURL(file);
+            }
+        }
+
+        function validerImportPhotoPage() {
+            fermerModalPhotoImport();
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+            document.getElementById('recipeTitle').value = "Recette importée par photo";
+            document.getElementById('recipeSource').value = "Photo de recette";
+            if (imageRecetteActuelle) {
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
             }
         }
 
@@ -1217,6 +1209,7 @@
             fermerFormulaireAjout();
             imageRecetteActuelle = "";
             document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            document.getElementById('photoImportPreview').innerHTML = "Aucune photo sélectionnée";
             
             const ongletActif = document.querySelector('.top-menu .menu-item.active');
             renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
