@@ -1,1 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Recettes - Interface Web</title>
+    <style>
+        :root {
+            --primary-color: #ecf0f1;
+            --accent-color: #1abc9c;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #fcfbfa;
+            --text-muted: #a0a0a0;
+            --border-color: #2c2c2c;
+            --nav-bg: #1a1a1a;
+        }
 
+        body.light-mode {
+            --primary-color: #2c3e50;
+            --bg-color: #fcfbfa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e0e0e0;
+            --nav-bg: #ffffff;
+        }
+
+        body.theme-turquoise { --accent-color: #1abc9c; }
+        body.theme-orange { --accent-color: #e67e22; }
+        body.theme-vert { --accent-color: #2ecc71; }
+        body.theme-mauve { --accent-color: #9b59b6; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: env(safe-area-inset-top) 16px 80px 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--accent-color);
+        }
+
+        .header-btn.btn-plus {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-content-large {
+            background-color: var(--card-bg);
+            padding: 18px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-tab-btn {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .form-tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .form-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .form-volet { display: none; }
+        .form-volet.active { display: block; }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 9px 10px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .form-row .form-group { flex: 1; }
+
+        .ingredient-row, .etape-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+            align-items: center;
+        }
+
+        .ing-qty { width: 60px !important; text-align: center; }
+        .ing-unit { width: 90px !important; }
+        .ing-name { flex-grow: 1; }
+
+        .etape-num {
+            background-color: var(--accent-color);
+            color: white;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .etape-row textarea {
+            flex-grow: 1;
+            min-height: 45px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .secondary-btn, .primary-btn, .close-modal-btn, .add-option-btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .secondary-btn {
+            background-color: var(--bg-color);
+            color: var(--accent-color);
+            border: 1px dashed var(--accent-color);
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .primary-btn {
+            background-color: var(--accent-color);
+            color: white;
+            flex: 1;
+        }
+
+        .close-modal-btn {
+            background-color: var(--border-color);
+            color: var(--text-main);
+            width: 100%;
+        }
+
+        .add-option-btn {
+            width: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .form-footer {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+  <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+</head>
+<body class="theme-turquoise">
+
+    <header>
+        <div class="header-brand">
+            <h1>Mes recettes</h1>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn btn-plus" onclick="ouvrirMenuAjout()">+</button>
+        </div>
+    </header>
+
+    <!-- Modale Choix d'Ajout -->
+    <div class="modal" id="addChoiceModal">
+        <div class="modal-content">
+            <h3>Ajouter une recette</h3>
+            <button class="add-option-btn" onclick="choixAjout('manuel')">✍️ Saisie manuelle</button>
+            <button class="add-option-btn" onclick="choixAjout('site')">🔗 Importer depuis un lien web</button>
+            <button class="close-modal-btn" onclick="fermerMenuAjout()">Annuler</button>
+        </div>
+    </div>
+
+    <!-- Modale Importation Lien Web -->
+    <div class="modal" id="siteImportModal">
+        <div class="modal-content-large" style="max-width: 400px;">
+            <div class="form-header">
+                <h3>Importer depuis un lien web</h3>
+                <button onclick="fermerModalSite()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div class="form-body">
+                <div class="form-group">
+                    <label>Collez le lien du site de cuisine</label>
+                    <input type="url" id="recipeUrlInput" placeholder="https://www.marmiton.org/recettes/...">
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted);">
+                    Comme nous sommes en mode interface pure sans base de données, l'application va générer un contenu type basé sur votre lien pour alimenter instantanément le formulaire.
+                </p>
+            </div>
+            <div class="form-footer">
+                <button class="close-modal-btn" onclick="fermerModalSite()">Annuler</button>
+                <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Remplir le formulaire</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire Formulaire Complet (5 Volets) -->
+    <div class="modal" id="recipeFormModal">
+        <div class="modal-content-large">
+            <div class="form-header">
+                <h3>Formulaire de Recette</h3>
+                <button onclick="fermerFormulaireAjout()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+
+            <div class="form-tabs">
+                <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
+                <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
+                <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
+                <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
+                <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
+            </div>
+
+            <div class="form-body">
+                <div class="form-volet active" id="volet-1">
+                    <div class="form-group">
+                        <label>Titre de la recette</label>
+                        <input type="text" id="recipeTitle" placeholder="Ex: Gâteau au chocolat">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Portions</label>
+                            <input type="number" id="recipePortions" value="4">
+                        </div>
+                        <div class="form-group">
+                            <label>Temps (min)</label>
+                            <input type="number" id="recipePrepTime" value="20">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Source / Lien</label>
+                        <input type="text" id="recipeSource">
+                    </div>
+                </div>
+
+                <div class="form-volet" id="volet-2">
+                    <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Ingrédients</label>
+                    <div id="ingredientsContainer">
+                        <div class="ingredient-row">
+                            <input type="text" placeholder="Qté" class="ing-qty">
+                            <select class="ing-unit">
+                                <option value="g">g</option>
+                                <option value="ml">ml</option>
+                                <option value="pièce">pièce(s)</option>
+                            </select>
+                            <input type="text" placeholder="Nom de l'ingrédient" class="ing-name">
+                        </div>
+                    </div>
+                    <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
+                </div>
+
+                <div class="form-volet" id="volet-3">
+                    <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Étapes</label>
+                    <div id="etapesContainer">
+                        <div class="etape-row">
+                            <span class="etape-num">1</span>
+                            <textarea placeholder="Description de l'étape..."></textarea>
+                        </div>
+                    </div>
+                    <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
+                </div>
+
+                <div class="form-volet" id="volet-4">
+                    <div class="form-group">
+                        <label>Notes & Astuces</label>
+                        <textarea id="recipeNotes" rows="4" placeholder="Vos remarques..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-volet" id="volet-5">
+                    <div class="form-group" style="text-align: center;">
+                        <label>Aperçu visuel</label>
+                        <p style="font-size: 12px; color: var(--text-muted);">Prêt pour enregistrement local !</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button class="close-modal-btn" onclick="fermerFormulaireAjout()">Annuler</button>
+                <button class="primary-btn" onclick="sauvegarderRecette()">Valider la recette</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function ouvrirMenuAjout() { document.getElementById('addChoiceModal').classList.add('active'); }
+        function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
+        function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
+        function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
+
+        function choixAjout(type) {
+            fermerMenuAjout();
+            if (type === 'manuel') {
+                document.getElementById('recipeFormModal').classList.add('active');
+                changerVoletForm(1);
+            } else if (type === 'site') {
+                document.getElementById('siteImportModal').classList.add('active');
+            }
+        }
+
+        function changerVoletForm(num) {
+            document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('volet-' + num).classList.add('active');
+            document.querySelectorAll('.form-tab-btn')[num - 1].classList.add('active');
+        }
+
+        function importerRecetteDepuisUrl() {
+            const url = document.getElementById('recipeUrlInput').value.trim();
+            if (!url) {
+                alert("Veuillez entrer un lien.");
+                return;
+            }
+            fermerModalSite();
+
+            // Simulation instantanée et fluide pour alimenter l'interface sans BD
+            document.getElementById('recipeTitle').value = "Recette extraite du lien web";
+            document.getElementById('recipeSource').value = url;
+            document.getElementById('recipePortions').value = 6;
+            document.getElementById('recipePrepTime').value = 15;
+
+            document.getElementById('ingredientsContainer').innerHTML = `
+                <div class="ingredient-row"><input type="text" value="250" class="ing-qty"><select class="ing-unit"><option value="g">g</option></select><input type="text" value="Chocolat noir" class="ing-name"></div>
+                <div class="ingredient-row"><input type="text" value="3" class="ing-qty"><select class="ing-unit"><option value="pièce">pièce(s)</option></select><input type="text" value="Œufs frais" class="ing-name"></div>
+            `;
+
+            document.getElementById('etapesContainer').innerHTML = `
+                <div class="etape-row"><span class="etape-num">1</span><textarea>Faire fondre le chocolat au bain-marie.</textarea></div>
+                <div class="etape-row"><span class="etape-num">2</span><textarea>Incorporer les œufs un par un délicatement.</textarea></div>
+            `;
+
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        function ajouterLigneIngredient() {
+            const container = document.getElementById('ingredientsContainer');
+            const row = document.createElement('div');
+            row.className = 'ingredient-row';
+            row.innerHTML = `<input type="text" placeholder="Qté" class="ing-qty"><select class="ing-unit"><option value="g">g</option><option value="ml">ml</option><option value="pièce">pièce(s)</option></select><input type="text" placeholder="Ingrédient" class="ing-name">`;
+            container.appendChild(row);
+        }
+
+        function ajouterLigneEtape() {
+            const container = document.getElementById('etapesContainer');
+            const count = container.querySelectorAll('.etape-row').length + 1;
+            const row = document.createElement('div');
+            row.className = 'etape-row';
+            row.innerHTML = `<span class="etape-num">${count}</span><textarea placeholder="Description..."></textarea>`;
+            container.appendChild(row);
+        }
+
+        function sauvegarderRecette() {
+            alert("Recette validée et prête pour l'interface !");
+            fermerFormulaireAjout();
+        }
+    </script>
+</body>
+</html>
