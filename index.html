@@ -2,126 +2,1826 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Application de Recettes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mes Recettes</title>
+    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
     <style>
-        .recipe-container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 650px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fdfdfd;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        :root {
+            --primary-color: #ecf0f1;
+            --accent-color: #1abc9c;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #fcfbfa;
+            --text-muted: #a0a0a0;
+            --border-color: #2c2c2c;
+            --nav-bg: #1a1a1a;
+            --font-scale: 1rem;
         }
 
-        /* Barre des outils (Calculette + Reset) */
-        .tools-bar {
+        body.light-mode {
+            --primary-color: #2c3e50;
+            --bg-color: #fcfbfa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e0e0e0;
+            --nav-bg: #ffffff;
+        }
+
+        body.theme-turquoise { --accent-color: #1abc9c; }
+        body.theme-orange { --accent-color: #e67e22; }
+        body.theme-vert { --accent-color: #2ecc71; }
+        body.theme-mauve { --accent-color: #9b59b6; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: env(safe-area-inset-top) 16px 80px 16px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: var(--font-scale);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        .header-brand {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
         }
 
-        .calculette-container {
-            background: #f1f5f9;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-weight: 500;
+        .header-logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
-        /* Bouton Réinitialiser placé après la calculette */
-        .btn-reset {
-            padding: 10px 18px;
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
+            color: var(--accent-color);
+        }
+
+        .header-btn.btn-plus {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .header-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .search-container {
+            display: none;
+            margin-bottom: 12px;
+        }
+
+        .search-container.active {
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .top-menu {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+            align-items: center;
+        }
+
+        .top-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-item {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
-            transition: background 0.2s;
+            white-space: nowrap;
+            cursor: pointer;
         }
 
-        .btn-reset:hover {
-            background-color: #dc2626;
+        .menu-item.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
         }
 
-        /* Barre des temps (Préparation, Cuisson, Congélation) */
-        .time-bar {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
         }
 
-        .time-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding-bottom: 20px;
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .category-img {
+            width: 100%;
+            height: 85px;
+            object-fit: cover;
+        }
+
+        .category-banner {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 600;
             text-align: center;
         }
 
-        .time-item img {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 6px;
+        .recipe-list-container {
+            display: none;
+            padding-bottom: 20px;
+        }
+        .recipe-list-container.active {
+            display: block;
         }
 
-        /* Typographie commune et homogène pour tous les libellés */
-        .time-label {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .back-cat-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
             font-size: 14px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 2px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .time-value {
+        .recipe-row-card {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .recipe-row-img {
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .recipe-row-banner {
+            background-color: var(--accent-color);
+            color: white;
+            flex-grow: 1;
+            height: 75px;
+            padding: 0 14px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .famille-select-container {
+            margin-bottom: 16px;
+        }
+
+        .famille-select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        /* POPUP POUR LE CHOIX INITIAL DU + */
+        .popup-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .popup-modal.active {
+            display: flex;
+        }
+        .popup-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .popup-header h3 {
+            font-size: 16px;
+            color: var(--accent-color);
+        }
+        
+        .popup-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* MODALE PLEIN ÉCRAN */
+        .fullscreen-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 2000;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+        }
+        .fullscreen-modal.active {
+            display: flex;
+        }
+
+        .fullscreen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .fullscreen-header h3 {
+            font-size: 18px;
+            color: var(--text-main);
+        }
+
+        .fullscreen-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .fullscreen-footer {
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* STYLES POUR LA VUE DÉTAILLÉE D'UNE RECETTE */
+        .recipe-detail-img-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .recipe-detail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .recipe-detail-close-overlay {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .recipe-detail-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 16px 14px 10px 14px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .recipe-detail-title-block {
+            flex-grow: 1;
+        }
+        .recipe-detail-title-overlay {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .recipe-detail-sub-overlay {
+            font-size: 12px;
+            opacity: 0.85;
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* LOGO CONGÉLATION CLIQUABLE */
+        .recipe-freeze-badge {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+        .recipe-freeze-badge.active {
+            background: rgba(26, 188, 156, 0.8);
+            border-color: #fff;
+        }
+        .recipe-freeze-badge svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .recipe-detail-infos {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+        
+        /* SÉPARATION PRÉPA / CUISSON PAR UNE BARRE VERTICALE */
+        .recipe-detail-infos-top {
+            display: flex;
+            justify-content: space-around;
             font-size: 13px;
-            color: #64748b;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            position: relative;
+        }
+        .recipe-detail-infos-top div {
+            text-align: center;
+            flex: 1;
+        }
+        .recipe-detail-infos-top div:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 50%;
+            top: 5%;
+            height: 80%;
+            width: 1px;
+            background-color: var(--border-color);
+        }
+        .recipe-detail-infos-top span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* Gestion des portions & calculette + reset */
+        .portions-control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .portions-stepper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stepper-btn {
+            background-color: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .reset-portions-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+        }
+        .reset-portions-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .reset-portions-btn:hover svg {
+            stroke: var(--accent-color);
+        }
+
+        .calculator-trigger-btn {
+            background: none;
+            border: 1px dashed var(--accent-color);
+            color: var(--accent-color);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .recipe-detail-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 16px 0 8px 0;
+        }
+        .recipe-detail-ingredients {
+            list-style: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+        .recipe-detail-ingredients li {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        .recipe-detail-ingredients li:last-child {
+            border-bottom: none;
+        }
+        .recipe-detail-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .recipe-detail-step-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .recipe-detail-step-num {
+            background-color: var(--accent-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .recipe-detail-step-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* BANDEAU D'OPTIONS INFÉRIEUR (DANS LA VUE DÉTAILLÉE) */
+        .recipe-bottom-nav {
+            position: fixed;
+            bottom: 8px;
+            left: 12px;
+            right: 12px;
+            background-color: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            z-index: 2100;
+        }
+
+        .recipe-nav-item {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            flex: 1;
+            position: relative;
+        }
+
+        .recipe-nav-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background-color: var(--border-color);
+        }
+
+        .recipe-nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .recipe-nav-item.danger {
+            color: #e74c3c;
+        }
+        .recipe-nav-item.danger svg {
+            stroke: #e74c3c;
+        }
+
+        /* Formulaire interne des volets */
+        .form-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            scrollbar-width: none;
+        }
+        .form-tabs::-webkit-scrollbar { display: none; }
+
+        .form-tab-btn {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .form-tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .form-volet { display: none; }
+        .form-volet.active { display: block; }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 11px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 8px;
+        }
+        .form-row .form-group { flex: 1; }
+
+        .ingredient-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .ingredient-row input, .ingredient-row select {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 9px;
+            font-size: 13px;
+        }
+        .ing-qty { width: 65px !important; text-align: center; }
+        .ing-unit { width: 95px !important; }
+        .ing-name { flex-grow: 1; }
+
+        .etape-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: flex-start;
+        }
+        .etape-num {
+            background-color: var(--accent-color);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+        .etape-row textarea {
+            flex-grow: 1;
+            resize: vertical;
+            min-height: 55px;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 9px;
+            outline: none;
+        }
+
+        .secondary-btn {
+            background-color: var(--card-bg);
+            color: var(--accent-color);
+            border: 1px dashed var(--accent-color);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 180px;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+            object-fit: cover;
+            background-color: var(--card-bg);
+            overflow: hidden;
+        }
+
+        .primary-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .add-option-btn {
+            width: 100%;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .add-option-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .color-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .color-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 8px;
+            left: 12px;
+            right: 12px;
+            background-color: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 6px 0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            flex: 1;
+            position: relative;
+        }
+
+        .nav-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background-color: var(--border-color);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
     </style>
 </head>
-<body>
+<body class="theme-turquoise">
 
-<div class="recipe-container">
-    
-    <!-- Section des outils : Calculette suivie immédiatement du bouton Réinitialiser -->
-    <div class="tools-bar">
-        <div class="calculette-container">
-            <span>🧮 Calculette des portions</span>
+    <header>
+        <div class="header-brand">
+            <img src="icone_app_cuisine2.png" alt="Logo" class="header-logo-img" onerror="this.style.display='none'">
+            <h1>Mes recettes</h1>
         </div>
-        
-        <button class="btn-reset">Réinitialiser</button>
+        <div class="header-actions">
+            <button class="header-btn btn-plus" onclick="ouvrirMenuAjout()" title="Ajouter">+</button>
+            <button class="header-btn" onclick="toggleRecherche()" title="Rechercher">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
-    <!-- Barre des temps de la recette -->
-    <div class="time-bar">
-        <!-- 1. Temps de préparation -->
-        <div class="time-item">
-            <img src="prep-icon.svg" alt="Icône Préparation" />
-            <span class="time-label">Préparation</span>
-            <span class="time-value">15 min</span>
-        </div>
+    <div class="top-menu" id="topMenuContainer">
+        <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
+        <button class="menu-item" id="profilTabBtn" onclick="changerOnglet('famille', this)">Profil : Lucie</button>
+    </div>
 
-        <!-- 2. Temps de cuisson -->
-        <div class="time-item">
-            <img src="cooking-icon.svg" alt="Icône Cuisson" />
-            <span class="time-label">Cuisson</span>
-            <span class="time-value">30 min</span>
-        </div>
+    <div id="view-incontournables" class="view-section active">
+        <div class="categories-grid" id="categoriesGrid-incontournables"></div>
+        <div class="recipe-list-container" id="recipeList-incontournables"></div>
+    </div>
 
-        <!-- 3. Congélation placée à la fin avec le nouveau pictogramme et la classe .time-label -->
-        <div class="time-item">
-            <img src="nouveau-flocon-icon.svg" alt="Icône Congélation" />
-            <span class="time-label">Congélation</span>
-            <span class="time-value">Possible</span>
+    <div id="view-famille" class="view-section">
+        <div class="famille-select-container">
+            <select class="famille-select" id="familleSelect" onchange="changerFamilleSelection(this.value)">
+                <option value="Lucie">Lucie</option>
+                <option value="Clémence">Clémence</option>
+                <option value="Adeline">Adeline</option>
+                <option value="Gwenaëlle">Gwenaëlle</option>
+                <option value="Maman">Maman</option>
+                <option value="Malo">Malo</option>
+                <option value="Invité">Invité</option>
+            </select>
+        </div>
+        <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
+    </div>
+
+    <!-- POPUP DE SÉLECTION INITIALE (EN CLIQUANT SUR +) -->
+    <div class="popup-modal" id="addChoiceModal">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Ajouter une recette</h3>
+                <button class="popup-close-btn" onclick="fermerMenuAjout()">&times;</button>
+            </div>
+            
+            <button class="add-option-btn" onclick="choixAjout('manuel')">
+                <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                Ajouter une nouvelle recette
+            </button>
+            
+            <button class="add-option-btn" onclick="choixAjout('site')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Importer une recette d'un site
+            </button>
+            
+            <button class="add-option-btn" onclick="choixAjout('scanPhoto')">
+                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                Importer une recette à partir d'une photo
+            </button>
+
+            <button class="add-option-btn" onclick="choixAjout('video')">
+                <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                Importer depuis une vidéo
+            </button>
         </div>
     </div>
 
-</div>
+    <!-- INPUTS FICHIERS CACHÉS -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterImportPhotoRecette(event)">
+    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="traiterImportPhotoRecette(event)">
 
+    <!-- MODALES D'IMPORTATION -->
+    <div class="fullscreen-modal" id="photoImportPageModal">
+        <div class="fullscreen-header">
+            <h3>Importer à partir d'une photo</h3>
+            <button class="popup-close-btn" onclick="fermerModalPhotoImport()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="text-align: center; padding-top: 10px;">
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Prenez une photo ou choisissez-la.</p>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button class="primary-btn" onclick="document.getElementById('cameraInput').click()">Prendre une photo</button>
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="document.getElementById('galleryInput').click()">Choisir une photo</button>
+            </div>
+            <div class="photo-preview" id="photoImportPreview" style="height: 220px; margin-bottom: 10px;">Aucune photo sélectionnée</div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalPhotoImport()">Annuler</button>
+            <button class="primary-btn" onclick="validerImportPhotoPage()">Continuer</button>
+        </div>
+    </div>
+
+    <div class="fullscreen-modal" id="siteImportModal">
+        <div class="fullscreen-header">
+            <h3>Importer depuis un site web</h3>
+            <button class="popup-close-btn" onclick="fermerModalSite()">&times;</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-group">
+                <label>Collez le lien (URL)</label>
+                <input type="url" id="recipeUrlInput" placeholder="https://...">
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSite()">Annuler</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Importer</button>
+        </div>
+    </div>
+
+    <div class="fullscreen-modal" id="videoImportModal">
+        <div class="fullscreen-header">
+            <h3>Importer depuis une vidéo</h3>
+            <button class="popup-close-btn" onclick="fermerModalVideo()">&times;</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-group">
+                <label>Lien de la vidéo</label>
+                <input type="url" id="recipeVideoUrlInput" placeholder="https://...">
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalVideo()">Annuler</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisVideo()">Importer</button>
+        </div>
+    </div>
+
+    <!-- FORMULAIRE DE CRÉATION -->
+    <div class="fullscreen-modal" id="recipeFormModal">
+        <div class="fullscreen-header">
+            <h3>Nouvelle Recette</h3>
+            <button class="popup-close-btn" onclick="fermerFormulaireAjout()">&times;</button>
+        </div>
+        <div class="form-tabs">
+            <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-volet active" id="volet-1">
+                <div class="form-group">
+                    <label>Titre</label>
+                    <input type="text" id="recipeTitle" placeholder="Ex: Tarte">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Destination</label>
+                        <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
+                            <option value="incontournables">Incontournables</option>
+                            <option value="famille">Profil</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="recipeProfilGroup" style="display: none;">
+                        <label>Membre</label>
+                        <select id="recipeProfilSelect">
+                            <option value="Lucie">Lucie</option><option value="Clémence">Clémence</option>
+                            <option value="Adeline">Adeline</option><option value="Gwenaëlle">Gwenaëlle</option>
+                            <option value="Maman">Maman</option><option value="Malo">Malo</option><option value="Invité">Invité</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="recipeCategory">
+                        <option value="apero">Apéro</option><option value="plats">Plats</option>
+                        <option value="desserts">Desserts</option><option value="boulangerie">Boulangerie</option>
+                        <option value="basiques">Basiques</option><option value="maison">Maison</option><option value="cosmetiques">Cosmétiques</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Portions</label><input type="number" id="recipePortions" value="4"></div>
+                    <div class="form-group"><label>Prépa (m)</label><input type="number" id="recipePrepTime" value="15"></div>
+                    <div class="form-group"><label>Cuisson (m)</label><input type="number" id="recipeCookTime" value="30"></div>
+                </div>
+                <div class="form-group"><label>Source</label><input type="text" id="recipeSource"></div>
+            </div>
+            <div class="form-volet" id="volet-2">
+                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Ingrédients</label>
+                <div id="ingredientsContainer">
+                    <div class="ingredient-row">
+                        <input type="text" placeholder="Qté" class="ing-qty">
+                        <select class="ing-unit">
+                            <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                            <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                            <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                        </select>
+                        <input type="text" placeholder="Ingrédient" class="ing-name">
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
+            </div>
+            <div class="form-volet" id="volet-3">
+                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Étapes</label>
+                <div id="etapesContainer">
+                    <div class="etape-row">
+                        <span class="etape-num">1</span>
+                        <textarea placeholder="Étape..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
+            </div>
+            <div class="form-volet" id="volet-4">
+                <div class="form-group"><label>Notes</label><textarea id="recipeNotes" rows="6"></textarea></div>
+            </div>
+            <div class="form-volet" id="volet-5">
+                <div class="form-group">
+                    <label>Photo</label>
+                    <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
+                    <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir un fichier</button>
+                </div>
+                <div class="form-group"><label>URL</label><input type="url" id="recipePhotoUrl" oninput="chargerApercuUrl(this.value)"></div>
+                <div class="form-group" style="text-align: center;"><div class="photo-preview" id="photoPreviewContainer">Aucune photo</div></div>
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerFormulaireAjout()">Annuler</button>
+            <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- MODALE DE LA VUE DÉTAILLÉE D'UNE RECETTE -->
+    <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
+        <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;">
+            <!-- Rempli dynamiquement -->
+        </div>
+        <!-- Bandeau fixe en bas avec icônes monochromes et séparateurs verticaux -->
+        <nav class="recipe-bottom-nav">
+            <button class="recipe-nav-item" onclick="actionModifierRecette()">
+                <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                <span>Modifier</span>
+            </button>
+            <button class="recipe-nav-item" onclick="actionPartagerRecette()">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>Partager</span>
+            </button>
+            <button class="recipe-nav-item" onclick="changerTaillePoliceCycle()">
+                <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                <span>Police</span>
+            </button>
+            <button class="recipe-nav-item danger" onclick="actionSupprimerRecette()">
+                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                <span>Supprimer</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALE CALCULATEUR D'INGRÉDIENT PROPORTIONNEL -->
+    <div class="popup-modal" id="calculatorModal">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Ajuster selon un ingrédient</h3>
+                <button class="popup-close-btn" onclick="fermerCalculateur()">&times;</button>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                Indiquez combien vous avez d'un ingrédient pour recalculer toute la recette.
+            </p>
+            <div class="form-group">
+                <label>Ingrédient de référence</label>
+                <select id="calcIngredientSelect" class="form-group" style="padding:10px; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:100%;"></select>
+            </div>
+            <div class="form-group">
+                <label>Quantité dont vous disposez actuellement :</label>
+                <input type="number" id="calcTargetQty" step="any" placeholder="Ex: 2" style="padding:10px; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:100%;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerCalculateur()">Annuler</button>
+                <button class="primary-btn" onclick="appliquerCalculProportionnel()">Calculer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE COULEURS -->
+    <div class="fullscreen-modal" id="colorModal">
+        <div class="fullscreen-header">
+            <h3>Choisir une couleur</h3>
+            <button class="popup-close-btn" onclick="fermerModalCouleurs()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
+            <div class="color-options" style="width: 100%; max-width: 300px;">
+                <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
+                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
+                <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
+                <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalCouleurs()">Fermer</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="retourAccueil()">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Accueil</span>
+        </button>
+        <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme()">
+            <svg id="themeIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <span>Mode</span>
+        </button>
+        <button class="nav-item" onclick="ouvrirModalCouleurs()">
+            <svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.504 5.555-5.55C21.996 6.45 17.5 2 12 2z"></path></svg>
+            <span>Couleurs</span>
+        </button>
+        <button class="nav-item" onclick="exporterRecettes()">
+            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <span>Exporter</span>
+        </button>
+    </nav>
+
+    <script>
+        const database = {
+            incontournables: {
+                apero: [
+                    { 
+                        id: "recette_1",
+                        nom: "Cake salé aux olives", 
+                        categorie: "Apéro",
+                        membre: "Incontournables",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 6, prepTime: 15, cookTime: 45,
+                        congelable: true,
+                        ingredients: [
+                            { qte: "150", unit: "g", nom: "de farine" },
+                            { qte: "3", unit: "pièce(s)", nom: "d'œufs" },
+                            { qte: "1", unit: "sachet", nom: "de levure chimique" },
+                            { qte: "100", unit: "g", nom: "d'olives dénoyautées" },
+                            { qte: "120", unit: "g", nom: "de lardons" }
+                        ],
+                        etapes: [
+                            "Préchauffer le four à 180°C.",
+                            "Dans un saladier, mélanger la farine, les œufs et la levure.",
+                            "Ajouter les lardons et les olives coupées en morceaux.",
+                            "Verser dans un moule à cake et enfourner pour 45 minutes."
+                        ],
+                        notes: "Se déguste tiède ou froid à l'apéro."
+                    }
+                ],
+                plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
+            },
+            famille: {
+                Lucie: [
+                    { 
+                        id: "recette_2",
+                        nom: "Cookies moelleux", 
+                        categorie: "Desserts",
+                        membre: "Lucie",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 8, prepTime: 15, cookTime: 10,
+                        congelable: false,
+                        ingredients: [
+                            { qte: "200", unit: "g", nom: "de pépites de chocolat" },
+                            { qte: "250", unit: "g", nom: "de farine" },
+                            { qte: "125", unit: "g", nom: "de beurre mou" }
+                        ],
+                        etapes: [
+                            "Mélanger le beurre mou avec le sucre.",
+                            "Incorporer la farine et les pépites de chocolat.",
+                            "Former des boules et cuire 10 min à 180°C."
+                        ],
+                        notes: "Attention à ne pas trop les cuire."
+                    }
+                ],
+                Clémence: [], Adeline: [], Gwenaëlle: [], Maman: [], Malo: [], Invité: []
+            }
+        };
+
+        const categoryMeta = {
+            apero: { nom: "Apéro", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
+            plats: { nom: "Plats", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
+            desserts: { nom: "Desserts", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
+            boulangerie: { nom: "Boulangerie", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff" },
+            basiques: { nom: "Basiques", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" },
+            maison: { nom: "Maison", img: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba" },
+            cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
+        };
+
+        let imageRecetteActuelle = "";
+        let recetteActiveEnCours = null;
+        let portionsActuelles = 4;
+
+        function renderCategories(onglet) {
+            if (onglet === 'famille') {
+                const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+                document.getElementById('familleSelect').value = profilEnregistre;
+                MettreAJourTexteBoutonProfil(profilEnregistre);
+                filtrerFamille(profilEnregistre);
+                return;
+            }
+
+            const container = document.getElementById(`categoriesGrid-${onglet}`);
+            if (!container) return;
+            container.innerHTML = '';
+            container.style.display = 'grid';
+            
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer) listContainer.classList.remove('active');
+
+            for (const [catKey, meta] of Object.entries(categoryMeta)) {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.onclick = () => ouvrirCategorie(onglet, catKey);
+                card.innerHTML = `
+                    <img src="${meta.img}" alt="${meta.nom}" class="category-img">
+                    <div class="category-banner">
+                        <span>${meta.nom}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function ouvrirCategorie(onglet, catKey) {
+            document.getElementById(`categoriesGrid-${onglet}`).style.display = 'none';
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            listContainer.classList.add('active');
+            listContainer.innerHTML = '';
+
+            const backBtn = document.createElement('button');
+            backBtn.className = 'back-cat-btn';
+            backBtn.innerHTML = '← Retour aux catégories';
+            backBtn.onclick = () => fermerCategorie(onglet);
+            listContainer.appendChild(backBtn);
+
+            const recipes = (database[onglet] && database[onglet][catKey]) || [];
+            if (recipes.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-muted)';
+                emptyMsg.style.padding = '30px';
+                emptyMsg.textContent = 'Aucune recette dans cette catégorie.';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                recipes.forEach(recipe => {
+                    recipe.categorie = categoryMeta[catKey] ? categoryMeta[catKey].nom : catKey;
+                    recipe.membre = "Incontournables";
+                    const row = document.createElement('div');
+                    row.className = 'recipe-row-card';
+                    row.onclick = () => afficherDetailRecette(recipe);
+                    row.innerHTML = `
+                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
+                        <div class="recipe-row-banner">
+                            <span>${recipe.nom}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        function fermerCategorie(onglet) {
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer) listContainer.classList.remove('active');
+            const grid = document.getElementById(`categoriesGrid-${onglet}`);
+            if (grid) grid.style.display = 'grid';
+        }
+
+        function MettreAJourTexteBoutonProfil(personne) {
+            const profilBtn = document.getElementById('profilTabBtn');
+            if (profilBtn) profilBtn.textContent = `Profil : ${personne}`;
+        }
+
+        function changerFamilleSelection(personne) {
+            localStorage.setItem('profilFamillePreere', personne);
+            MettreAJourTexteBoutonProfil(personne);
+            filtrerFamille(personne);
+        }
+
+        function filtrerFamille(personne) {
+            const listContainer = document.getElementById('recipeList-famille');
+            listContainer.innerHTML = '';
+            const recipes = (database.famille && database.famille[personne]) || [];
+            if (recipes.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-muted)';
+                emptyMsg.style.padding = '30px';
+                emptyMsg.textContent = 'Aucune recette pour ce profil.';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                recipes.forEach(recipe => {
+                    recipe.membre = personne;
+                    const row = document.createElement('div');
+                    row.className = 'recipe-row-card';
+                    row.onclick = () => afficherDetailRecette(recipe);
+                    row.innerHTML = `
+                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
+                        <div class="recipe-row-banner">
+                            <span>${recipe.nom}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        /* VUE DÉTAILLÉE SANS PICTOGRAMMES + LOGO CONGÉLATION CLIQUABLE */
+        function afficherDetailRecette(recipe) {
+            recetteActiveEnCours = recipe;
+            portionsActuelles = parseInt(recipe.portions) || 4;
+            construireContenuDetailRecette();
+            document.getElementById('recipeDetailModal').classList.add('active');
+        }
+
+        function construireContenuDetailRecette() {
+            const recipe = recetteActiveEnCours;
+            const bodyContainer = document.getElementById('detailRecipeBody');
+            
+            const basePortions = parseInt(recipe.portions) || 4;
+            const ratio = portionsActuelles / basePortions;
+
+            let ingredientsHtml = '';
+            if (recipe.ingredients && recipe.ingredients.length > 0) {
+                recipe.ingredients.forEach(ing => {
+                    let qteAffichee = ing.qte || '';
+                    if (!isNaN(qteAffichee) && qteAffichee !== '') {
+                        let valNum = parseFloat(qteAffichee) * ratio;
+                        qteAffichee = Number.isInteger(valNum) ? valNum : valNum.toFixed(1);
+                    }
+                    ingredientsHtml += `<li>${qteAffichee} ${ing.unit || ''} ${ing.nom}</li>`;
+                });
+            } else {
+                ingredientsHtml = '<li>Aucun ingrédient renseigné.</li>';
+            }
+
+            let etapesHtml = '';
+            if (recipe.etapes && recipe.etapes.length > 0) {
+                recipe.etapes.forEach((etape, index) => {
+                    etapesHtml += `
+                        <div class="recipe-detail-step-card">
+                            <div class="recipe-detail-step-num">${index + 1}</div>
+                            <div class="recipe-detail-step-text">${etape}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                etapesHtml = '<p style="color:var(--text-muted); font-size:14px;">Aucune étape renseignée.</p>';
+            }
+
+            const isCongelable = recipe.congelable === true;
+
+            bodyContainer.innerHTML = `
+                <div class="recipe-detail-img-container">
+                    <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()">&times;</button>
+                    <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
+                    <div class="recipe-detail-overlay">
+                        <div class="recipe-detail-title-block">
+                            <div class="recipe-detail-title-overlay">${recipe.nom}</div>
+                            <div class="recipe-detail-sub-overlay">
+                                <span>${recipe.categorie || 'Général'}</span>
+                                <span>•</span>
+                                <span>${recipe.membre || 'Commun'}</span>
+                            </div>
+                        </div>
+                        <div class="recipe-freeze-badge ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Se congèle ? (Cliquer pour changer)">
+                            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recipe-detail-infos">
+                    <div class="recipe-detail-infos-top">
+                        <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
+                        <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
+                    </div>
+                    
+                    <div class="portions-control-row">
+                        <span>Portions : <strong>${portionsActuelles}</strong></span>
+                        <div class="portions-stepper">
+                            <button class="reset-portions-btn" onclick="reinitialiserPortions()" title="Réinitialiser les portions">
+                                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            </button>
+                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
+                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
+                            <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recipe-detail-section-title">Ingrédients</div>
+                <ul class="recipe-detail-ingredients">
+                    ${ingredientsHtml}
+                </ul>
+
+                <div class="recipe-detail-section-title">Préparation</div>
+                <div class="recipe-detail-steps">
+                    ${etapesHtml}
+                </div>
+
+                ${recipe.notes ? `
+                    <div class="recipe-detail-section-title">Notes & Astuces</div>
+                    <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                ` : ''}
+            `;
+        }
+
+        function modifierPortions(delta) {
+            portionsActuelles += delta;
+            if (portionsActuelles < 1) portionsActuelles = 1;
+            if (portionsActuelles > 30) portionsActuelles = 30;
+            construireContenuDetailRecette();
+        }
+
+        function reinitialiserPortions() {
+            if (recetteActiveEnCours) {
+                portionsActuelles = parseInt(recetteActiveEnCours.portions) || 4;
+                construireContenuDetailRecette();
+            }
+        }
+
+        function toggleCongelationActuelle() {
+            if (recetteActiveEnCours) {
+                recetteActiveEnCours.congelable = !recetteActiveEnCours.congelable;
+                construireContenuDetailRecette();
+            }
+        }
+
+        function fermerDetailRecette() {
+            document.getElementById('recipeDetailModal').classList.remove('active');
+        }
+
+        function changerTaillePoliceCycle() {
+            const currentScale = getComputedStyle(document.documentElement).getPropertyValue('--font-scale').trim();
+            if (currentScale === '0.85rem') {
+                document.documentElement.style.setProperty('--font-scale', '1rem');
+                alert("Taille de police : Normale");
+            } else if (currentScale === '1rem') {
+                document.documentElement.style.setProperty('--font-scale', '1.2rem');
+                alert("Taille de police : Grande");
+            } else {
+                document.documentElement.style.setProperty('--font-scale', '0.85rem');
+                alert("Taille de police : Petite");
+            }
+        }
+
+        function actionModifierRecette() {
+            alert("Mode modification de la recette en cours de développement.");
+        }
+
+        function actionPartagerRecette() {
+            if (navigator.share && recetteActiveEnCours) {
+                navigator.share({ title: recetteActiveEnCours.nom, text: "Découvre cette recette !", url: window.location.href }).catch(() => {});
+            } else {
+                alert("Lien de partage copié !");
+            }
+        }
+
+        function actionSupprimerRecette() {
+            if (confirm("Voulez-vous vraiment supprimer cette recette ?")) {
+                fermerDetailRecette();
+                alert("Recette supprimée.");
+            }
+        }
+
+        /* CALCULATEUR PROPORTIONNEL PAR INGRÉDIENT */
+        function ouvrirCalculateur() {
+            if (!recetteActiveEnCours || !recetteActiveEnCours.ingredients) return;
+            const select = document.getElementById('calcIngredientSelect');
+            select.innerHTML = '';
+            recetteActiveEnCours.ingredients.forEach((ing, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${ing.qte || ''} ${ing.unit || ''} ${ing.nom}`;
+                select.appendChild(opt);
+            });
+            document.getElementById('calcTargetQty').value = '';
+            document.getElementById('calculatorModal').classList.add('active');
+        }
+
+        function fermerCalculateur() {
+            document.getElementById('calculatorModal').classList.remove('active');
+        }
+
+        function appliquerCalculProportionnel() {
+            const index = document.getElementById('calcIngredientSelect').value;
+            const nouvelleQteSaisie = parseFloat(document.getElementById('calcTargetQty').value);
+            if (isNaN(nouvelleQteSaisie) || nouvelleQteSaisie <= 0) {
+                alert("Veuillez entrer une quantité valide.");
+                return;
+            }
+            const ingOriginal = recetteActiveEnCours.ingredients[index];
+            const qteInitialeNum = parseFloat(ingOriginal.qte);
+            if (isNaN(qteInitialeNum) || qteInitialeNum <= 0) {
+                alert("Cet ingrédient n'a pas de quantité numérique initiale exploitable pour le calcul proportionnel.");
+                return;
+            }
+
+            const ratio = nouvelleQteSaisie / qteInitialeNum;
+            portionsActuelles = Math.round((parseInt(recetteActiveEnCours.portions) || 4) * ratio);
+            if (portionsActuelles < 1) portionsActuelles = 1;
+
+            fermerCalculateur();
+            construireContenuDetailRecette();
+        }
+
+        function changerOnglet(nomOnglet, elementBtn) {
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
+            document.getElementById('view-' + nomOnglet).classList.add('active');
+            document.querySelectorAll('.top-menu .menu-item').forEach(btn => btn.classList.remove('active'));
+            if(elementBtn) elementBtn.classList.add('active');
+            if (nomOnglet !== 'famille') fermerCategorie(nomOnglet);
+            renderCategories(nomOnglet);
+        }
+
+        function retourAccueil() {
+            changerOnglet('incontournables', document.querySelector('.top-menu .menu-item'));
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            const iconSvg = document.getElementById('themeIconSvg');
+            if (isLight) {
+                iconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            } else {
+                iconSvg.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            }
+        }
+
+        function ouvrirModalCouleurs() { document.getElementById('colorModal').classList.add('active'); }
+        function fermerModalCouleurs() { document.getElementById('colorModal').classList.remove('active'); }
+
+        function changerCouleur(couleur) {
+            document.body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
+            document.body.classList.add('theme-' + couleur);
+            fermerModalCouleurs();
+        }
+
+        function toggleRecherche() {
+            const sc = document.getElementById('searchContainer');
+            sc.classList.toggle('active');
+            if (sc.classList.contains('active')) document.getElementById('searchInput').focus();
+        }
+
+        function ouvrirMenuAjout() { document.getElementById('addChoiceModal').classList.add('active'); }
+        function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
+        function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
+        function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
+        function fermerModalPhotoImport() { document.getElementById('photoImportPageModal').classList.remove('active'); }
+        function fermerModalVideo() { document.getElementById('videoImportModal').classList.remove('active'); }
+
+        function gererVisibiliteProfil(valeur) {
+            document.getElementById('recipeProfilGroup').style.display = (valeur === 'famille') ? 'block' : 'none';
+        }
+
+        function changerVoletForm(num) {
+            document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('volet-' + num).classList.add('active');
+            document.querySelectorAll('.form-tab-btn')[num - 1].classList.add('active');
+        }
+
+        function choixAjout(type) {
+            fermerMenuAjout();
+            if (type === 'manuel') {
+                document.getElementById('recipeFormModal').classList.add('active');
+                changerVoletForm(1);
+            } else if (type === 'site') {
+                document.getElementById('siteImportModal').classList.add('active');
+            } else if (type === 'scanPhoto') {
+                document.getElementById('photoImportPageModal').classList.add('active');
+            } else if (type === 'video') {
+                document.getElementById('videoImportModal').classList.add('active');
+            }
+        }
+
+        function traiterImportPhotoRecette(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageRecetteActuelle = e.target.result;
+                    document.getElementById('photoImportPreview').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function validerImportPhotoPage() {
+            fermerModalPhotoImport();
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+            document.getElementById('recipeTitle').value = "Recette importée par photo";
+            document.getElementById('recipeSource').value = "Photo de recette";
+            if (imageRecetteActuelle) {
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+        }
+
+        function importerRecetteDepuisUrl() {
+            const url = document.getElementById('recipeUrlInput').value.trim();
+            if (!url) { alert("Veuillez entrer un lien URL valide."); return; }
+            fermerModalSite();
+            document.getElementById('recipeTitle').value = "Recette importée du web";
+            document.getElementById('recipeSource').value = url;
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        function importerRecetteDepuisVideo() {
+            const url = document.getElementById('recipeVideoUrlInput').value.trim();
+            if (!url) { alert("Veuillez entrer un lien vidéo valide."); return; }
+            fermerModalVideo();
+            document.getElementById('recipeTitle').value = "Recette importée de vidéo";
+            document.getElementById('recipeSource').value = url;
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        function ajouterLigneIngredient() {
+            const container = document.getElementById('ingredientsContainer');
+            const row = document.createElement('div');
+            row.className = 'ingredient-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Qté" class="ing-qty">
+                <select class="ing-unit">
+                    <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                    <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                    <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                </select>
+                <input type="text" placeholder="Ingrédient" class="ing-name">
+            `;
+            container.appendChild(row);
+        }
+
+        function ajouterLigneEtape() {
+            const container = document.getElementById('etapesContainer');
+            const count = container.querySelectorAll('.etape-row').length + 1;
+            const row = document.createElement('div');
+            row.className = 'etape-row';
+            row.innerHTML = `<span class="etape-num">${count}</span><textarea placeholder="Étape..."></textarea>`;
+            container.appendChild(row);
+        }
+
+        function chargerApercuPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('recipePhotoUrl').value = "";
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageRecetteActuelle = e.target.result;
+                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function chargerApercuUrl(url) {
+            document.getElementById('recipePhotoFile').value = "";
+            const cleanUrl = url.trim();
+            if (cleanUrl !== "") {
+                imageRecetteActuelle = cleanUrl;
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                imageRecetteActuelle = "";
+                document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            }
+        }
+
+        function sauvegarderRecetteComprehensive() {
+            const titre = document.getElementById('recipeTitle').value;
+            if (!titre.trim()) { alert("Veuillez renseigner au moins un titre."); changerVoletForm(1); return; }
+
+            const cible = document.getElementById('recipeTargetSection').value;
+            const categorie = document.getElementById('recipeCategory').value;
+            
+            const ingredients = [];
+            document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => {
+                const qte = row.querySelector('.ing-qty').value.trim();
+                const unit = row.querySelector('.ing-unit').value;
+                const nom = row.querySelector('.ing-name').value.trim();
+                if (nom) ingredients.push({ qte, unit, nom });
+            });
+
+            const etapes = [];
+            document.querySelectorAll('#etapesContainer .etape-row textarea').forEach(textarea => {
+                const texte = textarea.value.trim();
+                if (texte) etapes.push(texte);
+            });
+
+            const nouvelleRecette = {
+                id: 'recette_' + Date.now(),
+                nom: titre,
+                categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
+                membre: cible === 'incontournables' ? 'Incontournables' : document.getElementById('recipeProfilSelect').value,
+                img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+                portions: document.getElementById('recipePortions').value || 4,
+                prepTime: document.getElementById('recipePrepTime').value || 15,
+                cookTime: document.getElementById('recipeCookTime').value || 30,
+                congelable: false,
+                ingredients: ingredients,
+                etapes: etapes,
+                notes: document.getElementById('recipeNotes').value.trim()
+            };
+
+            if (cible === 'incontournables') {
+                if (!database.incontournables[categorie]) database.incontournables[categorie] = [];
+                database.incontournables[categorie].push(nouvelleRecette);
+            } else {
+                const membre = document.getElementById('recipeProfilSelect').value;
+                if (!database.famille[membre]) database.famille[membre] = [];
+                database.famille[membre].push(nouvelleRecette);
+            }
+
+            alert("Recette enregistrée !");
+            fermerFormulaireAjout();
+            imageRecetteActuelle = "";
+            document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            
+            const ongletActif = document.querySelector('.top-menu .menu-item.active');
+            renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+        }
+
+        function exporterRecettes() { alert("Exportation déclenchée !"); }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            document.getElementById('familleSelect').value = profilEnregistre;
+            MettreAJourTexteBoutonProfil(profilEnregistre);
+            renderCategories('incontournables');
+        });
+    </script>
 </body>
 </html>
