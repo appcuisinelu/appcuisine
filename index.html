@@ -388,6 +388,12 @@
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             padding: 16px 14px 10px 14px;
             color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .recipe-detail-title-block {
+            flex-grow: 1;
         }
         .recipe-detail-title-overlay {
             font-size: 20px;
@@ -400,6 +406,35 @@
             display: flex;
             gap: 8px;
         }
+        
+        /* LOGO CONGÉLATION CLIQUABLE */
+        .recipe-freeze-badge {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+        .recipe-freeze-badge.active {
+            background: rgba(26, 188, 156, 0.8);
+            border-color: #fff;
+        }
+        .recipe-freeze-badge svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
 
         .recipe-detail-infos {
             display: flex;
@@ -411,6 +446,8 @@
             margin-bottom: 16px;
             gap: 10px;
         }
+        
+        /* SÉPARATION PRÉPA / CUISSON PAR UNE BARRE VERTICALE */
         .recipe-detail-infos-top {
             display: flex;
             justify-content: space-around;
@@ -418,9 +455,20 @@
             font-weight: 600;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
+            position: relative;
         }
         .recipe-detail-infos-top div {
             text-align: center;
+            flex: 1;
+        }
+        .recipe-detail-infos-top div:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 50%;
+            top: 5%;
+            height: 80%;
+            width: 1px;
+            background-color: var(--border-color);
         }
         .recipe-detail-infos-top span {
             display: block;
@@ -429,7 +477,7 @@
             margin-top: 2px;
         }
 
-        /* Gestion des portions & calculette */
+        /* Gestion des portions & calculette + reset */
         .portions-control-row {
             display: flex;
             justify-content: space-between;
@@ -455,6 +503,31 @@
             align-items: center;
             justify-content: center;
         }
+        .reset-portions-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+        }
+        .reset-portions-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .reset-portions-btn:hover svg {
+            stroke: var(--accent-color);
+        }
+
         .calculator-trigger-btn {
             background: none;
             border: 1px dashed var(--accent-color);
@@ -821,7 +894,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1150,6 +1222,7 @@
                         membre: "Incontournables",
                         img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
                         portions: 6, prepTime: 15, cookTime: 45,
+                        congelable: true,
                         ingredients: [
                             { qte: "150", unit: "g", nom: "de farine" },
                             { qte: "3", unit: "pièce(s)", nom: "d'œufs" },
@@ -1163,7 +1236,7 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se déguise tiède ou froid à l'apéro."
+                        notes: "Se déguste tiède ou froid à l'apéro."
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1177,6 +1250,7 @@
                         membre: "Lucie",
                         img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
                         portions: 8, prepTime: 15, cookTime: 10,
+                        congelable: false,
                         ingredients: [
                             { qte: "200", unit: "g", nom: "de pépites de chocolat" },
                             { qte: "250", unit: "g", nom: "de farine" },
@@ -1323,7 +1397,7 @@
             }
         }
 
-        /* VUE DÉTAILLÉE AVEC CROIX EN SUPERPOSITION SUR LA PHOTO */
+        /* VUE DÉTAILLÉE SANS PICTOGRAMMES + LOGO CONGÉLATION CLIQUABLE */
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseInt(recipe.portions) || 4;
@@ -1335,7 +1409,7 @@
             const recipe = recetteActiveEnCours;
             const bodyContainer = document.getElementById('detailRecipeBody');
             
-            const basePortions = recipe.portions || 4;
+            const basePortions = parseInt(recipe.portions) || 4;
             const ratio = portionsActuelles / basePortions;
 
             let ingredientsHtml = '';
@@ -1366,16 +1440,23 @@
                 etapesHtml = '<p style="color:var(--text-muted); font-size:14px;">Aucune étape renseignée.</p>';
             }
 
+            const isCongelable = recipe.congelable === true;
+
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
                     <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()">&times;</button>
                     <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
                     <div class="recipe-detail-overlay">
-                        <div class="recipe-detail-title-overlay">${recipe.nom}</div>
-                        <div class="recipe-detail-sub-overlay">
-                            <span>📂 ${recipe.categorie || 'Général'}</span>
-                            <span>•</span>
-                            <span>👤 ${recipe.membre || 'Commun'}</span>
+                        <div class="recipe-detail-title-block">
+                            <div class="recipe-detail-title-overlay">${recipe.nom}</div>
+                            <div class="recipe-detail-sub-overlay">
+                                <span>${recipe.categorie || 'Général'}</span>
+                                <span>•</span>
+                                <span>${recipe.membre || 'Commun'}</span>
+                            </div>
+                        </div>
+                        <div class="recipe-freeze-badge ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Se congèle ? (Cliquer pour changer)">
+                            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"></path></svg>
                         </div>
                     </div>
                 </div>
@@ -1389,6 +1470,9 @@
                     <div class="portions-control-row">
                         <span>Portions : <strong>${portionsActuelles}</strong></span>
                         <div class="portions-stepper">
+                            <button class="reset-portions-btn" onclick="reinitialiserPortions()" title="Réinitialiser les portions">
+                                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            </button>
                             <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
                             <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
                             <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
@@ -1418,6 +1502,20 @@
             if (portionsActuelles < 1) portionsActuelles = 1;
             if (portionsActuelles > 30) portionsActuelles = 30;
             construireContenuDetailRecette();
+        }
+
+        function reinitialiserPortions() {
+            if (recetteActiveEnCours) {
+                portionsActuelles = parseInt(recetteActiveEnCours.portions) || 4;
+                construireContenuDetailRecette();
+            }
+        }
+
+        function toggleCongelationActuelle() {
+            if (recetteActiveEnCours) {
+                recetteActiveEnCours.congelable = !recetteActiveEnCours.congelable;
+                construireContenuDetailRecette();
+            }
         }
 
         function fermerDetailRecette() {
@@ -1491,7 +1589,7 @@
             }
 
             const ratio = nouvelleQteSaisie / qteInitialeNum;
-            portionsActuelles = Math.round((recetteActiveEnCours.portions || 4) * ratio);
+            portionsActuelles = Math.round((parseInt(recetteActiveEnCours.portions) || 4) * ratio);
             if (portionsActuelles < 1) portionsActuelles = 1;
 
             fermerCalculateur();
@@ -1692,6 +1790,7 @@
                 portions: document.getElementById('recipePortions').value || 4,
                 prepTime: document.getElementById('recipePrepTime').value || 15,
                 cookTime: document.getElementById('recipeCookTime').value || 30,
+                congelable: false,
                 ingredients: ingredients,
                 etapes: etapes,
                 notes: document.getElementById('recipeNotes').value.trim()
