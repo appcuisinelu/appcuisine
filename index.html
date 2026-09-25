@@ -407,7 +407,7 @@
             gap: 8px;
         }
         
-        /* LOGO CONGÉLATION CLIQUABLE */
+        /* LOGO CONGÉLATION CLIQUABLE (AVEC NOUVEAU PICTOGRAMME FLOCON) */
         .recipe-freeze-badge {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -894,7 +894,7 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1237,7 +1237,7 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se déguste tiède ou froid à l'apéro."
+                        notes: "Se délecte tiède ou froid à l'apéro."
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1398,7 +1398,7 @@
             }
         }
 
-        /* VUE DÉTAILLÉE SANS PICTOGRAMMES + LOGO CONGÉLATION CLIQUABLE */
+        /* VUE DÉTAILLÉE AVEC NOUVEL ORDRE DES BOUTONS DE PORTIONS ET PICTOGRAMME FLOCON */
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseInt(recipe.portions) || 4;
@@ -1457,6 +1457,7 @@
                             </div>
                         </div>
                         <div class="recipe-freeze-badge ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Se congèle ? (Cliquer pour changer)">
+                            <!-- Nouveau pictogramme (Flocon de neige) -->
                             <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"></path></svg>
                         </div>
                     </div>
@@ -1471,11 +1472,12 @@
                     <div class="portions-control-row">
                         <span>Portions : <strong>${portionsActuelles}</strong></span>
                         <div class="portions-stepper">
+                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
+                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
+                            <!-- Flèche de réinitialisation positionnée juste après le bouton plus -->
                             <button class="reset-portions-btn" onclick="reinitialiserPortions()" title="Réinitialiser les portions">
                                 <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                             </button>
-                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
-                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
                             <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
                         </div>
                     </div>
