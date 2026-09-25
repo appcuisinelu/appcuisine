@@ -224,7 +224,6 @@
             transition: background-color 0.3s;
         }
 
-        /* Vue liste des recettes dans une catégorie */
         .recipe-list-container {
             display: none;
             padding-bottom: 20px;
@@ -283,7 +282,6 @@
             transition: background-color 0.3s;
         }
 
-        /* Sélection de profil dans l'onglet */
         .famille-select-container {
             margin-bottom: 16px;
         }
@@ -336,14 +334,14 @@
             color: var(--text-main);
         }
 
-        /* Styles spécifiques pour la modale grand format du formulaire de recette */
+        /* FORMULAIRE ÉPURÉ ET SIMPLIFIÉ (Modale Grand Format) */
         .modal-content-large {
             background-color: var(--card-bg);
-            padding: 20px;
+            padding: 18px;
             border-radius: 16px;
             width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
+            max-width: 480px;
+            max-height: 88vh;
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
@@ -355,11 +353,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .form-header h3 {
-            font-size: 18px;
+            font-size: 17px;
             color: var(--text-main);
             margin: 0;
         }
@@ -368,17 +366,17 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
         }
 
-        /* Navigation par onglets du formulaire */
+        /* Onglets du formulaire plus discrets et épurés */
         .form-tabs {
             display: flex;
             gap: 4px;
             overflow-x: auto;
-            padding-bottom: 8px;
-            margin-bottom: 14px;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
             scrollbar-width: none;
         }
@@ -391,9 +389,9 @@
             background-color: var(--bg-color);
             color: var(--text-muted);
             border: 1px solid var(--border-color);
-            padding: 6px 10px;
+            padding: 5px 10px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -406,12 +404,11 @@
             border-color: var(--accent-color);
         }
 
-        /* Corps du formulaire (volets) */
         .form-body {
             flex-grow: 1;
             overflow-y: auto;
-            padding-right: 4px;
-            margin-bottom: 14px;
+            padding-right: 2px;
+            margin-bottom: 12px;
         }
 
         .form-volet {
@@ -423,23 +420,23 @@
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             color: var(--text-muted);
         }
 
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 10px;
-            font-size: 14px;
+            padding: 9px 10px;
+            font-size: 13px;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             background-color: var(--bg-color);
             color: var(--text-main);
             outline: none;
@@ -451,18 +448,18 @@
 
         .form-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .form-row .form-group {
             flex: 1;
         }
 
-        /* Gestion des 3 colonnes pour les Ingrédients (fonds uniformes) */
+        /* Ingrédients (3 colonnes, fond sombre/clair cohérent) */
         .ingredient-row {
             display: flex;
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             align-items: center;
         }
 
@@ -472,18 +469,18 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 8px;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
         }
 
         .ing-qty {
-            width: 65px !important;
+            width: 60px !important;
             flex-shrink: 0;
             text-align: center;
         }
 
         .ing-unit {
-            width: 95px !important;
+            width: 90px !important;
             flex-shrink: 0;
         }
 
@@ -491,84 +488,85 @@
             flex-grow: 1;
         }
 
-        /* Lignes de préparation numérotées (fonds uniformes) */
+        /* Étapes de préparation (fond sombre/clair cohérent) */
         .etape-row {
             display: flex;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             align-items: flex-start;
         }
 
         .etape-num {
             background-color: var(--accent-color);
             color: white;
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             flex-shrink: 0;
-            margin-top: 6px;
+            margin-top: 5px;
         }
 
         .etape-row textarea {
             flex-grow: 1;
             resize: vertical;
-            min-height: 50px;
+            min-height: 45px;
             background-color: var(--bg-color);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 8px;
             outline: none;
+            font-size: 13px;
         }
 
-        /* Boutons secondaires d'ajout */
         .secondary-btn {
             background-color: var(--bg-color);
             color: var(--accent-color);
             border: 1px dashed var(--accent-color);
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 6px;
+            margin-top: 4px;
             text-align: center;
         }
 
         .photo-preview {
             width: 100%;
-            height: 120px;
+            height: 110px;
             border: 2px dashed var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            font-size: 13px;
-            margin-top: 6px;
+            font-size: 12px;
+            margin-top: 4px;
             object-fit: cover;
             background-color: var(--bg-color);
         }
 
         .form-footer {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .primary-btn {
             background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 12px;
+            padding: 9px 14px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 13px;
             flex: 1;
         }
 
@@ -624,11 +622,11 @@
             background-color: var(--border-color);
             color: var(--text-main);
             border: none;
-            padding: 10px 16px;
-            border-radius: 12px;
+            padding: 9px 14px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            margin-top: 10px;
+            font-size: 13px;
             width: 100%;
         }
 
@@ -764,7 +762,7 @@
         </div>
     </div>
 
-    <!-- FENÊTRE MODALE DU FORMULAIRE DE CRÉATION (5 VOLETS) -->
+    <!-- FENÊTRE MODALE DU FORMULAIRE DE CRÉATION (5 VOLETS ÉPURÉS) -->
     <div class="modal" id="recipeFormModal">
         <div class="modal-content-large">
             
@@ -785,21 +783,35 @@
             <!-- CONTENU DES VOLETS -->
             <div class="form-body">
                 
-                <!-- VOLET 1 : APERÇU (Avec ajout du champ Profil/Destination) -->
+                <!-- VOLET 1 : APERÇU (Destination, Profil & Catégorie intégrés) -->
                 <div class="form-volet active" id="volet-1">
                     <div class="form-group">
                         <label>Titre de la recette</label>
                         <input type="text" id="recipeTitle" placeholder="Ex: Tarte aux pommes">
                     </div>
-                    <div class="form-group">
-                        <label>Enregistrer dans :</label>
-                        <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
-                            <option value="incontournables">Incontournables (Catégories générales)</option>
-                            <option value="famille">Profil Familial / Membre</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Destination</label>
+                            <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
+                                <option value="incontournables">Incontournables</option>
+                                <option value="famille">Profil / Membre</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="recipeProfilGroup" style="display: none;">
+                            <label>Membre</label>
+                            <select id="recipeProfilSelect">
+                                <option value="Lucie">Lucie</option>
+                                <option value="Clémence">Clémence</option>
+                                <option value="Adeline">Adeline</option>
+                                <option value="Gwenaëlle">Gwenaëlle</option>
+                                <option value="Maman">Maman</option>
+                                <option value="Malo">Malo</option>
+                                <option value="Invité">Invité</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group" id="recipeCategoryGroup">
-                        <label>Catégorie (Incontournables)</label>
+                    <div class="form-group">
+                        <label>Catégorie</label>
                         <select id="recipeCategory">
                             <option value="apero">Apéro</option>
                             <option value="plats">Plats</option>
@@ -810,41 +822,29 @@
                             <option value="cosmetiques">Cosmétiques</option>
                         </select>
                     </div>
-                    <div class="form-group" id="recipeProfilGroup" style="display: none;">
-                        <label>Profil concerné</label>
-                        <select id="recipeProfilSelect">
-                            <option value="Lucie">Lucie</option>
-                            <option value="Clémence">Clémence</option>
-                            <option value="Adeline">Adeline</option>
-                            <option value="Gwenaëlle">Gwenaëlle</option>
-                            <option value="Maman">Maman</option>
-                            <option value="Malo">Malo</option>
-                            <option value="Invité">Invité</option>
-                        </select>
-                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Portions</label>
                             <input type="number" id="recipePortions" value="4">
                         </div>
                         <div class="form-group">
-                            <label>Prépa (min)</label>
+                            <label>Prépa (m)</label>
                             <input type="number" id="recipePrepTime" value="15">
                         </div>
                         <div class="form-group">
-                            <label>Cuisson (min)</label>
+                            <label>Cuisson (m)</label>
                             <input type="number" id="recipeCookTime" value="30">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Source</label>
-                        <input type="text" id="recipeSource" placeholder="Ex: Livre de famille, site web...">
+                        <input type="text" id="recipeSource" placeholder="Ex: Livre, site...">
                     </div>
                 </div>
 
-                <!-- VOLET 2 : INGRÉDIENTS (3 colonnes avec fond sombre en mode sombre) -->
+                <!-- VOLET 2 : INGRÉDIENTS -->
                 <div class="form-volet" id="volet-2">
-                    <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Détail des ingrédients</label>
+                    <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Liste des ingrédients</label>
                     <div id="ingredientsContainer">
                         <div class="ingredient-row">
                             <input type="text" placeholder="Qté" class="ing-qty">
@@ -866,9 +866,9 @@
                     <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
                 </div>
 
-                <!-- VOLET 3 : PRÉPARATION (Étapes avec fond sombre en mode sombre) -->
+                <!-- VOLET 3 : PRÉPARATION -->
                 <div class="form-volet" id="volet-3">
-                    <label style="margin-bottom:8px; display:block; font-size:13px; color:var(--text-muted); font-weight:600;">Étapes de la recette</label>
+                    <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Étapes de préparation</label>
                     <div id="etapesContainer">
                         <div class="etape-row">
                             <span class="etape-num">1</span>
@@ -881,17 +881,17 @@
                 <!-- VOLET 4 : NOTES -->
                 <div class="form-volet" id="volet-4">
                     <div class="form-group">
-                        <label>Notes, astuces et variantes</label>
-                        <textarea id="recipeNotes" rows="6" placeholder="Conseils de conservation, variantes..."></textarea>
+                        <label>Notes & Astuces</label>
+                        <textarea id="recipeNotes" rows="5" placeholder="Conseils, conservation, variantes..."></textarea>
                     </div>
                 </div>
 
                 <!-- VOLET 5 : PHOTOS -->
                 <div class="form-volet" id="volet-5">
                     <div class="form-group" style="text-align: center;">
-                        <label>Illustration</label>
+                        <label>Photo de la recette</label>
                         <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
-                        <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir une photo</button>
+                        <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir une image</button>
                         <div class="photo-preview" id="photoPreviewContainer">Aucune photo sélectionnée</div>
                     </div>
                 </div>
@@ -1193,13 +1193,10 @@
         }
 
         function gererVisibiliteProfil(valeur) {
-            const catGroup = document.getElementById('recipeCategoryGroup');
             const profilGroup = document.getElementById('recipeProfilGroup');
             if (valeur === 'famille') {
-                catGroup.style.display = 'none';
                 profilGroup.style.display = 'block';
             } else {
-                catGroup.style.display = 'block';
                 profilGroup.style.display = 'none';
             }
         }
@@ -1265,7 +1262,7 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
+                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
                 }
                 reader.readAsDataURL(file);
             }
