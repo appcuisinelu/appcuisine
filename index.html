@@ -349,6 +349,87 @@
             gap: 10px;
         }
 
+        /* STYLES POUR LA VUE DÉTAILLÉE D'UNE RECETTE */
+        .recipe-detail-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+        .recipe-detail-infos {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .recipe-detail-infos div {
+            text-align: center;
+        }
+        .recipe-detail-infos span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        .recipe-detail-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 16px 0 8px 0;
+        }
+        .recipe-detail-ingredients {
+            list-style: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+        .recipe-detail-ingredients li {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        .recipe-detail-ingredients li:last-child {
+            border-bottom: none;
+        }
+        .recipe-detail-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .recipe-detail-step-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .recipe-detail-step-num {
+            background-color: var(--accent-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .recipe-detail-step-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
         /* Formulaire interne des volets */
         .form-tabs {
             display: flex;
@@ -684,7 +765,6 @@
                 Prenez une photo ou choisissez-la dans votre galerie.
             </p>
             
-            <!-- Deux boutons avec picto au-dessus -->
             <div style="display: flex; gap: 12px; margin-bottom: 20px;">
                 <button class="primary-btn" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px;" onclick="document.getElementById('cameraInput').click()">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
@@ -893,6 +973,20 @@
         </div>
     </div>
 
+    <!-- 6. MODALE DE LA VUE DÉTAILLÉE D'UNE RECETTE -->
+    <div class="fullscreen-modal" id="recipeDetailModal">
+        <div class="fullscreen-header">
+            <h3 id="detailRecipeTitle">Titre de la recette</h3>
+            <button class="popup-close-btn" onclick="fermerDetailRecette()">&times;</button>
+        </div>
+        <div class="fullscreen-body" id="detailRecipeBody">
+            <!-- Rempli dynamiquement en JS -->
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerDetailRecette()">Fermer</button>
+        </div>
+    </div>
+
     <!-- MODALE COULEURS PLEIN ÉCRAN -->
     <div class="fullscreen-modal" id="colorModal">
         <div class="fullscreen-header">
@@ -935,18 +1029,83 @@
         const database = {
             incontournables: {
                 apero: [
-                    { nom: "Cake salé aux olives", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }
+                    { 
+                        nom: "Cake salé aux olives", 
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 6, prepTime: 15, cookTime: 45,
+                        ingredients: [
+                            { qte: "150", unit: "g", nom: "de farine" },
+                            { qte: "3", unit: "pièce(s)", nom: "d'œufs" },
+                            { qte: "1", unit: "sachet", nom: "de levure chimique" },
+                            { qte: "100", unit: "g", nom: "d'olives dénoyautées" },
+                            { qte: "120", unit: "g", nom: "de lardons" }
+                        ],
+                        etapes: [
+                            "Préchauffer le four à 180°C.",
+                            "Dans un saladier, mélanger la farine, les œufs et la levure.",
+                            "Ajouter les lardons et les olives coupées en morceaux.",
+                            "Verser dans un moule à cake et enfourner pour 45 minutes."
+                        ],
+                        notes: "Se déguste tiède ou froid à l'apéro."
+                    }
                 ],
                 plats: [
-                    { nom: "Poulet rôti du dimanche", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c" }
+                    { 
+                        nom: "Poulet rôti du dimanche", 
+                        img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+                        portions: 4, prepTime: 20, cookTime: 60,
+                        ingredients: [
+                            { qte: "1", unit: "pièce(s)", nom: "poulet entier" },
+                            { qte: "50", unit: "g", nom: "de beurre" },
+                            { qte: "2", unit: "pincée", nom: "de sel et poivre" }
+                        ],
+                        etapes: [
+                            "Préchauffer le four à 200°C.",
+                            "Badigeonner le poulet de beurre fondu, saler et poivrer.",
+                            "Enfourner pendant 1 heure en arrosant régulièrement avec le jus."
+                        ],
+                        notes: "Parfait avec des pommes de terre rôties."
+                    }
                 ],
                 desserts: [
-                    { nom: "Tarte aux pommes", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" }
+                    { 
+                        nom: "Tarte aux pommes", 
+                        img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87",
+                        portions: 6, prepTime: 20, cookTime: 30,
+                        ingredients: [
+                            { qte: "1", unit: "pièce(s)", nom: "pâte brisée" },
+                            { qte: "4", unit: "pièce(s)", nom: "pommes golden" },
+                            { qte: "2", unit: "c. à s.", nom: "de sucre vanillé" }
+                        ],
+                        etapes: [
+                            "Étaler la pâte dans un moule à tarte.",
+                            "Disposer les pommes coupées en fines lamelles.",
+                            "Saupoudrer de sucre vanillé et cuire 30 min à 180°C."
+                        ],
+                        notes: "À servir tiède avec une boule de glace vanille."
+                    }
                 ],
                 boulangerie: [], basiques: [], maison: [], cosmetiques: []
             },
             famille: {
-                Lucie: [{ nom: "Cookies moelleux", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" }],
+                Lucie: [
+                    { 
+                        nom: "Cookies moelleux", 
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 8, prepTime: 15, cookTime: 10,
+                        ingredients: [
+                            { qte: "200", unit: "g", nom: "de pépites de chocolat" },
+                            { qte: "250", unit: "g", nom: "de farine" },
+                            { qte: "125", unit: "g", nom: "de beurre mou" }
+                        ],
+                        etapes: [
+                            "Mélanger le beurre mou avec le sucre.",
+                            "Incorporer la farine et les pépites de chocolat.",
+                            "Former des boules et cuire 10 min à 180°C."
+                        ],
+                        notes: "Attention à ne pas trop les cuire pour garder le moelleux."
+                    }
+                ],
                 Clémence: [], Adeline: [], Gwenaëlle: [], Maman: [], Malo: [], Invité: []
             }
         };
@@ -1018,7 +1177,7 @@
                 recipes.forEach(recipe => {
                     const row = document.createElement('div');
                     row.className = 'recipe-row-card';
-                    row.onclick = () => alert("Affichage de : " + recipe.nom);
+                    row.onclick = () => afficherDetailRecette(recipe);
                     row.innerHTML = `
                         <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
                         <div class="recipe-row-banner">
@@ -1063,7 +1222,7 @@
                 recipes.forEach(recipe => {
                     const row = document.createElement('div');
                     row.className = 'recipe-row-card';
-                    row.onclick = () => alert("Affichage de : " + recipe.nom);
+                    row.onclick = () => afficherDetailRecette(recipe);
                     row.innerHTML = `
                         <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
                         <div class="recipe-row-banner">
@@ -1073,6 +1232,67 @@
                     listContainer.appendChild(row);
                 });
             }
+        }
+
+        /* FONCTION POUR AFFICHER LA VUE DÉTAILLÉE D'UNE RECETTE */
+        function afficherDetailRecette(recipe) {
+            document.getElementById('detailRecipeTitle').textContent = recipe.nom;
+            
+            const bodyContainer = document.getElementById('detailRecipeBody');
+            
+            let ingredientsHtml = '';
+            if (recipe.ingredients && recipe.ingredients.length > 0) {
+                recipe.ingredients.forEach(ing => {
+                    ingredientsHtml += `<li>${ing.qte || ''} ${ing.unit || ''} ${ing.nom}</li>`;
+                });
+            } else {
+                ingredientsHtml = '<li>Aucun ingrédient renseigné.</li>';
+            }
+
+            let etapesHtml = '';
+            if (recipe.etapes && recipe.etapes.length > 0) {
+                recipe.etapes.forEach((etape, index) => {
+                    etapesHtml += `
+                        <div class="recipe-detail-step-card">
+                            <div class="recipe-detail-step-num">${index + 1}</div>
+                            <div class="recipe-detail-step-text">${etape}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                etapesHtml = '<p style="color:var(--text-muted); font-size:14px;">Aucune étape renseignée.</p>';
+            }
+
+            bodyContainer.innerHTML = `
+                <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
+                
+                <div class="recipe-detail-infos">
+                    <div>${recipe.portions || '-'}&nbsp;pers.<span>Portions</span></div>
+                    <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
+                    <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
+                </div>
+
+                <div class="recipe-detail-section-title">Ingrédients</div>
+                <ul class="recipe-detail-ingredients">
+                    ${ingredientsHtml}
+                </ul>
+
+                <div class="recipe-detail-section-title">Préparation</div>
+                <div class="recipe-detail-steps">
+                    ${etapesHtml}
+                </div>
+
+                ${recipe.notes ? `
+                    <div class="recipe-detail-section-title">Notes & Astuces</div>
+                    <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                ` : ''}
+            `;
+
+            document.getElementById('recipeDetailModal').classList.add('active');
+        }
+
+        function fermerDetailRecette() {
+            document.getElementById('recipeDetailModal').classList.remove('active');
         }
 
         function changerOnglet(nomOnglet, elementBtn) {
@@ -1246,9 +1466,32 @@
 
             const cible = document.getElementById('recipeTargetSection').value;
             const categorie = document.getElementById('recipeCategory').value;
+            
+            // Récupération des ingrédients saisis dans le formulaire
+            const ingredients = [];
+            document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => {
+                const qte = row.querySelector('.ing-qty').value.trim();
+                const unit = row.querySelector('.ing-unit').value;
+                const nom = row.querySelector('.ing-name').value.trim();
+                if (nom) ingredients.push({ qte, unit, nom });
+            });
+
+            // Récupération des étapes saisies dans le formulaire
+            const etapes = [];
+            document.querySelectorAll('#etapesContainer .etape-row textarea').forEach(textarea => {
+                const texte = textarea.value.trim();
+                if (texte) etapes.push(texte);
+            });
+
             const nouvelleRecette = {
                 nom: titre,
-                img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
+                img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+                portions: document.getElementById('recipePortions').value || 4,
+                prepTime: document.getElementById('recipePrepTime').value || 15,
+                cookTime: document.getElementById('recipeCookTime').value || 30,
+                ingredients: ingredients,
+                etapes: etapes,
+                notes: document.getElementById('recipeNotes').value.trim()
             };
 
             if (cible === 'incontournables') {
