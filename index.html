@@ -445,7 +445,6 @@
         .recipe-detail-infos-top svg {
             width: 18px;
             height: 18px;
-            stroke: var(--accent-color);
             fill: none;
             stroke-width: 2;
             stroke-linecap: round;
@@ -457,11 +456,18 @@
         .freeze-clickable {
             cursor: pointer;
         }
+        /* Couleur du thème si possible, grisé si impossible */
         .freeze-clickable.active svg {
             stroke: var(--accent-color);
         }
+        .freeze-clickable:not(.active) svg {
+            stroke: #7f8c8d;
+        }
+        .freeze-clickable:not(.active) span {
+            color: #7f8c8d;
+        }
 
-        /* Gestion des portions & calculette + reset après la calculette */
+        /* Gestion des portions & calculette */
         .portions-control-row {
             display: flex;
             justify-content: space-between;
@@ -878,7 +884,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -951,6 +956,23 @@
                 <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                 Importer depuis une vidéo
             </button>
+        </div>
+    </div>
+
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (TEXTE EN ROUGE, BOUTONS OUI / NON) -->
+    <div class="popup-modal" id="deleteConfirmModal">
+        <div class="popup-content" style="text-align: center;">
+            <div class="popup-header">
+                <h3 style="color: #e74c3c;">Confirmation</h3>
+                <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
+            </div>
+            <p style="font-size: 14px; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
+                Voulez-vous vraiment supprimer définitivement cette recette ?
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSuppression()">Non</button>
+                <button class="primary-btn" style="background-color: #e74c3c;" onclick="confirmerSuppressionRecette()">Oui</button>
+            </div>
         </div>
     </div>
 
@@ -1221,7 +1243,7 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se déguste tiède ou froid à l'apéro."
+                        notes: "Se délecte tiède ou froid à l'apéro."
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1266,8 +1288,8 @@
         let imageRecetteActuelle = "";
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
-        let idRecetteEnEdition = null; // Suivi si on édite une recette existante
-        let fontScaleIndex = 0; // 0: normal, 1: moyen, 2: grand
+        let idRecetteEnEdition = null;
+        let fontScaleIndex = 0;
 
         function renderCategories(onglet) {
             if (onglet === 'famille') {
@@ -1322,8 +1344,7 @@
                 listContainer.appendChild(emptyMsg);
             } else {
                 recipes.forEach(recipe => {
-                    recipe.categorie = categoryMeta[catKey] ? categoryMeta[catKey].nom : catKey;
-                    recipe.membre = "Incontournables";
+                    recipe.riqueCategorie = catKey;
                     const row = document.createElement('div');
                     row.className = 'recipe-row-card';
                     row.onclick = () => afficherDetailRecette(recipe);
@@ -1523,7 +1544,6 @@
             if (!recetteActiveEnCours) return;
             idRecetteEnEdition = recetteActiveEnCours.id;
             
-            // Remplir le formulaire avec les valeurs existantes
             document.getElementById('formModalTitle').textContent = "Modifier la recette";
             document.getElementById('recipeTitle').value = recetteActiveEnCours.nom || "";
             document.getElementById('recipePortions').value = recetteActiveEnCours.portions || 4;
@@ -1531,7 +1551,6 @@
             document.getElementById('recipeCookTime').value = recetteActiveEnCours.cookTime || 30;
             document.getElementById('recipeNotes').value = recetteActiveEnCours.notes || "";
             
-            // Ingrédients
             const ingContainer = document.getElementById('ingredientsContainer');
             ingContainer.innerHTML = '';
             if (recetteActiveEnCours.ingredients && recetteActiveEnCours.ingredients.length > 0) {
@@ -1553,7 +1572,6 @@
                 ajouterLigneIngredient();
             }
 
-            // Étapes
             const etapesContainer = document.getElementById('etapesContainer');
             etapesContainer.innerHTML = '';
             if (recetteActiveEnCours.etapes && recetteActiveEnCours.etapes.length > 0) {
@@ -1586,20 +1604,26 @@
         }
 
         function actionSupprimerRecette() {
-            if (confirm("Voulez-vous vraiment supprimer cette recette ?")) {
-                if (recetteActiveEnCours) {
-                    // Chercher et supprimer de database
-                    for (const catKey in database.incontournables) {
-                        database.incontournables[catKey] = database.incontournables[catKey].filter(r => r.id !== recetteActiveEnCours.id);
-                    }
-                    for (const profKey in database.famille) {
-                        database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
-                    }
+            document.getElementById('deleteConfirmModal').classList.add('active');
+        }
+
+        function fermerModalSuppression() {
+            document.getElementById('deleteConfirmModal').classList.remove('active');
+        }
+
+        function confirmerSuppressionRecette() {
+            if (recetteActiveEnCours) {
+                for (const catKey in database.incontournables) {
+                    database.incontournables[catKey] = database.incontournables[catKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
-                fermerDetailRecette();
-                alert("Recette supprimée.");
-                retourAccueil();
+                for (const profKey in database.famille) {
+                    database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
+                }
             }
+            fermerModalSuppression();
+            fermerDetailRecette();
+            alert("Recette supprimée.");
+            retourAccueil();
         }
 
         function ouvrirCalculateur() {
@@ -1685,7 +1709,6 @@
         function ouvrirMenuAjout() { 
             idRecetteEnEdition = null;
             document.getElementById('formModalTitle').textContent = "Nouvelle Recette";
-            // Vider les champs pour une création
             document.getElementById('recipeTitle').value = "";
             document.getElementById('recipePortions').value = "4";
             document.getElementById('recipePrepTime').value = "15";
@@ -1856,17 +1879,14 @@
             });
 
             if (idRecetteEnEdition) {
-                // Mise à jour d'une recette existante
-                let trouve = false;
+                let recetteMiseAJour = null;
                 for (const catKey in database.incontournables) {
                     database.incontournables[catKey] = database.incontournables[catKey].map(r => {
                         if (r.id === idRecetteEnEdition) {
-                            trouve = true;
-                            return {
+                            recetteMiseAJour = {
                                 ...r,
                                 nom: titre,
                                 categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
-                                membre: 'Incontournables',
                                 img: imageRecetteActuelle || r.img,
                                 portions: document.getElementById('recipePortions').value || 4,
                                 prepTime: document.getElementById('recipePrepTime').value || 15,
@@ -1875,19 +1895,19 @@
                                 etapes: etapes,
                                 notes: document.getElementById('recipeNotes').value.trim()
                             };
+                            return recetteMiseAJour;
                         }
                         return r;
                     });
                 }
-                if (!trouve) {
+                if (!recetteMiseAJour) {
                     for (const profKey in database.famille) {
                         database.famille[profKey] = database.famille[profKey].map(r => {
                             if (r.id === idRecetteEnEdition) {
-                                return {
+                                recetteMiseAJour = {
                                     ...r,
                                     nom: titre,
                                     categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
-                                    membre: profKey,
                                     img: imageRecetteActuelle || r.img,
                                     portions: document.getElementById('recipePortions').value || 4,
                                     prepTime: document.getElementById('recipePrepTime').value || 15,
@@ -1896,15 +1916,22 @@
                                     etapes: etapes,
                                     notes: document.getElementById('recipeNotes').value.trim()
                                 };
+                                return recetteMiseAJour;
                             }
                             return r;
                         });
                     }
                 }
+                
                 alert("Modifications enregistrées !");
+                fermerFormulaireAjout();
                 idRecetteEnEdition = null;
+
+                // Revenir directement sur la page de la recette mise à jour
+                if (recetteMiseAJour) {
+                    afficherDetailRecette(recetteMiseAJour);
+                }
             } else {
-                // Création d'une nouvelle recette
                 const nouvelleRecette = {
                     id: 'recette_' + Date.now(),
                     nom: titre,
@@ -1929,9 +1956,9 @@
                     database.famille[membre].push(nouvelleRecette);
                 }
                 alert("Recette enregistrée !");
+                fermerFormulaireAjout();
             }
 
-            fermerFormulaireAjout();
             imageRecetteActuelle = "";
             document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
             
