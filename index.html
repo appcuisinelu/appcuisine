@@ -382,8 +382,8 @@
         .recipe-detail-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            padding: 16px 14px 10px 14px;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+            padding: 20px 14px 12px 14px;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -396,6 +396,11 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 4px;
+        }
+        .recipe-detail-sub-info {
+            font-size: 12px;
+            color: #dcdde1;
+            font-weight: 500;
         }
 
         .recipe-detail-infos {
@@ -438,28 +443,19 @@
             font-size: 11px;
             margin-top: 2px;
         }
-        .recipe-detail-infos-top svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            display: inline-block;
-            vertical-align: middle;
-            margin-bottom: 2px;
-        }
+        
         .freeze-clickable {
             cursor: pointer;
         }
-        .freeze-clickable.active svg {
-            stroke: var(--accent-color);
+        .freeze-clickable strong {
+            display: block;
+            font-size: 13px;
         }
-        .freeze-clickable:not(.active) svg {
-            stroke: #7f8c8d;
+        .freeze-clickable.active strong {
+            color: var(--accent-color);
         }
-        .freeze-clickable:not(.active) span {
-            color: #7f8c8d;
+        .freeze-clickable:not(.active) strong {
+            color: #e74c3c;
         }
 
         .portions-control-row {
@@ -507,9 +503,6 @@
             stroke-width: 2;
             stroke-linecap: round;
             stroke-linejoin: round;
-        }
-        .reset-portions-btn:hover svg {
-            stroke: var(--accent-color);
         }
 
         .calculator-trigger-btn {
@@ -876,7 +869,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -952,7 +944,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (TEXTE EN ROUGE, BOUTONS OUI / NON EN ROUGE) -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header">
@@ -960,11 +952,26 @@
                 <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
             </div>
             <p style="font-size: 14px; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
-                Voulez-vous vraiment supprimer définitivement cette recette ?
+                Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
-                <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSuppression()">Non</button>
-                <button class="primary-btn" style="background-color: #e74c3c;" onclick="confirmerSuppressionRecette()">Oui</button>
+                <button class="primary-btn" style="background-color: #e74c3c; color: white;" onclick="confirmerSuppressionRecette(false)">Non</button>
+                <button class="primary-btn" style="background-color: #e74c3c; color: white;" onclick="confirmerSuppressionRecette(true)">Oui</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP DE CHOIX DE LA TAILLE DE POLICE -->
+    <div class="popup-modal" id="fontModal">
+        <div class="popup-content" style="text-align: center;">
+            <div class="popup-header">
+                <h3>Taille de la police</h3>
+                <button class="popup-close-btn" onclick="fermerModalPolice()">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('normal')">Normal</button>
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('moyen')">Moyen</button>
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('grand')">Grand</button>
             </div>
         </div>
     </div>
@@ -1134,7 +1141,7 @@
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                 <span>Partager</span>
             </button>
-            <button class="recipe-nav-item" onclick="changerTaillePoliceCycle()">
+            <button class="recipe-nav-item" onclick="ouvrirModalPolice()">
                 <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
                 <span>Police</span>
             </button>
@@ -1279,7 +1286,6 @@
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
         let idRecetteEnEdition = null;
-        let fontScaleIndex = 0;
 
         function renderCategories(onglet) {
             if (onglet === 'famille') {
@@ -1438,7 +1444,7 @@
             }
 
             const isCongelable = recipe.congelable === true;
-            const snowSvg = `<svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"/></svg>`;
+            const texteCongelation = isCongelable ? "Congélation possible" : "Congélation déconseillée";
 
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
@@ -1447,6 +1453,7 @@
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
                             <div class="recipe-detail-title-overlay">${recipe.nom}</div>
+                            <div class="recipe-detail-sub-info">${recipe.categorie || 'Autre'} • ${recipe.membre || 'Incontournables'}</div>
                         </div>
                     </div>
                 </div>
@@ -1456,8 +1463,8 @@
                         <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
                         <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
                         <div class="freeze-clickable ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()">
-                            ${snowSvg}
-                            <span>${isCongelable ? 'Oui' : 'Non'} (Congél.)</span>
+                            <strong>Congélation</strong>
+                            <span>${texteCongelation}</span>
                         </div>
                     </div>
                     
@@ -1516,18 +1523,23 @@
             document.getElementById('recipeDetailModal').classList.remove('active');
         }
 
-        function changerTaillePoliceCycle() {
-            fontScaleIndex = (fontScaleIndex + 1) % 3;
-            if (fontScaleIndex === 0) {
+        function ouvrirModalPolice() {
+            document.getElementById('fontModal').classList.add('active');
+        }
+
+        function fermerModalPolice() {
+            document.getElementById('fontModal').classList.remove('active');
+        }
+
+        function changerTaillePolice(taille) {
+            if (taille === 'normal') {
                 document.documentElement.style.setProperty('--font-scale', '1rem');
-                alert("Taille de police : Normal");
-            } else if (fontScaleIndex === 1) {
+            } else if (taille === 'moyen') {
                 document.documentElement.style.setProperty('--font-scale', '1.15rem');
-                alert("Taille de police : Moyen");
-            } else {
+            } else if (taille === 'grand') {
                 document.documentElement.style.setProperty('--font-scale', '1.3rem');
-                alert("Taille de police : Grand");
             }
+            fermerModalPolice();
         }
 
         function actionModifierRecette() {
@@ -1586,10 +1598,26 @@
         }
 
         function actionPartagerRecette() {
-            if (navigator.share && recetteActiveEnCours) {
-                navigator.share({ title: recetteActiveEnCours.nom, text: "Découvre cette recette !", url: window.location.href }).catch(() => {});
+            if (!recetteActiveEnCours) return;
+            let textePartage = `Recette : ${recetteActiveEnCours.nom}\nCatégorie : ${recetteActiveEnCours.categorie}\n\nIngrédients :\n`;
+            if (recetteActiveEnCours.ingredients) {
+                recetteActiveEnCours.ingredients.forEach(i => {
+                    textePartage += `- ${i.qte || ''} ${i.unit || ''} ${i.nom}\n`;
+                });
+            }
+            textePartage += `\nPréparation :\n`;
+            if (recetteActiveEnCours.etapes) {
+                recetteActiveEnCours.etapes.forEach((e, idx) => {
+                    textePartage += `${idx + 1}. ${e}\n`;
+                });
+            }
+
+            if (navigator.share) {
+                navigator.share({ title: recetteActiveEnCours.nom, text: textePartage }).catch(() => {});
             } else {
-                alert("Lien de partage copié !");
+                navigator.clipboard.writeText(textePartage).then(() => {
+                    alert("Recette copiée dans le presse-papier !");
+                });
             }
         }
 
@@ -1601,19 +1629,19 @@
             document.getElementById('deleteConfirmModal').classList.remove('active');
         }
 
-        function confirmerSuppressionRecette() {
-            if (recetteActiveEnCours) {
+        function confirmerSuppressionRecette(confirme) {
+            fermerModalSuppression();
+            if (confirme && recetteActiveEnCours) {
                 for (const catKey in database.incontournables) {
                     database.incontournables[catKey] = database.incontournables[catKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
                 for (const profKey in database.famille) {
                     database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
+                fermerDetailRecette();
+                alert("Recette supprimée.");
+                retourAccueil();
             }
-            fermerModalSuppression();
-            fermerDetailRecette();
-            alert("Recette supprimée.");
-            retourAccueil();
         }
 
         function ouvrirCalculateur() {
@@ -1853,6 +1881,8 @@
 
             const cible = document.getElementById('recipeTargetSection').value;
             const categorie = document.getElementById('recipeCategory').value;
+            const nomCat = categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie;
+            const membreVal = cible === 'incontournables' ? 'Incontournables' : document.getElementById('recipeProfilSelect').value;
             
             const ingredients = [];
             document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => {
@@ -1876,7 +1906,8 @@
                             recetteMiseAJour = {
                                 ...r,
                                 nom: titre,
-                                categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
+                                categorie: nomCat,
+                                membre: membreVal,
                                 img: imageRecetteActuelle || r.img,
                                 portions: document.getElementById('recipePortions').value || 4,
                                 prepTime: document.getElementById('recipePrepTime').value || 15,
@@ -1897,7 +1928,8 @@
                                 recetteMiseAJour = {
                                     ...r,
                                     nom: titre,
-                                    categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
+                                    categorie: nomCat,
+                                    membre: profKey,
                                     img: imageRecetteActuelle || r.img,
                                     portions: document.getElementById('recipePortions').value || 4,
                                     prepTime: document.getElementById('recipePrepTime').value || 15,
@@ -1924,8 +1956,8 @@
                 const nouvelleRecette = {
                     id: 'recette_' + Date.now(),
                     nom: titre,
-                    categorie: categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie,
-                    membre: cible === 'incontournables' ? 'Incontournables' : document.getElementById('recipeProfilSelect').value,
+                    categorie: nomCat,
+                    membre: membreVal,
                     img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
                     portions: document.getElementById('recipePortions').value || 4,
                     prepTime: document.getElementById('recipePrepTime').value || 15,
