@@ -266,7 +266,6 @@
             outline: none;
         }
 
-        /* POPUP POUR LE CHOIX INITIAL DU + */
         .popup-modal {
             display: none;
             position: fixed;
@@ -310,7 +309,6 @@
             line-height: 1;
         }
 
-        /* MODALE PLEIN ÉCRAN */
         .fullscreen-modal {
             display: none;
             position: fixed;
@@ -351,7 +349,6 @@
             gap: 10px;
         }
 
-        /* STYLES POUR LA VUE DÉTAILLÉE D'UNE RECETTE */
         .recipe-detail-img-container {
             position: relative;
             width: 100%;
@@ -412,7 +409,6 @@
             gap: 10px;
         }
         
-        /* SÉPARATION PRÉPA / CUISSON / CONGÉLATION (CLIKABLE) */
         .recipe-detail-infos-top {
             display: flex;
             justify-content: space-around;
@@ -456,7 +452,6 @@
         .freeze-clickable {
             cursor: pointer;
         }
-        /* Couleur du thème si possible, grisé si impossible */
         .freeze-clickable.active svg {
             stroke: var(--accent-color);
         }
@@ -467,7 +462,6 @@
             color: #7f8c8d;
         }
 
-        /* Gestion des portions & calculette */
         .portions-control-row {
             display: flex;
             justify-content: space-between;
@@ -581,7 +575,6 @@
             line-height: 1.4;
         }
 
-        /* BANDEAU D'OPTIONS INFÉRIEUR (DANS LA VUE DÉTAILLÉE) */
         .recipe-bottom-nav {
             position: fixed;
             bottom: 8px;
@@ -640,7 +633,6 @@
             stroke: #e74c3c;
         }
 
-        /* Formulaire interne des volets */
         .form-tabs {
             display: flex;
             gap: 4px;
@@ -884,7 +876,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -960,7 +951,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (TEXTE EN ROUGE, BOUTONS OUI / NON) -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header">
@@ -1132,10 +1123,7 @@
 
     <!-- MODALE DE LA VUE DÉTAILLÉE D'UNE RECETTE -->
     <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
-        <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;">
-            <!-- Rempli dynamiquement -->
-        </div>
-        <!-- Bandeau fixe en bas -->
+        <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;"></div>
         <nav class="recipe-bottom-nav">
             <button class="recipe-nav-item" onclick="actionModifierRecette()">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -1928,7 +1916,6 @@
                 fermerFormulaireAjout();
                 idRecetteEnEdition = null;
 
-                // Revenir directement sur la page de la recette mise à jour
                 if (recetteMiseAJour) {
                     afficherDetailRecette(recetteMiseAJour);
                 }
