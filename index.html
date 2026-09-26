@@ -400,14 +400,8 @@
             font-weight: 700;
             margin-bottom: 4px;
         }
-        .recipe-detail-sub-overlay {
-            font-size: 12px;
-            opacity: 0.85;
-            display: flex;
-            gap: 8px;
-        }
         
-        /* LOGO CONGÉLATION CLIQUABLE */
+        /* NOUVEAU DESIGN LOGO CONGÉLATION (FLOCON AMÉLIORÉ) */
         .recipe-freeze-badge {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -447,7 +441,7 @@
             gap: 10px;
         }
         
-        /* SÉPARATION PRÉPA / CUISSON PAR UNE BARRE VERTICALE */
+        /* SÉPARATION PRÉPA / CUISSON / CONGÉLATION PAR UNE BARRE VERTICALE */
         .recipe-detail-infos-top {
             display: flex;
             justify-content: space-around;
@@ -460,12 +454,13 @@
         .recipe-detail-infos-top div {
             text-align: center;
             flex: 1;
+            position: relative;
         }
         .recipe-detail-infos-top div:not(:last-child):after {
             content: '';
             position: absolute;
-            right: 50%;
-            top: 5%;
+            right: 0;
+            top: 10%;
             height: 80%;
             width: 1px;
             background-color: var(--border-color);
@@ -476,8 +471,20 @@
             font-size: 11px;
             margin-top: 2px;
         }
+        .recipe-detail-infos-top svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: inline-block;
+            vertical-align: middle;
+            margin-bottom: 2px;
+        }
 
-        /* Gestion des portions & calculette + reset */
+        /* Gestion des portions & calculette + reset à droite */
         .portions-control-row {
             display: flex;
             justify-content: space-between;
@@ -894,7 +901,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1237,7 +1243,7 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se déguste tiède ou froid à l'apéro."
+                        notes: "Se déguise tiède ou froid à l'apéro."
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1398,7 +1404,7 @@
             }
         }
 
-        /* VUE DÉTAILLÉE SANS PICTOGRAMMES + LOGO CONGÉLATION CLIQUABLE */
+        /* VUE DÉTAILLÉE : SANS PICTOGRAMMES SOUS LE NOM DE LA RECETTE ET LOGO FLOCON AMÉLIORÉ */
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseInt(recipe.portions) || 4;
@@ -1443,6 +1449,9 @@
 
             const isCongelable = recipe.congelable === true;
 
+            // Nouvelle icône de flocon de neige vectoriel plus détaillée et élégante
+            const snowSvg = `<svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"/></svg>`;
+
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
                     <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()">&times;</button>
@@ -1450,14 +1459,9 @@
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
                             <div class="recipe-detail-title-overlay">${recipe.nom}</div>
-                            <div class="recipe-detail-sub-overlay">
-                                <span>${recipe.categorie || 'Général'}</span>
-                                <span>•</span>
-                                <span>${recipe.membre || 'Commun'}</span>
-                            </div>
                         </div>
                         <div class="recipe-freeze-badge ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Se congèle ? (Cliquer pour changer)">
-                            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5l-10 14M7 5l10 14M2 12h20M5 7l14 10M5 17l14-10"></path></svg>
+                            ${snowSvg}
                         </div>
                     </div>
                 </div>
@@ -1466,16 +1470,17 @@
                     <div class="recipe-detail-infos-top">
                         <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
                         <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
+                        <div>${snowSvg}<span>Congélation</span></div>
                     </div>
                     
                     <div class="portions-control-row">
                         <span>Portions : <strong>${portionsActuelles}</strong></span>
                         <div class="portions-stepper">
+                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
+                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
                             <button class="reset-portions-btn" onclick="reinitialiserPortions()" title="Réinitialiser les portions">
                                 <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                             </button>
-                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
-                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
                             <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
                         </div>
                     </div>
@@ -1556,7 +1561,7 @@
             }
         }
 
-        /* CALCULATEUR PROPORTIONNEL PAR INGRÉDIENT */
+        /* CALCULATEUR PROPORTIONNEL PRÉCIS CORRIGÉ */
         function ouvrirCalculateur() {
             if (!recetteActiveEnCours || !recetteActiveEnCours.ingredients) return;
             const select = document.getElementById('calcIngredientSelect');
@@ -1583,15 +1588,17 @@
                 return;
             }
             const ingOriginal = recetteActiveEnCours.ingredients[index];
+            const basePortions = parseInt(recetteActiveEnCours.portions) || 4;
             const qteInitialeNum = parseFloat(ingOriginal.qte);
+            
             if (isNaN(qteInitialeNum) || qteInitialeNum <= 0) {
                 alert("Cet ingrédient n'a pas de quantité numérique initiale exploitable pour le calcul proportionnel.");
                 return;
             }
 
+            // Calcul rigoureux : ratio exact entre la quantité voulue et la quantité initiale de cet ingrédient précis
             const ratio = nouvelleQteSaisie / qteInitialeNum;
-            portionsActuelles = Math.round((parseInt(recetteActiveEnCours.portions) || 4) * ratio);
-            if (portionsActuelles < 1) portionsActuelles = 1;
+            portionsActuelles = Math.max(1, Math.round(basePortions * ratio));
 
             fermerCalculateur();
             construireContenuDetailRecette();
