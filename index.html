@@ -960,14 +960,13 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (Titre retiré) -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
-            <div class="popup-header">
-                <h3 style="color: #e74c3c;">Confirmation</h3>
+            <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
                 <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
             </div>
-            <p style="font-size: 14px; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
+            <p style="font-size: 15px; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
                 Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
@@ -1549,13 +1548,14 @@
             document.getElementById('fontModal').classList.remove('active');
         }
 
+        // Tailles de police augmentées pour Moyen et Grand
         function changerTaillePolice(taille) {
             if (taille === 'normal') {
                 document.documentElement.style.setProperty('--font-scale', '1rem');
             } else if (taille === 'moyen') {
-                document.documentElement.style.setProperty('--font-scale', '1.15rem');
+                document.documentElement.style.setProperty('--font-scale', '1.25rem');
             } else if (taille === 'grand') {
-                document.documentElement.style.setProperty('--font-scale', '1.3rem');
+                document.documentElement.style.setProperty('--font-scale', '1.5rem');
             }
             fermerModalPolice();
         }
@@ -1616,6 +1616,7 @@
             changerVoletForm(1);
         }
 
+        // Partage de la recette avec inclusion de la photo
         async function actionPartagerRecette() {
             if (!recetteActiveEnCours) return;
             let textePartage = `Recette : ${recetteActiveEnCours.nom}\n\nIngrédients :\n`;
@@ -1646,12 +1647,12 @@
                                 shareData.files = [file];
                             }
                         } catch (imgErr) {
-                            // En cas d'échec du chargement de l'image distante, on partage sans fichier
+                            // En cas d'échec de récupération de l'image, on partage le texte seul
                         }
                     }
                     await navigator.share(shareData);
                 } catch (err) {
-                    // Ignorer si annulé par l'utilisateur
+                    // Ignorer si l'utilisateur annule le partage
                 }
             } else {
                 navigator.clipboard.writeText(textePartage).then(() => {
