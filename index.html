@@ -578,7 +578,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 8px 0;
+            padding: 10px 0;
             border-radius: 16px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
             z-index: 2100;
@@ -588,12 +588,10 @@
             background: none;
             border: none;
             color: var(--accent-color);
-            font-size: 10px;
-            font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            justify-content: center;
             cursor: pointer;
             flex: 1;
             position: relative;
@@ -610,8 +608,8 @@
         }
 
         .recipe-nav-item svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             stroke: var(--accent-color);
             fill: none;
             stroke-width: 2;
@@ -869,7 +867,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1084,7 +1081,6 @@
                     <div class="form-group"><label>Prépa (m)</label><input type="number" id="recipePrepTime" value="15"></div>
                     <div class="form-group"><label>Cuisson (m)</label><input type="number" id="recipeCookTime" value="30"></div>
                 </div>
-                <div class="form-group"><label>Source</label><input type="text" id="recipeSource"></div>
             </div>
             <div class="form-volet" id="volet-2">
                 <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Ingrédients</label>
@@ -1113,6 +1109,7 @@
             </div>
             <div class="form-volet" id="volet-4">
                 <div class="form-group"><label>Notes</label><textarea id="recipeNotes" rows="6"></textarea></div>
+                <div class="form-group"><label>Source</label><input type="text" id="recipeSource" placeholder="Ex: Livre, site web..."></div>
             </div>
             <div class="form-volet" id="volet-5">
                 <div class="form-group">
@@ -1134,21 +1131,17 @@
     <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
         <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;"></div>
         <nav class="recipe-bottom-nav">
-            <button class="recipe-nav-item" onclick="actionModifierRecette()">
+            <button class="recipe-nav-item" onclick="actionModifierRecette()" title="Modifier">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                <span>Modifier</span>
             </button>
-            <button class="recipe-nav-item" onclick="actionPartagerRecette()">
+            <button class="recipe-nav-item" onclick="actionPartagerRecette()" title="Partager">
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                <span>Partager</span>
             </button>
-            <button class="recipe-nav-item" onclick="ouvrirModalPolice()">
+            <button class="recipe-nav-item" onclick="ouvrirModalPolice()" title="Police">
                 <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-                <span>Police</span>
             </button>
-            <button class="recipe-nav-item danger" onclick="actionSupprimerRecette()">
+            <button class="recipe-nav-item danger" onclick="actionSupprimerRecette()" title="Supprimer">
                 <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                <span>Supprimer</span>
             </button>
         </nav>
     </div>
@@ -1241,7 +1234,8 @@
                             "Ajouter les lardons et les olives coupées en morceaux.",
                             "Verser dans un moule à cake et enfourner pour 45 minutes."
                         ],
-                        notes: "Se délecte tiède ou froid à l'apéro."
+                        notes: "Se délecte tiède ou froid à l'apéro.",
+                        source: "Livre de cuisine familial"
                     }
                 ],
                 plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
@@ -1266,7 +1260,8 @@
                             "Incorporer la farine et les pépites de chocolat.",
                             "Former des boules et cuire 10 min à 180°C."
                         ],
-                        notes: "Attention à ne pas trop les cuire."
+                        notes: "Attention à ne pas trop les cuire.",
+                        source: "Blog culinaire"
                     }
                 ],
                 Clémence: [], Adeline: [], Gwenaëlle: [], Maman: [], Malo: [], Invité: []
@@ -1445,7 +1440,6 @@
             }
 
             const isCongelable = recipe.congelable === true;
-            const texteCongelation = isCongelable ? "Congélation possible" : "Congélation déconseillée";
 
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
@@ -1465,7 +1459,6 @@
                         <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
                         <div class="freeze-clickable ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()">
                             <strong>Congélation</strong>
-                            <span>${texteCongelation}</span>
                         </div>
                     </div>
                     
@@ -1495,6 +1488,11 @@
                 ${recipe.notes ? `
                     <div class="recipe-detail-section-title">Notes & Astuces</div>
                     <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                ` : ''}
+
+                ${recipe.source ? `
+                    <div class="recipe-detail-section-title">Source</div>
+                    <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
                 ` : ''}
             `;
         }
@@ -1553,6 +1551,7 @@
             document.getElementById('recipePrepTime').value = recetteActiveEnCours.prepTime || 15;
             document.getElementById('recipeCookTime').value = recetteActiveEnCours.cookTime || 30;
             document.getElementById('recipeNotes').value = recetteActiveEnCours.notes || "";
+            document.getElementById('recipeSource').value = recetteActiveEnCours.source || "";
             
             const ingContainer = document.getElementById('ingredientsContainer');
             ingContainer.innerHTML = '';
@@ -1598,7 +1597,7 @@
             changerVoletForm(1);
         }
 
-        function actionPartagerRecette() {
+        async function actionPartagerRecette() {
             if (!recetteActiveEnCours) return;
             let textePartage = `Recette : ${recetteActiveEnCours.nom}\nCatégorie : ${recetteActiveEnCours.categorie}\n\nIngrédients :\n`;
             if (recetteActiveEnCours.ingredients) {
@@ -1612,9 +1611,25 @@
                     textePartage += `${idx + 1}. ${e}\n`;
                 });
             }
+            if (recetteActiveEnCours.source) {
+                textePartage += `\nSource : ${recetteActiveEnCours.source}`;
+            }
 
             if (navigator.share) {
-                navigator.share({ title: recetteActiveEnCours.nom, text: textePartage }).catch(() => {});
+                try {
+                    let shareData = { title: recetteActiveEnCours.nom, text: textePartage };
+                    if (recetteActiveEnCours.img && recetteActiveEnCours.img.startsWith('http')) {
+                        const response = await fetch(recetteActiveEnCours.img);
+                        const blob = await response.blob();
+                        const file = new File([blob], 'recette.jpg', { type: blob.type });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            shareData.files = [file];
+                        }
+                    }
+                    await navigator.share(shareData);
+                } catch (err) {
+                    // Ignorer si annulé par l'utilisateur
+                }
             } else {
                 navigator.clipboard.writeText(textePartage).then(() => {
                     alert("Recette copiée dans le presse-papier !");
@@ -1733,6 +1748,7 @@
             document.getElementById('recipePrepTime').value = "15";
             document.getElementById('recipeCookTime').value = "30";
             document.getElementById('recipeNotes').value = "";
+            document.getElementById('recipeSource').value = "";
             document.getElementById('ingredientsContainer').innerHTML = `
                 <div class="ingredient-row">
                     <input type="text" placeholder="Qté" class="ing-qty">
@@ -1915,7 +1931,8 @@
                                 cookTime: document.getElementById('recipeCookTime').value || 30,
                                 ingredients: ingredients,
                                 etapes: etapes,
-                                notes: document.getElementById('recipeNotes').value.trim()
+                                notes: document.getElementById('recipeNotes').value.trim(),
+                                source: document.getElementById('recipeSource').value.trim()
                             };
                             return recetteMiseAJour;
                         }
@@ -1937,7 +1954,8 @@
                                     cookTime: document.getElementById('recipeCookTime').value || 30,
                                     ingredients: ingredients,
                                     etapes: etapes,
-                                    notes: document.getElementById('recipeNotes').value.trim()
+                                    notes: document.getElementById('recipeNotes').value.trim(),
+                                    source: document.getElementById('recipeSource').value.trim()
                                 };
                                 return recetteMiseAJour;
                             }
@@ -1966,7 +1984,8 @@
                     congelable: false,
                     ingredients: ingredients,
                     etapes: etapes,
-                    notes: document.getElementById('recipeNotes').value.trim()
+                    notes: document.getElementById('recipeNotes').value.trim(),
+                    source: document.getElementById('recipeSource').value.trim()
                 };
 
                 if (cible === 'incontournables') {
