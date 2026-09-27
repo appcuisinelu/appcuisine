@@ -446,16 +446,32 @@
         
         .freeze-clickable {
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .freeze-clickable strong {
+        .freeze-clickable svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            margin-bottom: 2px;
+        }
+        .freeze-clickable.active svg {
+            stroke: var(--accent-color);
+        }
+        .freeze-clickable span {
             display: block;
-            font-size: 13px;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 2px;
         }
-        .freeze-clickable.active strong {
+        .freeze-clickable.active span {
             color: var(--accent-color);
-        }
-        .freeze-clickable:not(.active) strong {
-            color: #e74c3c;
         }
 
         .portions-control-row {
@@ -867,7 +883,7 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -943,7 +959,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (TEXTE EN ROUGE, BOUTONS OUI / NON EN ROUGE) -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header">
@@ -1458,8 +1474,9 @@
                     <div class="recipe-detail-infos-top">
                         <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
                         <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
-                        <div class="freeze-clickable ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()">
-                            <strong>Congélation</strong>
+                        <div class="freeze-clickable ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Congélation">
+                            <svg viewBox="0 0 24 24"><path d="M2 12h20"></path><path d="M12 2v20"></path><path d="m4.93 4.93 14.14 14.14"></path><path d="m19.07 4.93-14.14 14.14"></path></svg>
+                            <span>Congélation</span>
                         </div>
                     </div>
                     
@@ -1600,7 +1617,7 @@
 
         async function actionPartagerRecette() {
             if (!recetteActiveEnCours) return;
-            let textePartage = `Recette : ${recetteActiveEnCours.nom}\nCatégorie : ${recetteActiveEnCours.categorie}\n\nIngrédients :\n`;
+            let textePartage = `Recette : ${recetteActiveEnCours.nom}\n\nIngrédients :\n`;
             if (recetteActiveEnCours.ingredients) {
                 recetteActiveEnCours.ingredients.forEach(i => {
                     textePartage += `- ${i.qte || ''} ${i.unit || ''} ${i.nom}\n`;
