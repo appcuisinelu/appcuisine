@@ -271,7 +271,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
+            z-index: 3000;
             justify-content: center;
             align-items: center;
             padding: 16px;
@@ -417,6 +417,7 @@
         .recipe-detail-infos-top {
             display: flex;
             justify-content: space-around;
+            align-items: center;
             font-size: 13px;
             font-weight: 600;
             border-bottom: 1px solid var(--border-color);
@@ -970,7 +971,7 @@
                 Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
-                <button class="primary-btn" style="background-color: #e74c3c; color: white;" onclick="confirmerSuppressionRecette(false)">Non</button>
+                <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="confirmerSuppressionRecette(false)">Non</button>
                 <button class="primary-btn" style="background-color: #e74c3c; color: white;" onclick="confirmerSuppressionRecette(true)">Oui</button>
             </div>
         </div>
@@ -1636,12 +1637,16 @@
             if (navigator.share) {
                 try {
                     let shareData = { title: recetteActiveEnCours.nom, text: textePartage };
-                    if (recetteActiveEnCours.img && recetteActiveEnCours.img.startsWith('http')) {
-                        const response = await fetch(recetteActiveEnCours.img);
-                        const blob = await response.blob();
-                        const file = new File([blob], 'recette.jpg', { type: blob.type });
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            shareData.files = [file];
+                    if (recetteActiveEnCours.img) {
+                        try {
+                            const response = await fetch(recetteActiveEnCours.img);
+                            const blob = await response.blob();
+                            const file = new File([blob], 'recette.jpg', { type: blob.type });
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                shareData.files = [file];
+                            }
+                        } catch (imgErr) {
+                            // En cas d'échec du chargement de l'image distante, on partage sans fichier
                         }
                     }
                     await navigator.share(shareData);
