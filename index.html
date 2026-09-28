@@ -15,7 +15,7 @@
             --text-muted: #a0a0a0;
             --border-color: #2c2c2c;
             --nav-bg: #1a1a1a;
-            --font-scale: 1rem;
+            --base-font-size: 16px;
         }
 
         body.light-mode {
@@ -46,7 +46,7 @@
             color: var(--text-main);
             padding: env(safe-area-inset-top) 16px 80px 16px;
             transition: background-color 0.3s, color 0.3s;
-            font-size: var(--font-scale);
+            font-size: var(--base-font-size);
         }
 
         header {
@@ -70,7 +70,7 @@
         }
 
         h1 {
-            font-size: 20px;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--accent-color);
             letter-spacing: -0.5px;
@@ -96,7 +96,7 @@
         }
 
         .header-btn.btn-plus {
-            font-size: 26px;
+            font-size: 1.6rem;
             font-weight: 700;
         }
 
@@ -122,7 +122,7 @@
         .search-input {
             width: 100%;
             padding: 10px 14px;
-            font-size: 15px;
+            font-size: 1rem;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             background-color: var(--card-bg);
@@ -150,7 +150,7 @@
             border: 1px solid var(--border-color);
             padding: 6px 14px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 0.85rem;
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
@@ -194,7 +194,7 @@
             background-color: var(--accent-color);
             color: white;
             padding: 6px 8px;
-            font-size: 11px;
+            font-size: 0.75rem;
             font-weight: 600;
             text-align: center;
         }
@@ -211,7 +211,7 @@
             background: none;
             border: none;
             color: var(--accent-color);
-            font-size: 14px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             margin-bottom: 12px;
@@ -244,7 +244,7 @@
             flex-grow: 1;
             height: 75px;
             padding: 0 14px;
-            font-size: 14px;
+            font-size: 0.95rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -257,7 +257,7 @@
         .famille-select {
             width: 100%;
             padding: 12px 14px;
-            font-size: 15px;
+            font-size: 1rem;
             font-weight: 600;
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -296,7 +296,7 @@
             margin-bottom: 16px;
         }
         .popup-header h3 {
-            font-size: 16px;
+            font-size: 1.05rem;
             color: var(--accent-color);
         }
         
@@ -304,7 +304,7 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 22px;
+            font-size: 1.4rem;
             cursor: pointer;
             line-height: 1;
         }
@@ -332,7 +332,7 @@
         }
 
         .fullscreen-header h3 {
-            font-size: 18px;
+            font-size: 1.15rem;
             color: var(--text-main);
         }
 
@@ -372,7 +372,7 @@
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 20px;
+            font-size: 1.25rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -393,12 +393,12 @@
             flex-grow: 1;
         }
         .recipe-detail-title-overlay {
-            font-size: 20px;
+            font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 4px;
         }
         .recipe-detail-sub-info {
-            font-size: 12px;
+            font-size: 0.8rem;
             color: #dcdde1;
             font-weight: 500;
         }
@@ -418,7 +418,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            font-size: 13px;
+            font-size: 0.85rem;
             font-weight: 600;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
@@ -441,7 +441,7 @@
         .recipe-detail-infos-top span {
             display: block;
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 0.75rem;
             margin-top: 2px;
         }
         
@@ -468,7 +468,7 @@
         .freeze-clickable span {
             display: block;
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 0.75rem;
             margin-top: 2px;
         }
         .freeze-clickable.active span {
@@ -479,7 +479,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            font-size: 0.85rem;
             font-weight: 600;
         }
         .portions-stepper {
@@ -528,12 +528,12 @@
             color: var(--accent-color);
             padding: 4px 8px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 0.75rem;
             cursor: pointer;
         }
 
         .recipe-detail-section-title {
-            font-size: 15px;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--accent-color);
             margin: 16px 0 8px 0;
@@ -548,7 +548,7 @@
         .recipe-detail-ingredients li {
             padding: 6px 0;
             border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
+            font-size: 0.95rem;
         }
         .recipe-detail-ingredients li:last-child {
             border-bottom: none;
@@ -576,12 +576,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 0.8rem;
             font-weight: 700;
             flex-shrink: 0;
         }
         .recipe-detail-step-text {
-            font-size: 14px;
+            font-size: 0.95rem;
             line-height: 1.4;
         }
 
@@ -658,7 +658,7 @@
             border: 1px solid var(--border-color);
             padding: 6px 12px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -677,7 +677,7 @@
         }
         .form-group label {
             display: block;
-            font-size: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
             margin-bottom: 4px;
             color: var(--text-muted);
@@ -685,7 +685,7 @@
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 11px 12px;
-            font-size: 14px;
+            font-size: 0.95rem;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             background-color: var(--card-bg);
@@ -711,7 +711,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 9px;
-            font-size: 13px;
+            font-size: 0.9rem;
         }
         .ing-qty { width: 65px !important; text-align: center; }
         .ing-unit { width: 95px !important; }
@@ -732,7 +732,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 0.8rem;
             font-weight: 700;
             flex-shrink: 0;
             margin-top: 6px;
@@ -755,7 +755,7 @@
             border: 1px dashed var(--accent-color);
             padding: 10px;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
@@ -772,7 +772,7 @@
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 0.9rem;
             margin-top: 8px;
             object-fit: cover;
             background-color: var(--card-bg);
@@ -787,7 +787,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 0.95rem;
             flex: 1;
             text-align: center;
         }
@@ -799,7 +799,7 @@
             border: 1px solid var(--border-color);
             padding: 14px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             margin-bottom: 10px;
@@ -853,7 +853,7 @@
             background: none;
             border: none;
             color: var(--accent-color);
-            font-size: 10px;
+            font-size: 0.7rem;
             font-weight: 600;
             display: flex;
             flex-direction: column;
@@ -884,7 +884,6 @@
             stroke-linejoin: round;
         }
     </style>
-    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -960,13 +959,14 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (Titre retiré) -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
-            <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
+            <div class="popup-header">
+                <h3 style="color: #e74c3c;">Confirmation</h3>
                 <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
             </div>
-            <p style="font-size: 15px; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
+            <p style="font-size: 0.9rem; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
                 Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
@@ -1002,7 +1002,7 @@
             <button class="popup-close-btn" onclick="fermerModalPhotoImport()">&times;</button>
         </div>
         <div class="fullscreen-body" style="text-align: center; padding-top: 10px;">
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Prenez une photo ou choisissez-la.</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Prenez une photo ou choisissez-la.</p>
             <div style="display: flex; gap: 12px; margin-bottom: 20px;">
                 <button class="primary-btn" onclick="document.getElementById('cameraInput').click()">Prendre une photo</button>
                 <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="document.getElementById('galleryInput').click()">Choisir une photo</button>
@@ -1100,7 +1100,7 @@
                 </div>
             </div>
             <div class="form-volet" id="volet-2">
-                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Ingrédients</label>
+                <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ingrédients</label>
                 <div id="ingredientsContainer">
                     <div class="ingredient-row">
                         <input type="text" placeholder="Qté" class="ing-qty">
@@ -1115,7 +1115,7 @@
                 <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
             </div>
             <div class="form-volet" id="volet-3">
-                <label style="margin-bottom:6px; display:block; font-size:12px; color:var(--text-muted); font-weight:600;">Étapes</label>
+                <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Étapes</label>
                 <div id="etapesContainer">
                     <div class="etape-row">
                         <span class="etape-num">1</span>
@@ -1170,7 +1170,7 @@
                 <h3>Ajuster selon un ingrédient</h3>
                 <button class="popup-close-btn" onclick="fermerCalculateur()">&times;</button>
             </div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
                 Indiquez combien vous avez d'un ingrédient pour recalculer toute la recette.
             </p>
             <div class="form-group">
@@ -1453,7 +1453,7 @@
                     `;
                 });
             } else {
-                etapesHtml = '<p style="color:var(--text-muted); font-size:14px;">Aucune étape renseignée.</p>';
+                etapesHtml = '<p style="color:var(--text-muted); font-size:0.95rem;">Aucune étape renseignée.</p>';
             }
 
             const isCongelable = recipe.congelable === true;
@@ -1505,12 +1505,12 @@
 
                 ${recipe.notes ? `
                     <div class="recipe-detail-section-title">Notes & Astuces</div>
-                    <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
                 ` : ''}
 
                 ${recipe.source ? `
                     <div class="recipe-detail-section-title">Source</div>
-                    <p style="font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
                 ` : ''}
             `;
         }
@@ -1548,14 +1548,13 @@
             document.getElementById('fontModal').classList.remove('active');
         }
 
-        // Tailles de police augmentées pour Moyen et Grand
         function changerTaillePolice(taille) {
             if (taille === 'normal') {
-                document.documentElement.style.setProperty('--font-scale', '1rem');
+                document.body.style.fontSize = '16px';
             } else if (taille === 'moyen') {
-                document.documentElement.style.setProperty('--font-scale', '1.25rem');
+                document.body.style.fontSize = '18.5px';
             } else if (taille === 'grand') {
-                document.documentElement.style.setProperty('--font-scale', '1.5rem');
+                document.body.style.fontSize = '21px';
             }
             fermerModalPolice();
         }
@@ -1616,7 +1615,6 @@
             changerVoletForm(1);
         }
 
-        // Partage de la recette avec inclusion de la photo
         async function actionPartagerRecette() {
             if (!recetteActiveEnCours) return;
             let textePartage = `Recette : ${recetteActiveEnCours.nom}\n\nIngrédients :\n`;
@@ -1647,12 +1645,12 @@
                                 shareData.files = [file];
                             }
                         } catch (imgErr) {
-                            // En cas d'échec de récupération de l'image, on partage le texte seul
+                            // Ignorer si l'image ne peut pas être convertie en fichier
                         }
                     }
                     await navigator.share(shareData);
                 } catch (err) {
-                    // Ignorer si l'utilisateur annule le partage
+                    // Ignorer si annulé par l'utilisateur
                 }
             } else {
                 navigator.clipboard.writeText(textePartage).then(() => {
