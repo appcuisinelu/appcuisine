@@ -901,7 +901,7 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -977,7 +977,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (Titre retiré) -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
@@ -1732,7 +1732,6 @@
             }
 
             const ratio = nouvelleQteSaisie / qteInitialeNum;
-            // Utilisation directe du calcul précis sans arrondi forcé à l'entier
             portionsActuelles = Math.max(0.1, basePortions * ratio);
 
             fermerCalculateur();
