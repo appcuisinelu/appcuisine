@@ -974,17 +974,15 @@
                 Importer depuis une vidéo
             </button>
         </div>
-            <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
+    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION (Titre retiré) -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
-            <div class="popup-header">
-                <h3 style="color: #e74c3c;">Confirmation</h3>
+            <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
                 <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
             </div>
-            <p style="font-size: 0.9rem; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
+            <p style="font-size: 0.95rem; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
                 Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
@@ -1434,7 +1432,7 @@
 
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
-            portionsActuelles = parseInt(recipe.portions) || 4;
+            portionsActuelles = parseFloat(recipe.portions) || 4;
             construireContenuDetailRecette();
             document.getElementById('recipeDetailModal').classList.add('active');
         }
@@ -1443,7 +1441,7 @@
             const recipe = recetteActiveEnCours;
             const bodyContainer = document.getElementById('detailRecipeBody');
             
-            const basePortions = parseInt(recipe.portions) || 4;
+            const basePortions = parseFloat(recipe.portions) || 4;
             const ratio = portionsActuelles / basePortions;
 
             let ingredientsHtml = '';
@@ -1452,7 +1450,7 @@
                     let qteAffichee = ing.qte || '';
                     if (!isNaN(qteAffichee) && qteAffichee !== '') {
                         let valNum = parseFloat(qteAffichee) * ratio;
-                        qteAffichee = Number.isInteger(valNum) ? valNum : valNum.toFixed(1);
+                        qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
                     }
                     ingredientsHtml += `<li onclick="this.classList.toggle('checked')">${qteAffichee} ${ing.unit || ''} ${ing.nom}</li>`;
                 });
@@ -1475,6 +1473,8 @@
             }
 
             const isCongelable = recipe.congelable === true;
+
+            let affichagePortions = Number.isInteger(portionsActuelles) ? portionsActuelles : portionsActuelles.toFixed(1);
 
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
@@ -1499,7 +1499,7 @@
                     </div>
                     
                     <div class="portions-control-row">
-                        <span>Portions : <strong>${portionsActuelles}</strong></span>
+                        <span>Portions : <strong>${affichagePortions}</strong></span>
                         <div class="portions-stepper">
                             <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
                             <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
@@ -1535,14 +1535,14 @@
 
         function modifierPortions(delta) {
             portionsActuelles += delta;
-            if (portionsActuelles < 1) portionsActuelles = 1;
-            if (portionsActuelles > 30) portionsActuelles = 30;
+            if (portionsActuelles < 0.5) portionsActuelles = 0.5;
+            if (portionsActuelles > 50) portionsActuelles = 50;
             construireContenuDetailRecette();
         }
 
         function reinitialiserPortions() {
             if (recetteActiveEnCours) {
-                portionsActuelles = parseInt(recetteActiveEnCours.portions) || 4;
+                portionsActuelles = parseFloat(recetteActiveEnCours.portions) || 4;
                 construireContenuDetailRecette();
             }
         }
@@ -1568,11 +1568,11 @@
 
         function changerTaillePolice(taille) {
             if (taille === 'normal') {
-                document.body.style.fontSize = '16px';
+                document.documentElement.style.fontSize = '16px';
             } else if (taille === 'moyen') {
-                document.body.style.fontSize = '19px';
+                document.documentElement.style.fontSize = '19px';
             } else if (taille === 'grand') {
-                document.body.style.fontSize = '22px';
+                document.documentElement.style.fontSize = '22px';
             }
             fermerModalPolice();
         }
@@ -1662,14 +1662,10 @@
                             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                                 shareData.files = [file];
                             }
-                        } catch (imgErr) {
-                            // Ignorer si l'image ne peut pas être convertie en fichier
-                        }
+                        } catch (imgErr) {}
                     }
                     await navigator.share(shareData);
-                } catch (err) {
-                    // Ignorer si annulé par l'utilisateur
-                }
+                } catch (err) {}
             } else {
                 navigator.clipboard.writeText(textePartage).then(() => {
                     alert("Recette copiée dans le presse-papier !");
@@ -1726,7 +1722,7 @@
                 return;
             }
             const ingOriginal = recetteActiveEnCours.ingredients[index];
-            const basePortions = parseInt(recetteActiveEnCours.portions) || 4;
+            const basePortions = parseFloat(recetteActiveEnCours.portions) || 4;
             const qteInitialeNum = parseFloat(ingOriginal.qte);
             
             if (isNaN(qteInitialeNum) || qteInitialeNum <= 0) {
@@ -1735,7 +1731,8 @@
             }
 
             const ratio = nouvelleQteSaisie / qteInitialeNum;
-            portionsActuelles = Math.max(1, Math.round(basePortions * ratio));
+            // Utilisation directe du calcul précis sans arrondi forcé à l'entier
+            portionsActuelles = Math.max(0.1, basePortions * ratio);
 
             fermerCalculateur();
             construireContenuDetailRecette();
