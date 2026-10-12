@@ -130,21 +130,21 @@
             outline: none;
         }
 
-        /* BANNIÈRE FLOTTANTE EN BAS POUR LA RECETTE EN PAUSE */
+        /* Bannière de reprise en bas de l'accueil (au-dessus de la nav) */
         #bannierePause {
             display: none;
             position: fixed;
             bottom: 75px;
-            left: 16px;
-            right: 16px;
+            left: 12px;
+            right: 12px;
             background-color: #2a2a2a;
             color: #fcfbfa;
             border: 1px solid #404040;
-            border-radius: 14px;
+            border-radius: 12px;
             padding: 12px 16px;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             z-index: 1500;
         }
         body.light-mode #bannierePause {
@@ -385,8 +385,8 @@
             height: 100%;
             object-fit: cover;
         }
-        
-        /* Boutons Pause et Croix groupés en haut à gauche avec le même style */
+
+        /* Croix et bouton Pause groupés en haut à gauche */
         .recipe-detail-top-actions {
             position: absolute;
             top: 12px;
@@ -396,31 +396,22 @@
             z-index: 10;
             align-items: center;
         }
+        .recipe-detail-close-overlay,
         .recipe-detail-pause-btn {
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 18px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .recipe-detail-close-overlay {
             background: rgba(0, 0, 0, 0.6);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .recipe-detail-pause-btn {
+            font-size: 0.9rem;
         }
 
         .recipe-detail-overlay {
@@ -945,7 +936,6 @@
             stroke-linejoin: round;
         }
     </style>
-    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -991,10 +981,10 @@
         <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
-    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL (POUR REPRENDRE LA RECETTE EN PAUSE) -->
+    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL (RECETTE EN PAUSE) -->
     <div id="bannierePause">
         <div>
-            <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recette en pause</div>
+            <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase;">Recette en pause</div>
             <div id="texteBannierePause" style="font-size: 0.9rem; font-weight: 600; margin-top: 2px;"></div>
         </div>
         <div style="display: flex; gap: 6px; align-items: center;">
@@ -1003,7 +993,7 @@
         </div>
     </div>
 
-    <!-- POPUP DE SÉLECTION INITIALE (EN CLIQUANT SUR +) -->
+    <!-- POPUP DE SÉLECTION INITIALE (+) -->
     <div class="popup-modal" id="addChoiceModal">
         <div class="popup-content">
             <div class="popup-header">
@@ -1033,7 +1023,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CONFIRMATION DE SUPPRESSION -->
+    <!-- POP-UP SUPPRESSION -->
     <div class="popup-modal" id="deleteConfirmModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
@@ -1049,7 +1039,7 @@
         </div>
     </div>
 
-    <!-- POP-UP DE CHOIX DE LA TAILLE DE POLICE -->
+    <!-- POP-UP TAILLE POLICE -->
     <div class="popup-modal" id="fontModal">
         <div class="popup-content" style="text-align: center;">
             <div class="popup-header">
@@ -1236,7 +1226,7 @@
         </nav>
     </div>
 
-    <!-- MODALE CALCULATEUR D'INGRÉDIENT PROPORTIONNEL -->
+    <!-- MODALE CALCULATEUR -->
     <div class="popup-modal" id="calculatorModal">
         <div class="popup-content">
             <div class="popup-header">
@@ -1444,4 +1434,162 @@
 
         function fermerCategorie(onglet) {
             const listContainer = document.getElementById(`recipeList-${onglet}`);
-            if (listContainer
+            if (listContainer) listContainer.classList.remove('active');
+            const grid = document.getElementById(`categoriesGrid-${onglet}`);
+            if (grid) grid.style.display = 'grid';
+        }
+
+        function MettreAJourTexteBoutonProfil(personne) {
+            const profilBtn = document.getElementById('profilTabBtn');
+            if (profilBtn) profilBtn.textContent = `Profil : ${personne}`;
+        }
+
+        function changerFamilleSelection(personne) {
+            localStorage.setItem('profilFamillePreere', personne);
+            MettreAJourTexteBoutonProfil(personne);
+            filtrerFamille(personne);
+        }
+
+        function filtrerFamille(personne) {
+            const listContainer = document.getElementById('recipeList-famille');
+            listContainer.innerHTML = '';
+            const recipes = (database.famille && database.famille[personne]) || [];
+            if (recipes.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-muted)';
+                emptyMsg.style.padding = '30px';
+                emptyMsg.textContent = 'Aucune recette pour ce profil.';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                recipes.forEach(recipe => {
+                    recipe.membre = personne;
+                    const row = document.createElement('div');
+                    row.className = 'recipe-row-card';
+                    row.onclick = () => afficherDetailRecette(recipe);
+                    row.innerHTML = `
+                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
+                        <div class="recipe-row-banner">
+                            <span>${recipe.nom}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        function afficherDetailRecette(recipe) {
+            recetteActiveEnCours = recipe;
+            portionsActuelles = parseFloat(recipe.portions) || 4;
+            construireContenuDetailRecette();
+
+            const pausedJSON = localStorage.getItem('recetteEnPause_' + recipe.id);
+            if (pausedJSON) {
+                const pausedData = JSON.parse(pausedJSON);
+                portionsActuelles = pausedData.portions || portionsActuelles;
+                construireContenuDetailRecette();
+
+                if (pausedData.checkedIngredients) {
+                    const ingLis = document.querySelectorAll('.recipe-detail-ingredients li');
+                    pausedData.checkedIngredients.forEach(idx => {
+                        if (ingLis[idx]) ingLis[idx].classList.add('checked');
+                    });
+                }
+                if (pausedData.checkedSteps) {
+                    const stepCards = document.querySelectorAll('.recipe-detail-step-card');
+                    pausedData.checkedSteps.forEach(idx => {
+                        if (stepCards[idx]) stepCards[idx].classList.add('checked');
+                    });
+                }
+            }
+
+            document.getElementById('recipeDetailModal').classList.add('active');
+        }
+
+        function pauserRecetteActuelle() {
+            if (!recetteActiveEnCours) return;
+
+            const checkedIngredients = [];
+            document.querySelectorAll('.recipe-detail-ingredients li').forEach((li, idx) => {
+                if (li.classList.contains('checked')) checkedIngredients.push(idx);
+            });
+
+            const checkedSteps = [];
+            document.querySelectorAll('.recipe-detail-step-card').forEach((card, idx) => {
+                if (card.classList.contains('checked')) checkedSteps.push(idx);
+            });
+
+            const pausedData = {
+                id: recetteActiveEnCours.id,
+                nom: recetteActiveEnCours.nom,
+                portions: portionsActuelles,
+                checkedIngredients: checkedIngredients,
+                checkedSteps: checkedSteps,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            localStorage.setItem('recetteEnPause_' + recetteActiveEnCours.id, JSON.stringify(pausedData));
+            localStorage.setItem('derniereRecetteEnPause', JSON.stringify(pausedData));
+
+            fermerDetailRecette();
+            verifierRecetteEnPause();
+        }
+
+        function verifierRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            const banniere = document.getElementById('bannierePause');
+            const texte = document.getElementById('texteBannierePause');
+            if (pausedJSON && banniere && texte) {
+                const data = JSON.parse(pausedJSON);
+                texte.textContent = `${data.nom} (${data.timestamp})`;
+                banniere.style.display = 'flex';
+            } else if (banniere) {
+                banniere.style.display = 'none';
+            }
+        }
+
+        function reprendreRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            if (pausedJSON) {
+                const data = JSON.parse(pausedJSON);
+                let recetteTrouvee = null;
+                for (const cat in database.incontournables) {
+                    const r = database.incontournables[cat].find(item => item.id === data.id);
+                    if (r) { recetteTrouvee = r; break; }
+                }
+                if (!recetteTrouvee) {
+                    for (const prof in database.famille) {
+                        const r = database.famille[prof].find(item => item.id === data.id);
+                        if (r) { recetteTrouvee = r; break; }
+                    }
+                }
+                if (recetteTrouvee) {
+                    afficherDetailRecette(recetteTrouvee);
+                } else {
+                    effacerRecetteEnPause();
+                }
+            }
+        }
+
+        function effacerRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            if (pausedJSON) {
+                const data = JSON.parse(pausedJSON);
+                localStorage.removeItem('recetteEnPause_' + data.id);
+                localStorage.removeItem('derniereRecetteEnPause');
+            }
+            verifierRecetteEnPause();
+        }
+
+        function construireContenuDetailRecette() {
+            const recipe = recetteActiveEnCours;
+            const bodyContainer = document.getElementById('detailRecipeBody');
+            
+            const basePortions = parseFloat(recipe.portions) || 4;
+            const ratio = portionsActuelles / basePortions;
+
+            let ingredientsHtml = '';
+            if (recipe.ingredients && recipe.ingredients.length > 0) {
+                recipe.ingredients.forEach(ing => {
+                    let qteAffichee = ing.qte || '';
+                    if
