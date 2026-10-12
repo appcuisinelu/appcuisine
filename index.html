@@ -1059,4 +1059,389 @@
             <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                 <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('normal')">Normal</button>
                 <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('moyen')">Moyen</button>
-                <button class="
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="changerTaillePolice('grand')">Grand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INPUTS FICHIERS CACHÉS -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="traiterImportPhotoRecette(event)">
+    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="traiterImportPhotoRecette(event)">
+
+    <!-- MODALES D'IMPORTATION -->
+    <div class="fullscreen-modal" id="photoImportPageModal">
+        <div class="fullscreen-header">
+            <h3>Importer à partir d'une photo</h3>
+            <button class="popup-close-btn" onclick="fermerModalPhotoImport()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="text-align: center; padding-top: 10px;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Prenez une photo ou choisissez-la.</p>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button class="primary-btn" onclick="document.getElementById('cameraInput').click()">Prendre une photo</button>
+                <button class="primary-btn" style="background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);" onclick="document.getElementById('galleryInput').click()">Choisir une photo</button>
+            </div>
+            <div class="photo-preview" id="photoImportPreview" style="height: 220px; margin-bottom: 10px;">Aucune photo sélectionnée</div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalPhotoImport()">Annuler</button>
+            <button class="primary-btn" onclick="validerImportPhotoPage()">Continuer</button>
+        </div>
+    </div>
+
+    <div class="fullscreen-modal" id="siteImportModal">
+        <div class="fullscreen-header">
+            <h3>Importer depuis un site web</h3>
+            <button class="popup-close-btn" onclick="fermerModalSite()">&times;</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-group">
+                <label>Collez le lien (URL)</label>
+                <input type="url" id="recipeUrlInput" placeholder="https://...">
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSite()">Annuler</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Importer</button>
+        </div>
+    </div>
+
+    <div class="fullscreen-modal" id="videoImportModal">
+        <div class="fullscreen-header">
+            <h3>Importer depuis une vidéo</h3>
+            <button class="popup-close-btn" onclick="fermerModalVideo()">&times;</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-group">
+                <label>Lien de la vidéo</label>
+                <input type="url" id="recipeVideoUrlInput" placeholder="https://...">
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalVideo()">Annuler</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisVideo()">Importer</button>
+        </div>
+    </div>
+
+    <!-- FORMULAIRE DE CRÉATION / MODIFICATION -->
+    <div class="fullscreen-modal" id="recipeFormModal">
+        <div class="fullscreen-header">
+            <h3 id="formModalTitle">Nouvelle Recette</h3>
+            <button class="popup-close-btn" onclick="fermerFormulaireAjout()">&times;</button>
+        </div>
+        <div class="form-tabs">
+            <button class="form-tab-btn active" onclick="changerVoletForm(1)">1. Aperçu</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(2)">2. Ingrédients</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(3)">3. Préparation</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(4)">4. Notes</button>
+            <button class="form-tab-btn" onclick="changerVoletForm(5)">5. Photos</button>
+        </div>
+        <div class="fullscreen-body">
+            <div class="form-volet active" id="volet-1">
+                <div class="form-group">
+                    <label>Titre</label>
+                    <input type="text" id="recipeTitle" placeholder="Ex: Tarte">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Destination</label>
+                        <select id="recipeTargetSection" onchange="gererVisibiliteProfil(this.value)">
+                            <option value="incontournables">Incontournables</option>
+                            <option value="famille">Profil</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="recipeProfilGroup" style="display: none;">
+                        <label>Membre</label>
+                        <select id="recipeProfilSelect">
+                            <option value="Lucie">Lucie</option><option value="Clémence">Clémence</option>
+                            <option value="Adeline">Adeline</option><option value="Gwenaëlle">Gwenaëlle</option>
+                            <option value="Maman">Maman</option><option value="Malo">Malo</option><option value="Invité">Invité</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="recipeCategory">
+                        <option value="apero">Apéro</option><option value="plats">Plats</option>
+                        <option value="desserts">Desserts</option><option value="boulangerie">Boulangerie</option>
+                        <option value="basiques">Basiques</option><option value="maison">Maison</option><option value="cosmetiques">Cosmétiques</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Portions</label><input type="number" id="recipePortions" value="4"></div>
+                    <div class="form-group"><label>Prépa (m)</label><input type="number" id="recipePrepTime" value="15"></div>
+                    <div class="form-group"><label>Cuisson (m)</label><input type="number" id="recipeCookTime" value="30"></div>
+                </div>
+            </div>
+            <div class="form-volet" id="volet-2">
+                <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ingrédients</label>
+                <div id="ingredientsContainer">
+                    <div class="ingredient-row">
+                        <input type="text" placeholder="Qté" class="ing-qty">
+                        <select class="ing-unit">
+                            <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                            <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                            <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                        </select>
+                        <input type="text" placeholder="Ingrédient" class="ing-name">
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneIngredient()">+ Ajouter un ingrédient</button>
+            </div>
+            <div class="form-volet" id="volet-3">
+                <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Étapes</label>
+                <div id="etapesContainer">
+                    <div class="etape-row">
+                        <span class="etape-num">1</span>
+                        <textarea placeholder="Étape..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="secondary-btn" onclick="ajouterLigneEtape()">+ Ajouter une étape</button>
+            </div>
+            <div class="form-volet" id="volet-4">
+                <div class="form-group"><label>Notes</label><textarea id="recipeNotes" rows="6"></textarea></div>
+                <div class="form-group"><label>Source</label><input type="text" id="recipeSource" placeholder="Ex: Livre, site web..."></div>
+            </div>
+            <div class="form-volet" id="volet-5">
+                <div class="form-group">
+                    <label>Photo</label>
+                    <input type="file" id="recipePhotoFile" accept="image/*" style="display:none;" onchange="chargerApercuPhoto(event)">
+                    <button type="button" class="secondary-btn" onclick="document.getElementById('recipePhotoFile').click()">Choisir un fichier</button>
+                </div>
+                <div class="form-group"><label>URL</label><input type="url" id="recipePhotoUrl" oninput="chargerApercuUrl(this.value)"></div>
+                <div class="form-group" style="text-align: center;"><div class="photo-preview" id="photoPreviewContainer">Aucune photo</div></div>
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerFormulaireAjout()">Annuler</button>
+            <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- MODALE DE LA VUE DÉTAILLÉE D'UNE RECETTE -->
+    <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
+        <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;"></div>
+        <nav class="recipe-bottom-nav">
+            <button class="recipe-nav-item" onclick="actionModifierRecette()" title="Modifier">
+                <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <button class="recipe-nav-item" onclick="actionPartagerRecette()" title="Partager">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
+            <button class="recipe-nav-item" onclick="ouvrirModalPolice()" title="Police">
+                <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+            </button>
+            <button class="recipe-nav-item danger" onclick="actionSupprimerRecette()" title="Supprimer">
+                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALE CALCULATEUR D'INGRÉDIENT PROPORTIONNEL -->
+    <div class="popup-modal" id="calculatorModal">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Ajuster selon un ingrédient</h3>
+                <button class="popup-close-btn" onclick="fermerCalculateur()">&times;</button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                Indiquez combien vous avez d'un ingrédient pour recalculer toute la recette.
+            </p>
+            <div class="form-group">
+                <label>Ingrédient de référence</label>
+                <select id="calcIngredientSelect" class="form-group" style="padding:10px; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:100%;"></select>
+            </div>
+            <div class="form-group">
+                <label>Quantité dont vous disposez actuellement :</label>
+                <input type="number" id="calcTargetQty" step="any" placeholder="Ex: 2" style="padding:10px; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:100%;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerCalculateur()">Annuler</button>
+                <button class="primary-btn" onclick="appliquerCalculProportionnel()">Calculer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE COULEURS -->
+    <div class="fullscreen-modal" id="colorModal">
+        <div class="fullscreen-header">
+            <h3>Choisir une couleur</h3>
+            <button class="popup-close-btn" onclick="fermerModalCouleurs()">&times;</button>
+        </div>
+        <div class="fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
+            <div class="color-options" style="width: 100%; max-width: 300px;">
+                <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
+                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
+                <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
+                <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
+            </div>
+        </div>
+        <div class="fullscreen-footer">
+            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalCouleurs()">Fermer</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="retourAccueil()">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Accueil</span>
+        </button>
+        <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme()">
+            <svg id="themeIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <span>Mode</span>
+        </button>
+        <button class="nav-item" onclick="ouvrirModalCouleurs()">
+            <svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.504 5.555-5.55C21.996 6.45 17.5 2 12 2z"></path></svg>
+            <span>Couleurs</span>
+        </button>
+        <button class="nav-item" onclick="exporterRecettes()">
+            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <span>Exporter</span>
+        </button>
+    </nav>
+
+    <script>
+        const database = {
+            incontournables: {
+                apero: [
+                    { 
+                        id: "recette_1",
+                        nom: "Cake salé aux olives", 
+                        categorie: "Apéro",
+                        membre: "Incontournables",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 6, prepTime: 15, cookTime: 45,
+                        congelable: true,
+                        ingredients: [
+                            { qte: "150", unit: "g", nom: "de farine" },
+                            { qte: "3", unit: "pièce(s)", nom: "d'œufs" },
+                            { qte: "1", unit: "sachet", nom: "de levure chimique" },
+                            { qte: "100", unit: "g", nom: "d'olives dénoyautées" },
+                            { qte: "120", unit: "g", nom: "de lardons" }
+                        ],
+                        etapes: [
+                            "Préchauffer le four à 180°C.",
+                            "Dans un saladier, mélanger la farine, les œufs et la levure.",
+                            "Ajouter les lardons et les olives coupées en morceaux.",
+                            "Verser dans un moule à cake et enfourner pour 45 minutes."
+                        ],
+                        notes: "Se délecte tiède ou froid à l'apéro.",
+                        source: "Livre de cuisine familial"
+                    }
+                ],
+                plats: [], desserts: [], boulangerie: [], basiques: [], maison: [], cosmetiques: []
+            },
+            famille: {
+                Lucie: [
+                    { 
+                        id: "recette_2",
+                        nom: "Cookies moelleux", 
+                        categorie: "Desserts",
+                        membre: "Lucie",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270",
+                        portions: 8, prepTime: 15, cookTime: 10,
+                        congelable: false,
+                        ingredients: [
+                            { qte: "200", unit: "g", nom: "de pépites de chocolat" },
+                            { qte: "250", unit: "g", nom: "de farine" },
+                            { qte: "125", unit: "g", nom: "de beurre mou" }
+                        ],
+                        etapes: [
+                            "Mélanger le beurre mou avec le sucre.",
+                            "Incorporer la farine et les pépites de chocolat.",
+                            "Former des boules et cuire 10 min à 180°C."
+                        ],
+                        notes: "Attention à ne pas trop les cuire.",
+                        source: "Blog culinaire"
+                    }
+                ],
+                Clémence: [], Adeline: [], Gwenaëlle: [], Maman: [], Malo: [], Invité: []
+            }
+        };
+
+        const categoryMeta = {
+            apero: { nom: "Apéro", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
+            plats: { nom: "Plats", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
+            desserts: { nom: "Desserts", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87" },
+            boulangerie: { nom: "Boulangerie", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff" },
+            basiques: { nom: "Basiques", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352" },
+            maison: { nom: "Maison", img: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba" },
+            cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
+        };
+
+        let imageRecetteActuelle = "";
+        let recetteActiveEnCours = null;
+        let portionsActuelles = 4;
+        let idRecetteEnEdition = null;
+
+        function renderCategories(onglet) {
+            verifierRecetteEnPause();
+            if (onglet === 'famille') {
+                const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+                document.getElementById('familleSelect').value = profilEnregistre;
+                MettreAJourTexteBoutonProfil(profilEnregistre);
+                filtrerFamille(profilEnregistre);
+                return;
+            }
+
+            const container = document.getElementById(`categoriesGrid-${onglet}`);
+            if (!container) return;
+            container.innerHTML = '';
+            container.style.display = 'grid';
+            
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer) listContainer.classList.remove('active');
+
+            for (const [catKey, meta] of Object.entries(categoryMeta)) {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.onclick = () => ouvrirCategorie(onglet, catKey);
+                card.innerHTML = `
+                    <img src="${meta.img}" alt="${meta.nom}" class="category-img">
+                    <div class="category-banner">
+                        <span>${meta.nom}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function ouvrirCategorie(onglet, catKey) {
+            document.getElementById(`categoriesGrid-${onglet}`).style.display = 'none';
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            listContainer.classList.add('active');
+            listContainer.innerHTML = '';
+
+            const backBtn = document.createElement('button');
+            backBtn.className = 'back-cat-btn';
+            backBtn.innerHTML = '← Retour aux catégories';
+            backBtn.onclick = () => fermerCategorie(onglet);
+            listContainer.appendChild(backBtn);
+
+            const recipes = (database[onglet] && database[onglet][catKey]) || [];
+            if (recipes.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-muted)';
+                emptyMsg.style.padding = '30px';
+                emptyMsg.textContent = 'Aucune recette dans cette catégorie.';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                recipes.forEach(recipe => {
+                    recipe.riqueCategorie = catKey;
+                    const row = document.createElement('div');
+                    row.className = 'recipe-row-card';
+                    row.onclick = () => afficherDetailRecette(recipe);
+                    row.innerHTML = `
+                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
+                        <div class="recipe-row-banner">
+                            <span>${recipe.nom}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        function fermerCategorie(onglet) {
+            const listContainer = document.getElementById(`recipeList-${onglet}`);
+            if (listContainer
