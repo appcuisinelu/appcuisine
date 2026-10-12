@@ -362,13 +362,34 @@
             height: 100%;
             object-fit: cover;
         }
-        .recipe-detail-close-overlay {
+        
+        /* Conteneur en haut à gauche pour le bouton Pause et la croix */
+        .recipe-detail-top-actions {
             position: absolute;
             top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.6);
+            left: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+            align-items: center;
+        }
+        .recipe-detail-pause-btn {
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 18px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .recipe-detail-close-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             width: 36px;
             height: 36px;
@@ -377,8 +398,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10;
         }
+
         .recipe-detail-overlay {
             position: absolute;
             bottom: 0; left: 0; right: 0;
@@ -922,6 +943,18 @@
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
     </div>
 
+    <!-- BANNIÈRE DE REPRISE DE RECETTE EN PAUSE -->
+    <div id="bannierePause" style="display: none; background-color: var(--card-bg); border: 1px solid var(--accent-color); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div>
+            <div style="font-size: 0.8rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recette en pause</div>
+            <div id="texteBannierePause" style="font-size: 0.95rem; font-weight: 600; margin-top: 2px;"></div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="primary-btn" style="padding: 8px 14px; font-size: 0.85rem;" onclick="reprendreRecetteEnPause()">Reprendre</button>
+            <button class="secondary-btn" style="margin-top:0; padding: 8px 10px; font-size: 0.85rem; border: none; width: auto;" onclick="effacerRecetteEnPause()" title="Fermer">✕</button>
+        </div>
+    </div>
+
     <div class="top-menu" id="topMenuContainer">
         <button class="menu-item active" onclick="changerOnglet('incontournables', this)">Incontournables</button>
         <button class="menu-item" id="profilTabBtn" onclick="changerOnglet('famille', this)">Profil : Lucie</button>
@@ -1318,6 +1351,7 @@
         let idRecetteEnEdition = null;
 
         function renderCategories(onglet) {
+            verifierRecetteEnPause();
             if (onglet === 'famille') {
                 const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
                 document.getElementById('familleSelect').value = profilEnregistre;
@@ -1435,7 +1469,111 @@
             recetteActiveEnCours = recipe;
             portionsActuelles = parseFloat(recipe.portions) || 4;
             construireContenuDetailRecette();
+
+            // Restaurer la progression si elle était en pause
+            const pausedJSON = localStorage.getItem('recetteEnPause_' + recipe.id);
+            if (pausedJSON) {
+                const pausedData = JSON.parse(pausedJSON);
+                portionsActuelles = pausedData.portions || portionsActuelles;
+                construireContenuDetailRecette(); // Reconstruire pour appliquer les portions
+
+                if (pausedData.checkedIngredients) {
+                    const ingLis = document.querySelectorAll('.recipe-detail-ingredients li');
+                    pausedData.checkedIngredients.forEach(idx => {
+                        if (ingLis[idx]) ingLis[idx].classList.add('checked');
+                    });
+                }
+                if (pausedData.checkedSteps) {
+                    const stepCards = document.querySelectorAll('.recipe-detail-step-card');
+                    pausedData.checkedSteps.forEach(idx => {
+                        if (stepCards[idx]) stepCards[idx].classList.add('checked');
+                    });
+                }
+            }
+
             document.getElementById('recipeDetailModal').classList.add('active');
+        }
+
+        // FONCTION DE MISE EN PAUSE DE LA RECETTE
+        function pauserRecetteActuelle() {
+            if (!recetteActiveEnCours) return;
+
+            const checkedIngredients = [];
+            document.querySelectorAll('.recipe-detail-ingredients li').forEach((li, idx) => {
+                if (li.classList.contains('checked')) {
+                    checkedIngredients.push(idx);
+                }
+            });
+
+            const checkedSteps = [];
+            document.querySelectorAll('.recipe-detail-step-card').forEach((card, idx) => {
+                if (card.classList.contains('checked')) {
+                    checkedSteps.push(idx);
+                }
+            });
+
+            const pausedData = {
+                id: recetteActiveEnCours.id,
+                nom: recetteActiveEnCours.nom,
+                portions: portionsActuelles,
+                checkedIngredients: checkedIngredients,
+                checkedSteps: checkedSteps,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            localStorage.setItem('recetteEnPause_' + recetteActiveEnCours.id, JSON.stringify(pausedData));
+            localStorage.setItem('derniereRecetteEnPause', JSON.stringify(pausedData));
+
+            alert("Progression mise en pause ! Vous pouvez fermer ou quitter la page.");
+            fermerDetailRecette();
+            verifierRecetteEnPause();
+        }
+
+        function verifierRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            const banniere = document.getElementById('bannierePause');
+            const texte = document.getElementById('texteBannierePause');
+            if (pausedJSON && banniere && texte) {
+                const data = JSON.parse(pausedJSON);
+                texte.textContent = `${data.nom} (mis en pause à ${data.timestamp})`;
+                banniere.style.display = 'flex';
+            } else if (banniere) {
+                banniere.style.display = 'none';
+            }
+        }
+
+        function reprendreRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            if (pausedJSON) {
+                const data = JSON.parse(pausedJSON);
+                let recetteTrouvee = null;
+                for (const cat in database.incontournables) {
+                    const r = database.incontournables[cat].find(item => item.id === data.id);
+                    if (r) { recetteTrouvee = r; break; }
+                }
+                if (!recetteTrouvee) {
+                    for (const prof in database.famille) {
+                        const r = database.famille[prof].find(item => item.id === data.id);
+                        if (r) { recetteTrouvee = r; break; }
+                    }
+                }
+                if (recetteTrouvee) {
+                    afficherDetailRecette(recetteTrouvee);
+                } else {
+                    alert("Recette introuvable.");
+                    effacerRecetteEnPause();
+                }
+            }
+        }
+
+        function effacerRecetteEnPause() {
+            const pausedJSON = localStorage.getItem('derniereRecetteEnPause');
+            if (pausedJSON) {
+                const data = JSON.parse(pausedJSON);
+                localStorage.removeItem('recetteEnPause_' + data.id);
+                localStorage.removeItem('derniereRecetteEnPause');
+            }
+            verifierRecetteEnPause();
         }
 
         function construireContenuDetailRecette() {
@@ -1474,12 +1612,14 @@
             }
 
             const isCongelable = recipe.congelable === true;
-
             let affichagePortions = Number.isInteger(portionsActuelles) ? portionsActuelles : portionsActuelles.toFixed(1);
 
             bodyContainer.innerHTML = `
                 <div class="recipe-detail-img-container">
-                    <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()">&times;</button>
+                    <div class="recipe-detail-top-actions">
+                        <button class="recipe-detail-pause-btn" onclick="pauserRecetteActuelle()" title="Mettre en pause">⏸️ Pause</button>
+                        <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()" title="Fermer">&times;</button>
+                    </div>
                     <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
