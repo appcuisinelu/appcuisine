@@ -1,3 +1,6 @@
+Voici le code mis à jour. Le bouton **Pause** a été ajouté juste à gauche de la croix en haut à droite avec le même style de bouton rond gris (icône épurée sans texte), et la bannière de reprise sur la page d'accueil flotte proprement juste au-dessus de la barre de navigation inférieure avec un design moderne.
+
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -137,20 +140,21 @@
             bottom: 75px;
             left: 12px;
             right: 12px;
-            background-color: #2a2a2a;
+            background-color: #1e1e1e;
             color: #fcfbfa;
-            border: 1px solid #404040;
-            border-radius: 12px;
+            border: 1px solid #333333;
+            border-radius: 16px;
             padding: 12px 16px;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
             z-index: 1500;
         }
         body.light-mode #bannierePause {
-            background-color: #e8e8e8;
+            background-color: #ffffff;
             color: #2c3e50;
             border-color: #d0d0d0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         }
 
         .top-menu {
@@ -386,32 +390,39 @@
             object-fit: cover;
         }
 
-        /* Croix et bouton Pause groupés en haut à gauche */
+        /* Boutons de fermeture et de pause groupés en haut à droite (style rond gris) */
         .recipe-detail-top-actions {
             position: absolute;
             top: 12px;
-            left: 12px;
+            right: 12px;
             display: flex;
             gap: 8px;
             z-index: 10;
-            align-items: center;
         }
         .recipe-detail-close-overlay,
         .recipe-detail-pause-btn {
             background: rgba(0, 0, 0, 0.6);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: none;
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .recipe-detail-pause-btn {
-            font-size: 0.9rem;
+        .recipe-detail-close-overlay {
+            font-size: 1.25rem;
+        }
+        .recipe-detail-pause-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .recipe-detail-overlay {
@@ -936,7 +947,6 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -982,15 +992,15 @@
         <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
-    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL (RECETTE EN PAUSE) -->
+    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL (AU-DESSUS DE LA BARRE D'ÉTAT) -->
     <div id="bannierePause">
         <div>
-            <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase;">Recette en pause</div>
+            <div style="font-size: 0.7rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recette en pause</div>
             <div id="texteBannierePause" style="font-size: 0.9rem; font-weight: 600; margin-top: 2px;"></div>
         </div>
-        <div style="display: flex; gap: 6px; align-items: center;">
-            <button class="primary-btn" style="padding: 6px 12px; font-size: 0.85rem;" onclick="reprendreRecetteEnPause()">Reprendre</button>
-            <button class="secondary-btn" style="margin-top:0; padding: 6px 8px; font-size: 0.85rem; border: none; width: auto; background: transparent; color: inherit;" onclick="effacerRecetteEnPause()" title="Fermer">✕</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="primary-btn" style="padding: 6px 14px; font-size: 0.85rem;" onclick="reprendreRecetteEnPause()">Reprendre</button>
+            <button style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px;" onclick="effacerRecetteEnPause()" title="Fermer">✕</button>
         </div>
     </div>
 
@@ -1593,4 +1603,615 @@
             if (recipe.ingredients && recipe.ingredients.length > 0) {
                 recipe.ingredients.forEach(ing => {
                     let qteAffichee = ing.qte || '';
-                    if
+                    if (!isNaN(qteAffichee) && qteAffichee !== '') {
+                        let valNum = parseFloat(qteAffichee) * ratio;
+                        qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                    }
+                    ingredientsHtml += `<li onclick="this.classList.toggle('checked')">${qteAffichee} ${ing.unit || ''} ${ing.nom}</li>`;
+                });
+            } else {
+                ingredientsHtml = '<li>Aucun ingrédient renseigné.</li>';
+            }
+
+            let etapesHtml = '';
+            if (recipe.etapes && recipe.etapes.length > 0) {
+                recipe.etapes.forEach((etape, index) => {
+                    etapesHtml += `
+                        <div class="recipe-detail-step-card" onclick="this.classList.toggle('checked')">
+                            <div class="recipe-detail-step-num">${index + 1}</div>
+                            <div class="recipe-detail-step-text">${etape}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                etapesHtml = '<p style="color:var(--text-muted); font-size:0.95rem;">Aucune étape renseignée.</p>';
+            }
+
+            const isCongelable = recipe.congelable === true;
+            let affichagePortions = Number.isInteger(portionsActuelles) ? portionsActuelles : portionsActuelles.toFixed(1);
+
+            bodyContainer.innerHTML = `
+                <div class="recipe-detail-img-container">
+                    <div class="recipe-detail-top-actions">
+                        <button class="recipe-detail-pause-btn" onclick="pauserRecetteActuelle()" title="Mettre en pause">
+                            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+                        </button>
+                        <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()" title="Fermer">&times;</button>
+                    </div>
+                    <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
+                    <div class="recipe-detail-overlay">
+                        <div class="recipe-detail-title-block">
+                            <div class="recipe-detail-title-overlay">${recipe.nom}</div>
+                            <div class="recipe-detail-sub-info">${recipe.categorie || 'Autre'} • ${recipe.membre || 'Incontournables'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recipe-detail-infos">
+                    <div class="recipe-detail-infos-top">
+                        <div>${recipe.prepTime || '-'}&nbsp;min<span>Préparation</span></div>
+                        <div>${recipe.cookTime || '-'}&nbsp;min<span>Cuisson</span></div>
+                        <div class="freeze-clickable ${isCongelable ? 'active' : ''}" onclick="toggleCongelationActuelle()" title="Congélation">
+                            <svg viewBox="0 0 24 24"><path d="M2 12h20"></path><path d="M12 2v20"></path><path d="m4.93 4.93 14.14 14.14"></path><path d="m19.07 4.93-14.14 14.14"></path></svg>
+                            <span>Congélation</span>
+                        </div>
+                    </div>
+                    
+                    <div class="portions-control-row">
+                        <span>Portions : <strong>${affichagePortions}</strong></span>
+                        <div class="portions-stepper">
+                            <button class="stepper-btn" onclick="modifierPortions(-1)">-</button>
+                            <button class="stepper-btn" onclick="modifierPortions(1)">+</button>
+                            <button class="calculator-trigger-btn" onclick="ouvrirCalculateur()">Calculette ingrédient</button>
+                            <button class="reset-portions-btn" onclick="reinitialiserPortions()" title="Réinitialiser les portions">
+                                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recipe-detail-section-title">Ingrédients</div>
+                <ul class="recipe-detail-ingredients">
+                    ${ingredientsHtml}
+                </ul>
+
+                <div class="recipe-detail-section-title">Préparation</div>
+                <div class="recipe-detail-steps">
+                    ${etapesHtml}
+                </div>
+
+                ${recipe.notes ? `
+                    <div class="recipe-detail-section-title">Notes & Astuces</div>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                ` : ''}
+
+                ${recipe.source ? `
+                    <div class="recipe-detail-section-title">Source</div>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
+                ` : ''}
+            `;
+        }
+
+        function modifierPortions(delta) {
+            portionsActuelles += delta;
+            if (portionsActuelles < 0.5) portionsActuelles = 0.5;
+            if (portionsActuelles > 50) portionsActuelles = 50;
+            construireContenuDetailRecette();
+        }
+
+        function reinitialiserPortions() {
+            if (recetteActiveEnCours) {
+                portionsActuelles = parseFloat(recetteActiveEnCours.portions) || 4;
+                construireContenuDetailRecette();
+            }
+        }
+
+        function toggleCongelationActuelle() {
+            if (recetteActiveEnCours) {
+                recetteActiveEnCours.congelable = !recetteActiveEnCours.congelable;
+                construireContenuDetailRecette();
+            }
+        }
+
+        function fermerDetailRecette() {
+            document.getElementById('recipeDetailModal').classList.remove('active');
+        }
+
+        function ouvrirModalPolice() {
+            document.getElementById('fontModal').classList.add('active');
+        }
+
+        function fermerModalPolice() {
+            document.getElementById('fontModal').classList.remove('active');
+        }
+
+        function changerTaillePolice(taille) {
+            if (taille === 'normal') {
+                document.documentElement.style.fontSize = '16px';
+            } else if (taille === 'moyen') {
+                document.documentElement.style.fontSize = '19px';
+            } else if (taille === 'grand') {
+                document.documentElement.style.fontSize = '22px';
+            }
+            fermerModalPolice();
+        }
+
+        function actionModifierRecette() {
+            if (!recetteActiveEnCours) return;
+            idRecetteEnEdition = recetteActiveEnCours.id;
+            
+            document.getElementById('formModalTitle').textContent = "Modifier la recette";
+            document.getElementById('recipeTitle').value = recetteActiveEnCours.nom || "";
+            document.getElementById('recipePortions').value = recetteActiveEnCours.portions || 4;
+            document.getElementById('recipePrepTime').value = recetteActiveEnCours.prepTime || 15;
+            document.getElementById('recipeCookTime').value = recetteActiveEnCours.cookTime || 30;
+            document.getElementById('recipeNotes').value = recetteActiveEnCours.notes || "";
+            document.getElementById('recipeSource').value = recetteActiveEnCours.source || "";
+            
+            const ingContainer = document.getElementById('ingredientsContainer');
+            ingContainer.innerHTML = '';
+            if (recetteActiveEnCours.ingredients && recetteActiveEnCours.ingredients.length > 0) {
+                recetteActiveEnCours.ingredients.forEach(ing => {
+                    const row = document.createElement('div');
+                    row.className = 'ingredient-row';
+                    row.innerHTML = `
+                        <input type="text" value="${ing.qte || ''}" placeholder="Qté" class="ing-qty">
+                        <select class="ing-unit">
+                            <option value="">(unité)</option><option value="g" ${ing.unit==='g'?'selected':''}>g</option><option value="kg" ${ing.unit==='kg'?'selected':''}>kg</option>
+                            <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option><option value="cl" ${ing.unit==='cl'?'selected':''}>cl</option><option value="L" ${ing.unit==='L'?'selected':''}>L</option>
+                            <option value="c.à.s" ${ing.unit==='c.à.s'?'selected':''}>c. à s.</option><option value="c.à.c" ${ing.unit==='c.à.c'?'selected':''}>c. à c.</option><option value="pincée" ${ing.unit==='pincée'?'selected':''}>pincée</option><option value="pièce" ${ing.unit==='pièce(s)'?'selected':''}>pièce(s)</option>
+                        </select>
+                        <input type="text" value="${ing.nom || ''}" placeholder="Ingrédient" class="ing-name">
+                    `;
+                    ingContainer.appendChild(row);
+                });
+            } else {
+                ajouterLigneIngredient();
+            }
+
+            const etapesContainer = document.getElementById('etapesContainer');
+            etapesContainer.innerHTML = '';
+            if (recetteActiveEnCours.etapes && recetteActiveEnCours.etapes.length > 0) {
+                recetteActiveEnCours.etapes.forEach((etape, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'etape-row';
+                    row.innerHTML = `<span class="etape-num">${index + 1}</span><textarea placeholder="Étape...">${etape}</textarea>`;
+                    etapesContainer.appendChild(row);
+                });
+            } else {
+                ajouterLigneEtape();
+            }
+
+            imageRecetteActuelle = recetteActiveEnCours.img || "";
+            if (imageRecetteActuelle) {
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+
+            fermerDetailRecette();
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        async function actionPartagerRecette() {
+            if (!recetteActiveEnCours) return;
+            let textePartage = `Recette : ${recetteActiveEnCours.nom}\n\nIngrédients :\n`;
+            if (recetteActiveEnCours.ingredients) {
+                recetteActiveEnCours.ingredients.forEach(i => {
+                    textePartage += `- ${i.qte || ''} ${i.unit || ''} ${i.nom}\n`;
+                });
+            }
+            textePartage += `\nPréparation :\n`;
+            if (recetteActiveEnCours.etapes) {
+                recetteActiveEnCours.etapes.forEach((e, idx) => {
+                    textePartage += `${idx + 1}. ${e}\n`;
+                });
+            }
+            if (recetteActiveEnCours.source) {
+                textePartage += `\nSource : ${recetteActiveEnCours.source}`;
+            }
+
+            if (navigator.share) {
+                try {
+                    let shareData = { title: recetteActiveEnCours.nom, text: textePartage };
+                    if (recetteActiveEnCours.img) {
+                        try {
+                            const response = await fetch(recetteActiveEnCours.img);
+                            const blob = await response.blob();
+                            const file = new File([blob], 'recette.jpg', { type: blob.type });
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                shareData.files = [file];
+                            }
+                        } catch (imgErr) {}
+                    }
+                    await navigator.share(shareData);
+                } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(textePartage).then(() => {
+                    alert("Recette copiée dans le presse-papier !");
+                });
+            }
+        }
+
+        function actionSupprimerRecette() {
+            document.getElementById('deleteConfirmModal').classList.add('active');
+        }
+
+        function fermerModalSuppression() {
+            document.getElementById('deleteConfirmModal').classList.remove('active');
+        }
+
+        function confirmerSuppressionRecette(confirme) {
+            fermerModalSuppression();
+            if (confirme && recetteActiveEnCours) {
+                for (const catKey in database.incontournables) {
+                    database.incontournables[catKey] = database.incontournables[catKey].filter(r => r.id !== recetteActiveEnCours.id);
+                }
+                for (const profKey in database.famille) {
+                    database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
+                }
+                fermerDetailRecette();
+                alert("Recette supprimée.");
+                retourAccueil();
+            }
+        }
+
+        function ouvrirCalculateur() {
+            if (!recetteActiveEnCours || !recetteActiveEnCours.ingredients) return;
+            const select = document.getElementById('calcIngredientSelect');
+            select.innerHTML = '';
+            recetteActiveEnCours.ingredients.forEach((ing, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${ing.qte || ''} ${ing.unit || ''} ${ing.nom}`;
+                select.appendChild(opt);
+            });
+            document.getElementById('calcTargetQty').value = '';
+            document.getElementById('calculatorModal').classList.add('active');
+        }
+
+        function fermerCalculateur() {
+            document.getElementById('calculatorModal').classList.remove('active');
+        }
+
+        function appliquerCalculProportionnel() {
+            const index = document.getElementById('calcIngredientSelect').value;
+            const nouvelleQteSaisie = parseFloat(document.getElementById('calcTargetQty').value);
+            if (isNaN(nouvelleQteSaisie) || nouvelleQteSaisie <= 0) {
+                alert("Veuillez entrer une quantité valide.");
+                return;
+            }
+            const ingOriginal = recetteActiveEnCours.ingredients[index];
+            const basePortions = parseFloat(recetteActiveEnCours.portions) || 4;
+            const qteInitialeNum = parseFloat(ingOriginal.qte);
+            
+            if (isNaN(qteInitialeNum) || qteInitialeNum <= 0) {
+                alert("Cet ingrédient n'a pas de quantité numérique initiale exploitable pour le calcul proportionnel.");
+                return;
+            }
+
+            const ratio = nouvelleQteSaisie / qteInitialeNum;
+            portionsActuelles = Math.max(0.1, basePortions * ratio);
+
+            fermerCalculateur();
+            construireContenuDetailRecette();
+        }
+
+        function changerOnglet(nomOnglet, elementBtn) {
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
+            document.getElementById('view-' + nomOnglet).classList.add('active');
+            document.querySelectorAll('.top-menu .menu-item').forEach(btn => btn.classList.remove('active'));
+            if(elementBtn) elementBtn.classList.add('active');
+            if (nomOnglet !== 'famille') fermerCategorie(nomOnglet);
+            renderCategories(nomOnglet);
+        }
+
+        function retourAccueil() {
+            changerOnglet('incontournables', document.querySelector('.top-menu .menu-item'));
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            const iconSvg = document.getElementById('themeIconSvg');
+            if (isLight) {
+                iconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            } else {
+                iconSvg.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            }
+        }
+
+        function ouvrirModalCouleurs() { document.getElementById('colorModal').classList.add('active'); }
+        function fermerModalCouleurs() { document.getElementById('colorModal').classList.remove('active'); }
+
+        function changerCouleur(couleur) {
+            document.body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
+            document.body.classList.add('theme-' + couleur);
+            fermerModalCouleurs();
+        }
+
+        function toggleRecherche() {
+            const sc = document.getElementById('searchContainer');
+            sc.classList.toggle('active');
+            if (sc.classList.contains('active')) document.getElementById('searchInput').focus();
+        }
+
+        function ouvrirMenuAjout() { 
+            idRecetteEnEdition = null;
+            document.getElementById('formModalTitle').textContent = "Nouvelle Recette";
+            document.getElementById('recipeTitle').value = "";
+            document.getElementById('recipePortions').value = "4";
+            document.getElementById('recipePrepTime').value = "15";
+            document.getElementById('recipeCookTime').value = "30";
+            document.getElementById('recipeNotes').value = "";
+            document.getElementById('recipeSource').value = "";
+            document.getElementById('ingredientsContainer').innerHTML = `
+                <div class="ingredient-row">
+                    <input type="text" placeholder="Qté" class="ing-qty">
+                    <select class="ing-unit">
+                        <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                        <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                        <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                    </select>
+                    <input type="text" placeholder="Ingrédient" class="ing-name">
+                </div>`;
+            document.getElementById('etapesContainer').innerHTML = `
+                <div class="etape-row">
+                    <span class="etape-num">1</span>
+                    <textarea placeholder="Étape..."></textarea>
+                </div>`;
+            imageRecetteActuelle = "";
+            document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo";
+            document.getElementById('addChoiceModal').classList.add('active'); 
+        }
+        function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
+        function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
+        function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
+        function fermerModalPhotoImport() { document.getElementById('photoImportPageModal').classList.remove('active'); }
+        function fermerModalVideo() { document.getElementById('videoImportModal').classList.remove('active'); }
+
+        function gererVisibiliteProfil(valeur) {
+            document.getElementById('recipeProfilGroup').style.display = (valeur === 'famille') ? 'block' : 'none';
+        }
+
+        function changerVoletForm(num) {
+            document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('volet-' + num).classList.add('active');
+            document.querySelectorAll('.form-tab-btn')[num - 1].classList.add('active');
+        }
+
+        function choixAjout(type) {
+            fermerMenuAjout();
+            if (type === 'manuel') {
+                document.getElementById('recipeFormModal').classList.add('active');
+                changerVoletForm(1);
+            } else if (type === 'site') {
+                document.getElementById('siteImportModal').classList.add('active');
+            } else if (type === 'scanPhoto') {
+                document.getElementById('photoImportPageModal').classList.add('active');
+            } else if (type === 'video') {
+                document.getElementById('videoImportModal').classList.add('active');
+            }
+        }
+
+        function traiterImportPhotoRecette(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageRecetteActuelle = e.target.result;
+                    document.getElementById('photoImportPreview').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function validerImportPhotoPage() {
+            fermerModalPhotoImport();
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+            document.getElementById('recipeTitle').value = "Recette importée par photo";
+            document.getElementById('recipeSource').value = "Photo de recette";
+            if (imageRecetteActuelle) {
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+        }
+
+        function importerRecetteDepuisUrl() {
+            const url = document.getElementById('recipeUrlInput').value.trim();
+            if (!url) { alert("Veuillez entrer un lien URL valide."); return; }
+            fermerModalSite();
+            document.getElementById('recipeTitle').value = "Recette importée du web";
+            document.getElementById('recipeSource').value = url;
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        function importerRecetteDepuisVideo() {
+            const url = document.getElementById('recipeVideoUrlInput').value.trim();
+            if (!url) { alert("Veuillez entrer un lien vidéo valide."); return; }
+            fermerModalVideo();
+            document.getElementById('recipeTitle').value = "Recette importée de vidéo";
+            document.getElementById('recipeSource').value = url;
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
+        }
+
+        function ajouterLigneIngredient() {
+            const container = document.getElementById('ingredientsContainer');
+            const row = document.createElement('div');
+            row.className = 'ingredient-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Qté" class="ing-qty">
+                <select class="ing-unit">
+                    <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                    <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                    <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                </select>
+                <input type="text" placeholder="Ingrédient" class="ing-name">
+            `;
+            container.appendChild(row);
+        }
+
+        function ajouterLigneEtape() {
+            const container = document.getElementById('etapesContainer');
+            const count = container.querySelectorAll('.etape-row').length + 1;
+            const row = document.createElement('div');
+            row.className = 'etape-row';
+            row.innerHTML = `<span class="etape-num">${count}</span><textarea placeholder="Étape..."></textarea>`;
+            container.appendChild(row);
+        }
+
+        function chargerApercuPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('recipePhotoUrl').value = "";
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageRecetteActuelle = e.target.result;
+                    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${imageRecetteActuelle}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function chargerApercuUrl(url) {
+            document.getElementById('recipePhotoFile').value = "";
+            const cleanUrl = url.trim();
+            if (cleanUrl !== "") {
+                imageRecetteActuelle = cleanUrl;
+                document.getElementById('photoPreviewContainer').innerHTML = `<img src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                imageRecetteActuelle = "";
+                document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            }
+        }
+
+        function sauvegarderRecetteComprehensive() {
+            const titre = document.getElementById('recipeTitle').value;
+            if (!titre.trim()) { alert("Veuillez renseigner au moins un titre."); changerVoletForm(1); return; }
+
+            const cible = document.getElementById('recipeTargetSection').value;
+            const categorie = document.getElementById('recipeCategory').value;
+            const nomCat = categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie;
+            const membreVal = cible === 'incontournables' ? 'Incontournables' : document.getElementById('recipeProfilSelect').value;
+            
+            const ingredients = [];
+            document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => {
+                const qte = row.querySelector('.ing-qty').value.trim();
+                const unit = row.querySelector('.ing-unit').value;
+                const nom = row.querySelector('.ing-name').value.trim();
+                if (nom) ingredients.push({ qte, unit, nom });
+            });
+
+            const etapes = [];
+            document.querySelectorAll('#etapesContainer .etape-row textarea').forEach(textarea => {
+                const texte = textarea.value.trim();
+                if (texte) etapes.push(texte);
+            });
+
+            if (idRecetteEnEdition) {
+                let recetteMiseAJour = null;
+                for (const catKey in database.incontournables) {
+                    database.incontournables[catKey] = database.incontournables[catKey].map(r => {
+                        if (r.id === idRecetteEnEdition) {
+                            recetteMiseAJour = {
+                                ...r,
+                                nom: titre,
+                                categorie: nomCat,
+                                membre: membreVal,
+                                img: imageRecetteActuelle || r.img,
+                                portions: document.getElementById('recipePortions').value || 4,
+                                prepTime: document.getElementById('recipePrepTime').value || 15,
+                                cookTime: document.getElementById('recipeCookTime').value || 30,
+                                ingredients: ingredients,
+                                etapes: etapes,
+                                notes: document.getElementById('recipeNotes').value.trim(),
+                                source: document.getElementById('recipeSource').value.trim()
+                            };
+                            return recetteMiseAJour;
+                        }
+                        return r;
+                    });
+                }
+                if (!recetteMiseAJour) {
+                    for (const profKey in database.famille) {
+                        database.famille[profKey] = database.famille[profKey].map(r => {
+                            if (r.id === idRecetteEnEdition) {
+                                recetteMiseAJour = {
+                                    ...r,
+                                    nom: titre,
+                                    categorie: nomCat,
+                                    membre: profKey,
+                                    img: imageRecetteActuelle || r.img,
+                                    portions: document.getElementById('recipePortions').value || 4,
+                                    prepTime: document.getElementById('recipePrepTime').value || 15,
+                                    cookTime: document.getElementById('recipeCookTime').value || 30,
+                                    ingredients: ingredients,
+                                    etapes: etapes,
+                                    notes: document.getElementById('recipeNotes').value.trim(),
+                                    source: document.getElementById('recipeSource').value.trim()
+                                };
+                                return recetteMiseAJour;
+                            }
+                            return r;
+                        });
+                    }
+                }
+                
+                alert("Modifications enregistrées !");
+                fermerFormulaireAjout();
+                idRecetteEnEdition = null;
+
+                if (recetteMiseAJour) {
+                    afficherDetailRecette(recetteMiseAJour);
+                }
+            } else {
+                const nouvelleRecette = {
+                    id: 'recette_' + Date.now(),
+                    nom: titre,
+                    categorie: nomCat,
+                    membre: membreVal,
+                    img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+                    portions: document.getElementById('recipePortions').value || 4,
+                    prepTime: document.getElementById('recipePrepTime').value || 15,
+                    cookTime: document.getElementById('recipeCookTime').value || 30,
+                    congelable: false,
+                    ingredients: ingredients,
+                    etapes: etapes,
+                    notes: document.getElementById('recipeNotes').value.trim(),
+                    source: document.getElementById('recipeSource').value.trim()
+                };
+
+                if (cible === 'incontournables') {
+                    if (!database.incontournables[categorie]) database.incontournables[categorie] = [];
+                    database.incontournables[categorie].push(nouvelleRecette);
+                } else {
+                    const membre = document.getElementById('recipeProfilSelect').value;
+                    if (!database.famille[membre]) database.famille[membre] = [];
+                    database.famille[membre].push(nouvelleRecette);
+                }
+                alert("Recette enregistrée !");
+                fermerFormulaireAjout();
+            }
+
+            imageRecetteActuelle = "";
+            document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            
+            const ongletActif = document.querySelector('.top-menu .menu-item.active');
+            renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+        }
+
+        function exporterRecettes() { alert("Exportation déclenchée !"); }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            document.getElementById('familleSelect').value = profilEnregistre;
+            MettreAJourTexteBoutonProfil(profilEnregistre);
+            renderCategories('incontournables');
+        });
+    </script>
+</body>
+</html>
+
+```
