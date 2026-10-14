@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mes Recettes</title>
-    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine3.png">
     <style>
         :root {
             --primary-color: #ecf0f1;
@@ -113,35 +113,21 @@
         .search-container {
             display: none;
             margin-bottom: 12px;
-            position: relative;
         }
 
         .search-container.active {
-            display: flex;
-            align-items: center;
+            display: block;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 38px 10px 14px;
+            padding: 10px 14px;
             font-size: 1rem;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
-        }
-
-        .search-clear-btn {
-            position: absolute;
-            right: 12px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: none;
-            padding: 4px;
         }
 
         /* Bannière de reprise en bas de l'accueil (au-dessus de la nav) */
@@ -401,6 +387,7 @@
             object-fit: cover;
         }
 
+        /* Boutons de fermeture et de pause groupés en haut à droite (style rond gris) */
         .recipe-detail-top-actions {
             position: absolute;
             top: 12px;
@@ -975,7 +962,6 @@
 
     <div class="search-container" id="searchContainer">
         <input type="text" class="search-input" placeholder="Rechercher une recette..." id="searchInput">
-        <button class="search-clear-btn" id="searchClearBtn" onclick="effacerRecherche()" title="Réinitialiser">&times;</button>
     </div>
 
     <div class="top-menu" id="topMenuContainer">
@@ -1003,7 +989,7 @@
         <div id="recipeList-famille" class="recipe-list-container active" style="display: block;"></div>
     </div>
 
-    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL -->
+    <!-- BANNIÈRE FLOTTANTE EN BAS DE L'ACCUEIL (AU-DESSUS DE LA BARRE D'ÉTAT) -->
     <div id="bannierePause">
         <div>
             <div style="font-size: 0.7rem; color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recette en pause</div>
@@ -1500,129 +1486,6 @@
             }
         }
 
-        /* RECHERCHE ACTIVES (UNIQUEMENT FILTRAGE DES CATÉGORIES OU DU PROFIL ACTIF SANS AFFICHER TOUT EN BAS DE LA PAGE) */
-        function filtrerRecettesEnTempsReel(query) {
-            const q = query.trim().toLowerCase();
-            const clearBtn = document.getElementById('searchClearBtn');
-            if (clearBtn) {
-                clearBtn.style.display = q ? 'block' : 'none';
-            }
-
-            const ongletActifBtn = document.querySelector('.top-menu .menu-item.active');
-            const estFamille = ongletActifBtn && ongletActifBtn.id === 'profilTabBtn';
-
-            if (estFamille) {
-                const personne = document.getElementById('familleSelect').value || 'Lucie';
-                const listContainer = document.getElementById('recipeList-famille');
-                listContainer.innerHTML = '';
-                const recipes = (database.famille && database.famille[personne]) || [];
-                const filtres = recipes.filter(r => recetteCorrespond(r, q));
-
-                if (filtres.length === 0) {
-                    listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px;">Aucune recette trouvée.</div>`;
-                } else {
-                    filtres.forEach(recipe => {
-                        const row = document.createElement('div');
-                        row.className = 'recipe-row-card';
-                        row.onclick = () => afficherDetailRecette(recipe);
-                        row.innerHTML = `
-                            <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
-                            <div class="recipe-row-banner">
-                                <span>${recipe.nom}</span>
-                            </div>
-                        `;
-                        listContainer.appendChild(row);
-                    });
-                }
-            } else {
-                // Dans Incontournables, on filtre directement les cartes de catégories affichées
-                const container = document.getElementById('categoriesGrid-incontournables');
-                if (!container) return;
-                container.innerHTML = '';
-                container.style.display = 'grid';
-
-                const listContainer = document.getElementById('recipeList-incontournables');
-                if (listContainer) listContainer.classList.remove('active');
-
-                for (const [catKey, meta] of Object.entries(categoryMeta)) {
-                    const recipes = database.incontournables[catKey] || [];
-                    const filtres = recipes.filter(r => recetteCorrespond(r, q));
-
-                    // On n'affiche la catégorie que si elle contient au moins une recette correspondante (si recherche active) ou toutes si recherche vide
-                    if (!q || filtres.length > 0) {
-                        const card = document.createElement('div');
-                        card.className = 'category-card';
-                        card.onclick = () => {
-                            ouvrirCategorie('incontournables', catKey);
-                            if (q) {
-                                // Si une recherche est en cours, filtrer la liste ouverte de la catégorie
-                                setTimeout(() => filtrerRecettesDansCategorieOuverte('incontournables', catKey, q), 50);
-                            }
-                        };
-                        card.innerHTML = `
-                            <img src="${meta.img}" alt="${meta.nom}" class="category-img">
-                            <div class="category-banner">
-                                <span>${meta.nom} ${q && filtres.length > 0 ? '(' + filtres.length + ')' : ''}</span>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    }
-                }
-            }
-        }
-
-        function filtrerRecettesDansCategorieOuverte(onglet, catKey, q) {
-            const listContainer = document.getElementById(`recipeList-${onglet}`);
-            if (!listContainer) return;
-            const rows = listContainer.querySelectorAll('.recipe-row-card');
-            const recipes = database[onglet][catKey] || [];
-            
-            listContainer.innerHTML = '';
-            const backBtn = document.createElement('button');
-            backBtn.className = 'back-cat-btn';
-            backBtn.innerHTML = '← Retour aux catégories';
-            backBtn.onclick = () => fermerCategorie(onglet);
-            listContainer.appendChild(backBtn);
-
-            recipes.forEach((recipe, idx) => {
-                if (recetteCorrespond(recipe, q)) {
-                    const row = document.createElement('div');
-                    row.className = 'recipe-row-card';
-                    row.onclick = () => afficherDetailRecette(recipe);
-                    row.innerHTML = `
-                        <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-row-img">
-                        <div class="recipe-row-banner">
-                            <span>${recipe.nom}</span>
-                        </div>
-                    `;
-                    listContainer.appendChild(row);
-                }
-            });
-        }
-
-        function recetteCorrespond(recipe, query) {
-            if (!query) return true;
-            if (recipe.nom && recipe.nom.toLowerCase().includes(query)) return true;
-            if (recipe.categorie && recipe.categorie.toLowerCase().includes(query)) return true;
-            if (recipe.notes && recipe.notes.toLowerCase().includes(query)) return true;
-            if (recipe.source && recipe.source.toLowerCase().includes(query)) return true;
-            if (recipe.ingredients && recipe.ingredients.some(i => i.nom && i.nom.toLowerCase().includes(query))) return true;
-            return false;
-        }
-
-        function effacerRecherche() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.focus();
-            }
-            const clearBtn = document.getElementById('searchClearBtn');
-            if (clearBtn) clearBtn.style.display = 'none';
-
-            const ongletActif = document.querySelector('.top-menu .menu-item.active');
-            renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
-        }
-
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseFloat(recipe.portions) || 4;
@@ -2043,9 +1906,7 @@
             document.querySelectorAll('.top-menu .menu-item').forEach(btn => btn.classList.remove('active'));
             if(elementBtn) elementBtn.classList.add('active');
             if (nomOnglet !== 'famille') fermerCategorie(nomOnglet);
-            
-            const searchInput = document.getElementById('searchInput');
-            filtrerRecettesEnTempsReel(searchInput ? searchInput.value : '');
+            renderCategories(nomOnglet);
         }
 
         function retourAccueil() {
@@ -2075,12 +1936,7 @@
         function toggleRecherche() {
             const sc = document.getElementById('searchContainer');
             sc.classList.toggle('active');
-            const searchInput = document.getElementById('searchInput');
-            if (sc.classList.contains('active')) {
-                searchInput.focus();
-            } else {
-                effacerRecherche();
-            }
+            if (sc.classList.contains('active')) document.getElementById('searchInput').focus();
         }
 
         function ouvrirMenuAjout() { 
@@ -2255,7 +2111,7 @@
             const etapes = [];
             document.querySelectorAll('#etapesContainer .etape-row textarea').forEach(textarea => {
                 const texte = textarea.value.trim();
-                if (texte) etapes.put ? etapes.push(texte) : etapes.push(texte);
+                if (texte) etapes.push(texte);
             });
 
             if (idRecetteEnEdition) {
@@ -2324,4 +2180,40 @@
                     portions: document.getElementById('recipePortions').value || 4,
                     prepTime: document.getElementById('recipePrepTime').value || 15,
                     cookTime: document.getElementById('recipeCookTime').value || 30,
-                    congel
+                    congelable: false,
+                    ingredients: ingredients,
+                    etapes: etapes,
+                    notes: document.getElementById('recipeNotes').value.trim(),
+                    source: document.getElementById('recipeSource').value.trim()
+                };
+
+                if (cible === 'incontournables') {
+                    if (!database.incontournables[categorie]) database.incontournables[categorie] = [];
+                    database.incontournables[categorie].push(nouvelleRecette);
+                } else {
+                    const membre = document.getElementById('recipeProfilSelect').value;
+                    if (!database.famille[membre]) database.famille[membre] = [];
+                    database.famille[membre].push(nouvelleRecette);
+                }
+                alert("Recette enregistrée !");
+                fermerFormulaireAjout();
+            }
+
+            imageRecetteActuelle = "";
+            document.getElementById('photoPreviewContainer').innerHTML = "Aucune photo sélectionnée";
+            
+            const ongletActif = document.querySelector('.top-menu .menu-item.active');
+            renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+        }
+
+        function exporterRecettes() { alert("Exportation déclenchée !"); }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            document.getElementById('familleSelect').value = profilEnregistre;
+            MettreAJourTexteBoutonProfil(profilEnregistre);
+            renderCategories('incontournables');
+        });
+    </script>
+</body>
+</html>
