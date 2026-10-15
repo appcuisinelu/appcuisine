@@ -119,9 +119,13 @@
             display: block;
         }
 
+        .search-field-wrap {
+            position: relative;
+            width: 100%;
+        }
         .search-input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 10px 42px 10px 14px;
             font-size: 1rem;
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -129,6 +133,23 @@
             color: var(--text-main);
             outline: none;
         }
+        .search-clear-btn {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .search-clear-btn.visible { display: block; }
 
         /* Bannière de reprise en bas de l'accueil (au-dessus de la nav) */
         #bannierePause {
@@ -238,10 +259,11 @@
         }
         .search-result-meta {
             display: block;
-            color: var(--text-muted);
+            color: inherit;
             font-size: 0.78rem;
             font-weight: 400;
             margin-top: 4px;
+            opacity: 0.9;
         }
         .search-empty {
             text-align: center;
@@ -981,7 +1003,10 @@
     </header>
 
     <div class="search-container" id="searchContainer">
-        <input type="search" class="search-input" placeholder="Rechercher une recette, un ingrédient..." id="searchInput" autocomplete="off">
+        <div class="search-field-wrap">
+            <input type="search" class="search-input" placeholder="Rechercher une recette, un ingrédient..." id="searchInput" autocomplete="off">
+            <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Effacer la recherche" title="Effacer la recherche" onclick="effacerRecherche()">×</button>
+        </div>
     </div>
     <div id="searchResults" class="recipe-list-container" aria-live="polite"></div>
 
@@ -1739,6 +1764,17 @@
 
         function fermerDetailRecette() {
             document.getElementById('recipeDetailModal').classList.remove('active');
+            if (recetteOuverteDepuisRecherche) {
+                recetteOuverteDepuisRecherche = false;
+                const input = document.getElementById('searchInput');
+                const searchContainer = document.getElementById('searchContainer');
+                const results = document.getElementById('searchResults');
+                if (input) input.value = '';
+                if (searchContainer) searchContainer.classList.remove('active');
+                if (results) { results.innerHTML = ''; results.classList.remove('active'); }
+                actualiserBoutonEffacerRecherche();
+                recetteActiveEnCours = null;
+            }
             verifierRecetteEnPause();
         }
 
@@ -1954,6 +1990,28 @@
             fermerModalCouleurs();
         }
 
+        let recetteOuverteDepuisRecherche = false;
+
+        function actualiserBoutonEffacerRecherche() {
+            const input = document.getElementById('searchInput');
+            const bouton = document.getElementById('searchClearBtn');
+            if (input && bouton) bouton.classList.toggle('visible', input.value.length > 0);
+        }
+
+        function effacerRecherche() {
+            const input = document.getElementById('searchInput');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            const resultats = document.getElementById('searchResults');
+            if (resultats) {
+                resultats.innerHTML = '';
+                resultats.classList.remove('active');
+            }
+            actualiserBoutonEffacerRecherche();
+        }
+
         // Recherche dynamique dans toutes les recettes, y compris les profils familiaux.
         function normaliserRecherche(valeur) {
             return String(valeur ?? '')
@@ -2044,10 +2102,11 @@
                 texte.appendChild(meta);
                 bandeau.appendChild(texte);
                 carte.append(image, bandeau);
-                carte.addEventListener('click', () => afficherDetailRecette(recette));
+                carte.addEventListener('click', () => { recetteOuverteDepuisRecherche = true; afficherDetailRecette(recette); });
                 carte.addEventListener('keydown', event => {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
+                        recetteOuverteDepuisRecherche = true;
                         afficherDetailRecette(recette);
                     }
                 });
@@ -2062,10 +2121,12 @@
                 const input = document.getElementById('searchInput');
                 input.focus();
                 if (input.value.trim()) rechercherRecettes(input.value);
+                actualiserBoutonEffacerRecherche();
             } else {
                 document.getElementById('searchInput').value = '';
                 document.getElementById('searchResults').classList.remove('active');
                 document.getElementById('searchResults').innerHTML = '';
+                actualiserBoutonEffacerRecherche();
             }
         }
 
@@ -2341,6 +2402,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('searchInput').addEventListener('input', event => {
                 rechercherRecettes(event.target.value);
+                actualiserBoutonEffacerRecherche();
             });
             const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
             document.getElementById('familleSelect').value = profilEnregistre;
