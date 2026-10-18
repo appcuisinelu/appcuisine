@@ -271,6 +271,15 @@
             padding: 28px 16px;
             line-height: 1.5;
         }
+        .recipe-tags-summary { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
+        .recipe-tag-chip { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-size:.85rem; }
+        .tag-open-btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:10px; background:var(--card-bg); color:var(--text-main); cursor:pointer; text-align:left; }
+        .tag-picker-list { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 18px; }
+        .tag-choice { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border-color); border-radius:999px; padding:8px 11px; background:var(--card-bg); color:var(--text-main); }
+        .tag-choice input { accent-color:var(--accent-color); }
+        .tag-add-row { display:flex; gap:8px; align-items:center; padding:8px; border:1px solid var(--border-color); border-radius:10px; background:var(--card-bg); }
+        .tag-add-row input { flex:1; min-width:0; border:0; outline:none; background:transparent; color:var(--text-main); padding:8px; }
+        .tag-add-row button { width:38px; height:38px; border:0; border-radius:9px; background:var(--accent-color); color:white; font-size:1.4rem; cursor:pointer; }
 
         .back-cat-btn {
             background: none;
@@ -985,7 +994,6 @@
             stroke-linejoin: round;
         }
     </style>
-    <link rel="apple-touch-icon" href="icone_app_cuisine2.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1210,6 +1218,10 @@
                         <option value="basiques">Basiques</option><option value="maison">Maison</option><option value="cosmetiques">Cosmétiques</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <button type="button" class="tag-open-btn" onclick="ouvrirSelectionTags()"><span id="recipeTagsSummary">Choisir des tags</span><span aria-hidden="true">＋</span></button>
+                </div>
                 <div class="form-row">
                     <div class="form-group"><label>Portions</label><input type="number" id="recipePortions" value="4"></div>
                     <div class="form-group"><label>Prépa (m)</label><input type="number" id="recipePrepTime" value="15"></div>
@@ -1258,6 +1270,26 @@
         <div class="fullscreen-footer">
             <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerFormulaireAjout()">Annuler</button>
             <button class="primary-btn" onclick="sauvegarderRecetteComprehensive()">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- FENÊTRE DE SÉLECTION DES TAGS -->
+    <div class="popup-modal" id="recipeTagsModal">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Tags de la recette</h3>
+                <button class="popup-close-btn" onclick="fermerSelectionTags()">&times;</button>
+            </div>
+            <p style="color:var(--text-muted); font-size:.9rem; margin:0 0 8px;">Sélectionnez un ou plusieurs tags.</p>
+            <div id="recipeTagChoices" class="tag-picker-list"></div>
+            <label for="newRecipeTag" style="display:block; margin-bottom:7px; font-weight:600;">Ajouter nouveau</label>
+            <div class="tag-add-row">
+                <input id="newRecipeTag" type="text" placeholder="Ex. repas rapide" autocomplete="off">
+                <button type="button" onclick="ajouterNouveauTag()" aria-label="Ajouter le tag">+</button>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+                <button class="primary-btn" onclick="fermerSelectionTags()">Terminé</button>
+            </div>
         </div>
     </div>
 
@@ -1416,6 +1448,55 @@
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
         let idRecetteEnEdition = null;
+        const TAGS_DEFAUT = ['#camping', '#instantpot', '#noël', '#vegan', '#vitamix', '#thermomix'];
+        let tagsDisponibles = chargerTagsDisponibles();
+        let tagsSelectionnes = [];
+
+        function chargerTagsDisponibles() {
+            try {
+                const sauvegardes = JSON.parse(localStorage.getItem('tagsRecettesDisponibles') || '[]');
+                return [...new Set([...TAGS_DEFAUT, ...sauvegardes].map(normaliserTag).filter(Boolean))];
+            } catch (e) { return [...TAGS_DEFAUT]; }
+        }
+        function normaliserTag(tag) {
+            const valeur = String(tag || '').trim().replace(/^#+/, '').trim();
+            return valeur ? '#' + valeur : '';
+        }
+        function afficherResumeTags() {
+            const el = document.getElementById('recipeTagsSummary');
+            if (el) el.textContent = tagsSelectionnes.length ? tagsSelectionnes.join(' · ') : 'Choisir des tags';
+        }
+        function afficherChoixTags() {
+            const container = document.getElementById('recipeTagChoices');
+            if (!container) return;
+            container.innerHTML = '';
+            tagsDisponibles.forEach(tag => {
+                const label = document.createElement('label');
+                label.className = 'tag-choice';
+                const input = document.createElement('input');
+                input.type = 'checkbox'; input.value = tag; input.checked = tagsSelectionnes.includes(tag);
+                input.addEventListener('change', () => {
+                    if (input.checked) { if (!tagsSelectionnes.includes(tag)) tagsSelectionnes.push(tag); }
+                    else tagsSelectionnes = tagsSelectionnes.filter(t => t !== tag);
+                    afficherResumeTags();
+                });
+                const texte = document.createElement('span'); texte.textContent = tag;
+                label.append(input, texte); container.appendChild(label);
+            });
+        }
+        function ouvrirSelectionTags() { afficherChoixTags(); document.getElementById('recipeTagsModal').classList.add('active'); }
+        function fermerSelectionTags() { document.getElementById('recipeTagsModal').classList.remove('active'); afficherResumeTags(); }
+        function ajouterNouveauTag() {
+            const input = document.getElementById('newRecipeTag');
+            const tag = normaliserTag(input.value);
+            if (!tag) { input.focus(); return; }
+            if (!tagsDisponibles.some(t => t.toLocaleLowerCase('fr') === tag.toLocaleLowerCase('fr'))) {
+                tagsDisponibles.push(tag);
+                try { localStorage.setItem('tagsRecettesDisponibles', JSON.stringify(tagsDisponibles)); } catch (e) { /* Le tag reste disponible pour cette session. */ }
+            }
+            if (!tagsSelectionnes.includes(tag)) tagsSelectionnes.push(tag);
+            input.value = ''; afficherChoixTags(); afficherResumeTags(); input.focus();
+        }
 
         function renderCategories(onglet) {
             verifierRecetteEnPause();
@@ -1691,7 +1772,7 @@
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
                             <div class="recipe-detail-title-overlay">${recipe.nom}</div>
-                            <div class="recipe-detail-sub-info">${recipe.categorie || 'Autre'} • ${recipe.membre || 'Incontournables'}</div>
+                            <div class="recipe-detail-sub-info">${recipe.categorie || 'Autre'}${Array.isArray(recipe.tags) && recipe.tags.length ? ' • ' + recipe.tags.join(' • ') : ''} • ${recipe.membre || 'Incontournables'}</div>
                         </div>
                     </div>
                 </div>
@@ -1808,6 +1889,9 @@
             document.getElementById('recipeCookTime').value = recetteActiveEnCours.cookTime || 30;
             document.getElementById('recipeNotes').value = recetteActiveEnCours.notes || "";
             document.getElementById('recipeSource').value = recetteActiveEnCours.source || "";
+            tagsSelectionnes = Array.isArray(recetteActiveEnCours.tags) ? recetteActiveEnCours.tags.map(normaliserTag).filter(Boolean) : [];
+            tagsSelectionnes.forEach(tag => { if (!tagsDisponibles.includes(tag)) tagsDisponibles.push(tag); });
+            afficherResumeTags();
             
             const ingContainer = document.getElementById('ingredientsContainer');
             ingContainer.innerHTML = '';
@@ -2055,7 +2139,7 @@
                 const etapes = (r.etapes || []).map(e => typeof e === 'string' ? e : (e.texte || e.description || '')).join(' ');
                 const contenu = [
                     r.nom, r.categorie, item.categorieKey, item.membre,
-                    r.notes, r.source, ingredients, etapes
+                    r.notes, r.source, ...(r.tags || []), ingredients, etapes
                 ].join(' ');
                 return normaliserRecherche(contenu).includes(recherche);
             });
@@ -2130,7 +2214,10 @@
             }
         }
 
-        function ouvrirMenuAjout() { 
+        function ouvrirMenuAjout() {
+            tagsSelectionnes = [];
+            afficherResumeTags();
+
             idRecetteEnEdition = null;
             document.getElementById('formModalTitle').textContent = "Nouvelle Recette";
             document.getElementById('recipeTitle').value = "";
@@ -2290,6 +2377,7 @@
             const categorie = document.getElementById('recipeCategory').value;
             const nomCat = categoryMeta[categorie] ? categoryMeta[categorie].nom : categorie;
             const membreVal = cible === 'incontournables' ? 'Incontournables' : document.getElementById('recipeProfilSelect').value;
+            const tags = [...new Set(tagsSelectionnes.map(normaliserTag).filter(Boolean))];
             
             const ingredients = [];
             document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => {
@@ -2314,6 +2402,7 @@
                                 ...r,
                                 nom: titre,
                                 categorie: nomCat,
+                                tags: tags,
                                 membre: membreVal,
                                 img: imageRecetteActuelle || r.img,
                                 portions: document.getElementById('recipePortions').value || 4,
@@ -2337,6 +2426,7 @@
                                     ...r,
                                     nom: titre,
                                     categorie: nomCat,
+                                    tags: tags,
                                     membre: profKey,
                                     img: imageRecetteActuelle || r.img,
                                     portions: document.getElementById('recipePortions').value || 4,
@@ -2366,6 +2456,7 @@
                     id: 'recette_' + Date.now(),
                     nom: titre,
                     categorie: nomCat,
+                    tags: tags,
                     membre: membreVal,
                     img: imageRecetteActuelle || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
                     portions: document.getElementById('recipePortions').value || 4,
@@ -2400,6 +2491,8 @@
         function exporterRecettes() { alert("Exportation déclenchée !"); }
 
         window.addEventListener('DOMContentLoaded', () => {
+            const champNouveauTag = document.getElementById('newRecipeTag');
+            if (champNouveauTag) champNouveauTag.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); ajouterNouveauTag(); } });
             document.getElementById('searchInput').addEventListener('input', event => {
                 rechercherRecettes(event.target.value);
                 actualiserBoutonEffacerRecherche();
