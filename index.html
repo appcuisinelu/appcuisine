@@ -273,12 +273,12 @@
         }
         .recipe-tags-summary { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
         .recipe-tag-chip { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-size:.85rem; }
-        .tag-open-btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:10px; background:var(--card-bg); color:var(--text-main); cursor:pointer; text-align:left; }
+        .tag-open-btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 14px; border:1px solid var(--border-color); border-radius:10px; background:var(--card-bg); color:var(--text-main); cursor:pointer; text-align:left; font-size:1rem; }
         .tag-picker-list { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 18px; }
-        .tag-choice { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border-color); border-radius:999px; padding:8px 11px; background:var(--card-bg); color:var(--text-main); }
+        .tag-choice { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border-color); border-radius:999px; padding:10px 13px; background:var(--card-bg); color:var(--text-main); font-size:1rem; line-height:1.35; }
         .tag-choice input { accent-color:var(--accent-color); }
         .tag-add-row { display:flex; gap:8px; align-items:center; padding:8px; border:1px solid var(--border-color); border-radius:10px; background:var(--card-bg); }
-        .tag-add-row input { flex:1; min-width:0; border:0; outline:none; background:transparent; color:var(--text-main); padding:8px; }
+        .tag-add-row input { flex:1; min-width:0; border:0; outline:none; background:transparent; color:var(--text-main); padding:10px 8px; font-size:1rem; line-height:1.4; }
         .tag-add-row button { width:38px; height:38px; border:0; border-radius:9px; background:var(--accent-color); color:white; font-size:1.4rem; cursor:pointer; }
 
         .back-cat-btn {
@@ -820,8 +820,9 @@
             color: var(--text-main);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 9px;
-            font-size: 0.9rem;
+            padding: 10px 9px;
+            font-size: 1rem;
+            line-height: 1.35;
         }
         .ing-qty { width: 65px !important; text-align: center; }
         .ing-unit { width: 95px !important; }
@@ -850,13 +851,28 @@
         .etape-row textarea {
             flex-grow: 1;
             resize: vertical;
-            min-height: 55px;
+            min-height: 72px;
             background-color: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 9px;
+            padding: 11px;
             outline: none;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .unit-toggle {
+            display:inline-flex; gap:3px; padding:3px; border:1px solid var(--border-color);
+            border-radius:999px; background:var(--card-bg); width:auto; margin:0;
+        }
+        .unit-toggle button {
+            border:0; border-radius:999px; padding:8px 12px; font-size:.9rem; font-weight:600;
+            color:var(--text-muted); background:transparent; cursor:pointer; white-space:nowrap;
+        }
+        .unit-toggle button.active { background:var(--accent-color); color:#fff; }
+        @media (max-width:420px) {
+            .unit-toggle button { padding:7px 9px; font-size:.82rem; }
         }
 
         .secondary-btn {
@@ -1679,7 +1695,7 @@
                 { mots: ['cacao'], g: 100 },
                 { mots: ['flocons d avoine', 'avoine'], g: 90 },
                 { mots: ['riz'], g: 185 },
-                { mots: ['sel'], g: 288 },
+                { mots: ['sel fin', 'sel de table', 'sel'], g: 300 },
                 { mots: ['fecule', 'maisena', 'amidon de mais'], g: 128 },
                 { mots: ['pepites de chocolat', 'chocolat en morceaux'], g: 170 },
                 { mots: ['chocolat'], g: 170 },
@@ -1701,7 +1717,11 @@
         }
 
         function basculerUnitesMetriques() {
-            afficherUnitesMetriques = !afficherUnitesMetriques;
+            definirUnitesMetriques(!afficherUnitesMetriques);
+        }
+
+        function definirUnitesMetriques(valeur) {
+            afficherUnitesMetriques = Boolean(valeur);
             construireContenuDetailRecette();
         }
 
@@ -1903,7 +1923,10 @@
 
                 <div class="recipe-detail-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                     <span>Ingrédients</span>
-                    <button type="button" class="secondary-btn" style="width:auto; margin:0; padding:7px 10px; font-size:0.78rem;" onclick="basculerUnitesMetriques()">${afficherUnitesMetriques ? 'Unités originales' : 'Convertir en métrique'}</button>
+                    <div class="unit-toggle" role="group" aria-label="Unités des ingrédients">
+                        <button type="button" class="${!afficherUnitesMetriques ? 'active' : ''}" aria-pressed="${!afficherUnitesMetriques}" onclick="definirUnitesMetriques(false)">Originales</button>
+                        <button type="button" class="${afficherUnitesMetriques ? 'active' : ''}" aria-pressed="${afficherUnitesMetriques}" onclick="definirUnitesMetriques(true)">Métriques (g/ml)</button>
+                    </div>
                 </div>
                 <ul class="recipe-detail-ingredients">
                     ${ingredientsHtml}
