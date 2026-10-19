@@ -1249,7 +1249,7 @@
                 <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ingrédients</label>
                 <div id="ingredientsContainer">
                     <div class="ingredient-row">
-                        <input type="text" placeholder="Qté" class="ing-qty">
+                        <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
                         <select class="ing-unit">
                             <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                             <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
@@ -1656,9 +1656,39 @@
             else libererVerrouEcran();
         });
 
+        // Accepte les nombres décimaux, les fractions (1/4), les nombres mixtes (1 1/2)
+        // et les caractères fractionnaires courants (¼, ⅓, ½, etc.).
+        function parserQuantite(valeur) {
+            if (typeof valeur === 'number') return Number.isFinite(valeur) ? valeur : NaN;
+            let texte = String(valeur ?? '').trim().replace(/,/g, '.');
+            if (!texte) return NaN;
+            const fractions = { '¼':'1/4', '⅕':'1/5', '⅙':'1/6', '⅛':'1/8', '⅓':'1/3', '⅜':'3/8', '⅖':'2/5', '½':'1/2', '⅗':'3/5', '⅝':'5/8', '⅔':'2/3', '⅚':'5/6', '⅞':'7/8' };
+            // Remplace les caractères fractionnaires en conservant la partie entière éventuelle.
+            texte = texte.replace(/([0-9]+)?\s*([¼⅕⅙⅛⅓⅜⅖½⅗⅝⅔⅚⅞])/g, (_, entier, fraction) => `${entier ? entier + ' ' : ''}${fractions[fraction]}`);
+            const mixte = texte.match(/^(-?\d+)\s+(\d+)\s*\/\s*(\d+)$/);
+            if (mixte) return Number(mixte[1]) + Math.sign(Number(mixte[1]) || 1) * Number(mixte[2]) / Number(mixte[3]);
+            const frac = texte.match(/^(-?\d+)\s*\/\s*(\d+)$/);
+            if (frac) return Number(frac[2]) ? Number(frac[1]) / Number(frac[2]) : NaN;
+            const dec = Number(texte);
+            return Number.isFinite(dec) ? dec : NaN;
+        }
+
+        function formaterQuantiteFraction(valeur) {
+            if (!Number.isFinite(valeur)) return '';
+            const entier = Math.trunc(valeur);
+            const reste = Math.abs(valeur - entier);
+            const fractions = [[1/8,'1/8'],[1/6,'1/6'],[1/5,'1/5'],[1/4,'1/4'],[1/3,'1/3'],[3/8,'3/8'],[2/5,'2/5'],[1/2,'1/2'],[3/5,'3/5'],[5/8,'5/8'],[2/3,'2/3'],[3/4,'3/4'],[5/6,'5/6'],[7/8,'7/8']];
+            if (reste < 0.0001) return String(entier);
+            let meilleure = fractions[0];
+            for (const f of fractions) if (Math.abs(f[0] - reste) < Math.abs(meilleure[0] - reste)) meilleure = f;
+            if (Math.abs(meilleure[0] - reste) > 0.025) return String(Number(valeur.toFixed(2)));
+            return entier === 0 ? (valeur < 0 ? '-' : '') + meilleure[1] : `${entier} ${meilleure[1]}`;
+        }
+
         function convertirIngredientEnMetrique(ing, quantite) {
             const unite = String(ing.unit || '').toLowerCase().trim().replace(/\s/g, '').replace(/,/g, '.');
             const nom = String(ing.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            quantite = parserQuantite(quantite);
             if (!Number.isFinite(quantite)) return null;
 
             // Les unités déjà métriques sont normalisées sans conversion de volume/masse.
@@ -1848,14 +1878,14 @@
                 recipe.ingredients.forEach(ing => {
                     let qteAffichee = ing.qte || '';
                     let uniteAffichee = ing.unit || '';
-                    if (qteAffichee !== '' && Number.isFinite(parseFloat(qteAffichee))) {
-                        const valNum = parseFloat(qteAffichee) * ratio;
+                    if (qteAffichee !== '' && Number.isFinite(parserQuantite(qteAffichee))) {
+                        const valNum = parserQuantite(qteAffichee) * ratio;
                         if (afficherUnitesMetriques) {
                             const converti = convertirIngredientEnMetrique(ing, valNum);
                             if (converti) { qteAffichee = converti.qte; uniteAffichee = converti.unit; }
-                            else qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                            else qteAffichee = formaterQuantiteFraction(valNum);
                         } else {
-                            qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                            qteAffichee = ['tasse','c.à.s','c.à.c'].includes(String(ing.unit || '').toLowerCase()) ? formaterQuantiteFraction(valNum) : (Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2)));
                         }
                     }
                     ingredientsHtml += `<li onclick="this.classList.toggle('checked')">${qteAffichee} ${uniteAffichee} ${ing.nom}</li>`;
@@ -2029,11 +2059,11 @@
                     const row = document.createElement('div');
                     row.className = 'ingredient-row';
                     row.innerHTML = `
-                        <input type="text" value="${ing.qte || ''}" placeholder="Qté" class="ing-qty">
+                        <input type="text" value="${ing.qte || ''}" placeholder="Qté (ex. 1/2)" class="ing-qty">
                         <select class="ing-unit">
                             <option value="">(unité)</option><option value="g" ${ing.unit==='g'?'selected':''}>g</option><option value="kg" ${ing.unit==='kg'?'selected':''}>kg</option>
                             <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option><option value="cl" ${ing.unit==='cl'?'selected':''}>cl</option><option value="L" ${ing.unit==='L'?'selected':''}>L</option>
-                            <option value="c.à.s" ${ing.unit==='c.à.s'?'selected':''}>c. à s.</option><option value="c.à.c" ${ing.unit==='c.à.c'?'selected':''}>c. à c.</option><option value="pincée" ${ing.unit==='pincée'?'selected':''}>pincée</option><option value="pièce" ${ing.unit==='pièce(s)'?'selected':''}>pièce(s)</option>
+                            <option value="c.à.s" ${ing.unit==='c.à.s'?'selected':''}>c. à s.</option><option value="c.à.c" ${ing.unit==='c.à.c'?'selected':''}>c. à c.</option><option value="tasse" ${ing.unit==='tasse'?'selected':''}>tasse(s)</option><option value="pincée" ${ing.unit==='pincée'?'selected':''}>pincée</option><option value="pièce" ${ing.unit==='pièce(s)'?'selected':''}>pièce(s)</option>
                         </select>
                         <input type="text" value="${ing.nom || ''}" placeholder="Ingrédient" class="ing-name">
                     `;
@@ -2156,7 +2186,7 @@
             }
             const ingOriginal = recetteActiveEnCours.ingredients[index];
             const basePortions = parseFloat(recetteActiveEnCours.portions) || 4;
-            const qteInitialeNum = parseFloat(ingOriginal.qte);
+            const qteInitialeNum = parserQuantite(ingOriginal.qte);
             
             if (isNaN(qteInitialeNum) || qteInitialeNum <= 0) {
                 alert("Cet ingrédient n'a pas de quantité numérique initiale exploitable pour le calcul proportionnel.");
@@ -2357,7 +2387,7 @@
             document.getElementById('recipeSource').value = "";
             document.getElementById('ingredientsContainer').innerHTML = `
                 <div class="ingredient-row">
-                    <input type="text" placeholder="Qté" class="ing-qty">
+                    <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
                     <select class="ing-unit">
                         <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                         <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
@@ -2453,7 +2483,7 @@
             const row = document.createElement('div');
             row.className = 'ingredient-row';
             row.innerHTML = `
-                <input type="text" placeholder="Qté" class="ing-qty">
+                <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
                 <select class="ing-unit">
                     <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                     <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
