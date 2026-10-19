@@ -994,7 +994,7 @@
             stroke-linejoin: round;
         }
     </style>
-        <link rel="apple-touch-icon" href="icone_app_cuisine4.png">
+    <link rel="apple-touch-icon" href="icone_app_cuisine4.png">
 </head>
 <body class="theme-turquoise">
 
@@ -1237,7 +1237,7 @@
                         <select class="ing-unit">
                             <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                             <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
-                            <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                            <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                         </select>
                         <input type="text" placeholder="Ingrédient" class="ing-name">
                     </div>
@@ -1448,6 +1448,8 @@
         let imageRecetteActuelle = "";
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
+        let afficherUnitesMetriques = false;
+        let verrouEcranRecette = null;
         let idRecetteEnEdition = null;
         const TAGS_DEFAUT = ['#camping', '#instantpot', '#noël', '#vegan', '#vitamix', '#thermomix'];
         let tagsDisponibles = chargerTagsDisponibles();
@@ -1614,6 +1616,95 @@
             }
         }
 
+        async function garderEcranAllume() {
+            if (!('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+            try {
+                if (verrouEcranRecette) await verrouEcranRecette.release();
+                verrouEcranRecette = await navigator.wakeLock.request('screen');
+                verrouEcranRecette.addEventListener('release', () => { verrouEcranRecette = null; });
+            } catch (erreur) {
+                // Certains navigateurs/appareils ne permettent pas le maintien de l'écran allumé.
+                verrouEcranRecette = null;
+            }
+        }
+
+        async function libererVerrouEcran() {
+            if (!verrouEcranRecette) return;
+            try { await verrouEcranRecette.release(); } catch (erreur) {}
+            verrouEcranRecette = null;
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            const detailOuvert = document.getElementById('recipeDetailModal')?.classList.contains('active');
+            if (detailOuvert && document.visibilityState === 'visible') garderEcranAllume();
+            else libererVerrouEcran();
+        });
+
+        function convertirIngredientEnMetrique(ing, quantite) {
+            const unite = String(ing.unit || '').toLowerCase().trim().replace(/\s/g, '').replace(/,/g, '.');
+            const nom = String(ing.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (!Number.isFinite(quantite)) return null;
+
+            // Les unités déjà métriques sont normalisées sans conversion de volume/masse.
+            if (['g', 'gr', 'gramme', 'grammes'].includes(unite)) return { qte: Math.round(quantite), unit: 'g' };
+            if (['kg', 'kilogramme', 'kilogrammes'].includes(unite)) return { qte: Math.round(quantite * 1000), unit: 'g' };
+            if (['ml', 'millilitre', 'millilitres'].includes(unite)) return { qte: Math.round(quantite), unit: 'ml' };
+            if (['l', 'litre', 'litres'].includes(unite)) return { qte: Math.round(quantite * 1000), unit: 'ml' };
+
+            const volumeParUnite = {
+                'c.à.c': 5, 'càc': 5, 'cà.c': 5, 'cac': 5, 'tsp': 5,
+                'c.à.s': 15, 'càs': 15, 'cà.s': 15, 'cas': 15, 'tbsp': 15,
+                'tasse': 250, 'tasses': 250, 'cup': 250, 'cups': 250
+            };
+            const mlParUnite = volumeParUnite[unite];
+            if (!mlParUnite) return null;
+
+            // Les liquides sont convertis en ml. Les solides sont convertis en grammes
+            // seulement lorsqu'une densité culinaire courante est connue.
+            const motsLiquides = [
+                'eau', 'lait', 'creme', 'huile', 'jus', 'bouillon', 'vinaigre', 'sirop',
+                'sauce soya', 'sauce soja', 'sauce', 'vin', 'cafe', 'the', 'yogourt a boire'
+            ];
+            const estLiquide = motsLiquides.some(mot => nom.includes(mot));
+            if (estLiquide) return { qte: Math.round(quantite * mlParUnite), unit: 'ml' };
+
+            // Équivalences approximatives par tasse de 250 ml; elles varient selon
+            // la marque, le tassement et la façon de mesurer l'ingrédient.
+            const grammesParTasse = [
+                { mots: ['farine'], g: 125 },
+                { mots: ['sucre a glacer', 'sucre glace'], g: 120 },
+                { mots: ['cassonade', 'sucre brun'], g: 220 },
+                { mots: ['sucre'], g: 200 },
+                { mots: ['beurre', 'margarine'], g: 227 },
+                { mots: ['cacao'], g: 100 },
+                { mots: ['flocons d avoine', 'avoine'], g: 90 },
+                { mots: ['riz'], g: 185 },
+                { mots: ['sel'], g: 288 },
+                { mots: ['fecule', 'maisena', 'amidon de mais'], g: 128 },
+                { mots: ['pepites de chocolat', 'chocolat en morceaux'], g: 170 },
+                { mots: ['chocolat'], g: 170 },
+                { mots: ['fromage rape', 'fromage cheddar rape', 'mozzarella rape'], g: 110 },
+                { mots: ['amandes'], g: 140 },
+                { mots: ['noix'], g: 120 },
+                { mots: ['beurre d arachide', 'beurre de cacahuete'], g: 258 },
+                { mots: ['miel'], g: 340 },
+                { mots: ['levure chimique', 'poudre a pate'], g: 220 },
+                { mots: ['bicarbonate'], g: 240 },
+                { mots: ['noix de coco rapee', 'coco rapee'], g: 80 },
+                { mots: ['lentilles'], g: 200 },
+                { mots: ['haricots secs'], g: 190 }
+            ];
+            const equivalent = grammesParTasse.find(item => item.mots.some(mot => nom.includes(mot)));
+            if (!equivalent) return null;
+            const grammes = quantite * (mlParUnite / 250) * equivalent.g;
+            return { qte: Math.round(grammes), unit: 'g' };
+        }
+
+        function basculerUnitesMetriques() {
+            afficherUnitesMetriques = !afficherUnitesMetriques;
+            construireContenuDetailRecette();
+        }
+
         function afficherDetailRecette(recipe) {
             recetteActiveEnCours = recipe;
             portionsActuelles = parseFloat(recipe.portions) || 4;
@@ -1639,7 +1730,9 @@
                 }
             }
 
+            afficherUnitesMetriques = false;
             document.getElementById('recipeDetailModal').classList.add('active');
+            garderEcranAllume();
             verifierRecetteEnPause();
         }
 
@@ -1734,11 +1827,18 @@
             if (recipe.ingredients && recipe.ingredients.length > 0) {
                 recipe.ingredients.forEach(ing => {
                     let qteAffichee = ing.qte || '';
-                    if (!isNaN(qteAffichee) && qteAffichee !== '') {
-                        let valNum = parseFloat(qteAffichee) * ratio;
-                        qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                    let uniteAffichee = ing.unit || '';
+                    if (qteAffichee !== '' && Number.isFinite(parseFloat(qteAffichee))) {
+                        const valNum = parseFloat(qteAffichee) * ratio;
+                        if (afficherUnitesMetriques) {
+                            const converti = convertirIngredientEnMetrique(ing, valNum);
+                            if (converti) { qteAffichee = converti.qte; uniteAffichee = converti.unit; }
+                            else qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                        } else {
+                            qteAffichee = Number.isInteger(valNum) ? valNum : parseFloat(valNum.toFixed(2));
+                        }
                     }
-                    ingredientsHtml += `<li onclick="this.classList.toggle('checked')">${qteAffichee} ${ing.unit || ''} ${ing.nom}</li>`;
+                    ingredientsHtml += `<li onclick="this.classList.toggle('checked')">${qteAffichee} ${uniteAffichee} ${ing.nom}</li>`;
                 });
             } else {
                 ingredientsHtml = '<li>Aucun ingrédient renseigné.</li>';
@@ -1801,7 +1901,10 @@
                     </div>
                 </div>
 
-                <div class="recipe-detail-section-title">Ingrédients</div>
+                <div class="recipe-detail-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <span>Ingrédients</span>
+                    <button type="button" class="secondary-btn" style="width:auto; margin:0; padding:7px 10px; font-size:0.78rem;" onclick="basculerUnitesMetriques()">${afficherUnitesMetriques ? 'Unités originales' : 'Convertir en métrique'}</button>
+                </div>
                 <ul class="recipe-detail-ingredients">
                     ${ingredientsHtml}
                 </ul>
@@ -1846,6 +1949,8 @@
 
         function fermerDetailRecette() {
             document.getElementById('recipeDetailModal').classList.remove('active');
+            libererVerrouEcran();
+            afficherUnitesMetriques = false;
             if (recetteOuverteDepuisRecherche) {
                 recetteOuverteDepuisRecherche = false;
                 const input = document.getElementById('searchInput');
@@ -2233,7 +2338,7 @@
                     <select class="ing-unit">
                         <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                         <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
-                        <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                        <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                     </select>
                     <input type="text" placeholder="Ingrédient" class="ing-name">
                 </div>`;
@@ -2329,7 +2434,7 @@
                 <select class="ing-unit">
                     <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                     <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
-                    <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                    <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                 </select>
                 <input type="text" placeholder="Ingrédient" class="ing-name">
             `;
