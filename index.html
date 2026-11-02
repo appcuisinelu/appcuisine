@@ -824,7 +824,7 @@
             font-size: 1rem;
             line-height: 1.35;
         }
-        .ing-qty { width: 65px !important; text-align: center; }
+        .ing-qty { width: 78px !important; min-width: 78px; text-align: center; cursor: pointer; }
         .ing-unit { width: 95px !important; }
         .ing-name { flex-grow: 1; }
 
@@ -1249,8 +1249,8 @@
                 <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ingrédients</label>
                 <div id="ingredientsContainer">
                     <div class="ingredient-row">
-                        <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
-                        <select class="ing-unit">
+                        <select class="ing-qty" aria-label="Quantité"><option value="">Qté</option></select>
+                        <select class="ing-unit" onchange="actualiserQuantitesIngredient(this)">
                             <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                             <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                             <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
@@ -1520,7 +1520,8 @@
         function renderCategories(onglet) {
             verifierRecetteEnPause();
             if (onglet === 'famille') {
-                const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+                document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => actualiserQuantitesIngredient(row));
+            const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
                 document.getElementById('familleSelect').value = profilEnregistre;
                 MettreAJourTexteBoutonProfil(profilEnregistre);
                 filtrerFamille(profilEnregistre);
@@ -1923,7 +1924,7 @@
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
                             <div class="recipe-detail-title-overlay">${recipe.nom}</div>
-                            <div class="recipe-detail-sub-info">${recipe.categorie || 'Autre'}${Array.isArray(recipe.tags) && recipe.tags.length ? ' • ' + recipe.tags.join(' • ') : ''} • ${recipe.membre || 'Incontournables'}</div>
+                            <div class="recipe-detail-sub-info">${recipe.membre || 'Incontournables'} • ${recipe.categorie || 'Autre'}${Array.isArray(recipe.tags) && recipe.tags.length ? ' • ' + recipe.tags.join(' • ') : ''}</div>
                         </div>
                     </div>
                 </div>
@@ -2059,8 +2060,8 @@
                     const row = document.createElement('div');
                     row.className = 'ingredient-row';
                     row.innerHTML = `
-                        <input type="text" value="${ing.qte || ''}" placeholder="Qté (ex. 1/2)" class="ing-qty">
-                        <select class="ing-unit">
+                        <select class="ing-qty" aria-label="Quantité"><option value="">Qté</option></select>
+                        <select class="ing-unit" onchange="actualiserQuantitesIngredient(this)">
                             <option value="">(unité)</option><option value="g" ${ing.unit==='g'?'selected':''}>g</option><option value="kg" ${ing.unit==='kg'?'selected':''}>kg</option>
                             <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option><option value="cl" ${ing.unit==='cl'?'selected':''}>cl</option><option value="L" ${ing.unit==='L'?'selected':''}>L</option>
                             <option value="c.à.s" ${ing.unit==='c.à.s'?'selected':''}>c. à s.</option><option value="c.à.c" ${ing.unit==='c.à.c'?'selected':''}>c. à c.</option><option value="tasse" ${ing.unit==='tasse'?'selected':''}>tasse(s)</option><option value="pincée" ${ing.unit==='pincée'?'selected':''}>pincée</option><option value="pièce" ${ing.unit==='pièce(s)'?'selected':''}>pièce(s)</option>
@@ -2068,6 +2069,7 @@
                         <input type="text" value="${ing.nom || ''}" placeholder="Ingrédient" class="ing-name">
                     `;
                     ingContainer.appendChild(row);
+                    actualiserQuantitesIngredient(row, ing.qte || '');
                 });
             } else {
                 ajouterLigneIngredient();
@@ -2387,14 +2389,15 @@
             document.getElementById('recipeSource').value = "";
             document.getElementById('ingredientsContainer').innerHTML = `
                 <div class="ingredient-row">
-                    <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
-                    <select class="ing-unit">
+                    <select class="ing-qty" aria-label="Quantité"><option value="">Qté</option></select>
+                    <select class="ing-unit" onchange="actualiserQuantitesIngredient(this)">
                         <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                         <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                         <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                     </select>
                     <input type="text" placeholder="Ingrédient" class="ing-name">
                 </div>`;
+            actualiserQuantitesIngredient(document.querySelector('#ingredientsContainer .ingredient-row'));
             document.getElementById('etapesContainer').innerHTML = `
                 <div class="etape-row">
                     <span class="etape-num">1</span>
@@ -2478,13 +2481,57 @@
             changerVoletForm(1);
         }
 
+
+        // Quantités proposées : les fractions sont réservées aux c. à s., c. à c. et tasses.
+        function actualiserQuantitesIngredient(element, valeurSouhaitee) {
+            const row = element.classList && element.classList.contains('ingredient-row')
+                ? element
+                : element.closest('.ingredient-row');
+            if (!row) return;
+
+            const selectUnite = row.querySelector('.ing-unit');
+            const selectQte = row.querySelector('.ing-qty');
+            if (!selectUnite || !selectQte) return;
+
+            const valeurActuelle = valeurSouhaitee !== undefined
+                ? String(valeurSouhaitee)
+                : String(selectQte.value || '');
+            const fractions = ['1/4', '1/3', '1/2', '3/4'];
+            const quantitesNumeriques = ['1', '2', '3', '4', '5', '6', '8', '10', '12', '15', '20', '25', '30', '50', '75', '100', '125', '150', '200', '250', '300', '400', '500', '750', '1000'];
+            const uniteAvecFractions = ['c.à.s', 'c.à.c', 'tasse'].includes(selectUnite.value);
+            const choix = [...(uniteAvecFractions ? fractions : []), ...quantitesNumeriques];
+
+            selectQte.innerHTML = '';
+            const optionVide = document.createElement('option');
+            optionVide.value = '';
+            optionVide.textContent = 'Qté';
+            selectQte.appendChild(optionVide);
+
+            choix.forEach(qte => {
+                const option = document.createElement('option');
+                option.value = qte;
+                option.textContent = qte;
+                selectQte.appendChild(option);
+            });
+
+            // Conserve une ancienne quantité personnalisée sans ajouter d'autres fractions
+            // à la liste des choix proposés pour les unités non concernées.
+            if (valeurActuelle && !choix.includes(valeurActuelle)) {
+                const optionExistante = document.createElement('option');
+                optionExistante.value = valeurActuelle;
+                optionExistante.textContent = 'Valeur actuelle';
+                selectQte.appendChild(optionExistante);
+            }
+            selectQte.value = valeurActuelle;
+        }
+
         function ajouterLigneIngredient() {
             const container = document.getElementById('ingredientsContainer');
             const row = document.createElement('div');
             row.className = 'ingredient-row';
             row.innerHTML = `
-                <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
-                <select class="ing-unit">
+                <select class="ing-qty" aria-label="Quantité"><option value="">Qté</option></select>
+                <select class="ing-unit" onchange="actualiserQuantitesIngredient(this)">
                     <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                     <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                     <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
@@ -2492,6 +2539,7 @@
                 <input type="text" placeholder="Ingrédient" class="ing-name">
             `;
             container.appendChild(row);
+            actualiserQuantitesIngredient(row);
         }
 
         function ajouterLigneEtape() {
