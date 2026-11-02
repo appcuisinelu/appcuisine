@@ -824,12 +824,12 @@
             font-size: 1rem;
             line-height: 1.35;
         }
-        .ing-qty { width: 82px !important; text-align: center; cursor: pointer; }
+        .ing-qty { width: 65px !important; text-align: center; }
         .ing-unit { width: 95px !important; }
         .ing-name { flex-grow: 1; }
         .ingredient-row { flex-wrap: wrap; }
         .ing-fraction-shortcuts {
-            display: none; gap: 6px; width: 100%; margin-top: 1px;
+            display: flex; gap: 6px; width: 100%; margin-top: 1px;
         }
         .ing-fraction-shortcuts button {
             flex: 1; min-width: 0; padding: 6px 4px;
@@ -1262,11 +1262,8 @@
                 <label style="margin-bottom:6px; display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ingrédients</label>
                 <div id="ingredientsContainer">
                     <div class="ingredient-row">
-                        <select class="ing-qty" aria-label="Quantité">
-<option value="">Qté</option>
-<option value="1">1</option><option value="1 1/4">1 1/4</option><option value="1 1/3">1 1/3</option><option value="1 1/2">1 1/2</option><option value="1 3/4">1 3/4</option>
-<option value="2">2</option><option value="2 1/2">2 1/2</option><option value="3">3</option><option value="3 1/2">3 1/2</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select>
-                        <select class="ing-unit" onchange="actualiserRaccourcisFractions(this.closest('.ingredient-row'))">
+                        <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
+                        <select class="ing-unit">
                             <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                             <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                             <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
@@ -2075,18 +2072,15 @@
                     const row = document.createElement('div');
                     row.className = 'ingredient-row';
                     row.innerHTML = `
-                        <select class="ing-qty" aria-label="Quantité">
-<option value="${ing.qte || ''}" selected>${ing.qte || 'Qté'}</option>
-<option value="1">1</option><option value="1 1/4">1 1/4</option><option value="1 1/3">1 1/3</option><option value="1 1/2">1 1/2</option><option value="1 3/4">1 3/4</option>
-<option value="2">2</option><option value="2 1/2">2 1/2</option><option value="3">3</option><option value="3 1/2">3 1/2</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select>
-                        <select class="ing-unit" onchange="actualiserRaccourcisFractions(this.closest('.ingredient-row'))">
+                        <input type="text" value="${ing.qte || ''}" placeholder="Qté (ex. 1/2)" class="ing-qty">
+                        <select class="ing-unit">
                             <option value="">(unité)</option><option value="g" ${ing.unit==='g'?'selected':''}>g</option><option value="kg" ${ing.unit==='kg'?'selected':''}>kg</option>
                             <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option><option value="cl" ${ing.unit==='cl'?'selected':''}>cl</option><option value="L" ${ing.unit==='L'?'selected':''}>L</option>
                             <option value="c.à.s" ${ing.unit==='c.à.s'?'selected':''}>c. à s.</option><option value="c.à.c" ${ing.unit==='c.à.c'?'selected':''}>c. à c.</option><option value="tasse" ${ing.unit==='tasse'?'selected':''}>tasse(s)</option><option value="pincée" ${ing.unit==='pincée'?'selected':''}>pincée</option><option value="pièce" ${ing.unit==='pièce(s)'?'selected':''}>pièce(s)</option>
                         </select>
                         <input type="text" value="${ing.nom || ''}" placeholder="Ingrédient" class="ing-name"><div class="ing-fraction-shortcuts"><button type="button" onclick="choisirFractionIngredient(this, '1/2')">1/2</button><button type="button" onclick="choisirFractionIngredient(this, '1/4')">1/4</button><button type="button" onclick="choisirFractionIngredient(this, '1/3')">1/3</button><button type="button" onclick="choisirFractionIngredient(this, '3/4')">3/4</button></div>
                     `;
-                    ingContainer.appendChild(row);\n                    actualiserRaccourcisFractions(row);
+                    ingContainer.appendChild(row);
                 });
             } else {
                 ajouterLigneIngredient();
@@ -2406,11 +2400,8 @@
             document.getElementById('recipeSource').value = "";
             document.getElementById('ingredientsContainer').innerHTML = `
                 <div class="ingredient-row">
-                    <select class="ing-qty" aria-label="Quantité">
-<option value="">Qté</option>
-<option value="1">1</option><option value="1 1/4">1 1/4</option><option value="1 1/3">1 1/3</option><option value="1 1/2">1 1/2</option><option value="1 3/4">1 3/4</option>
-<option value="2">2</option><option value="2 1/2">2 1/2</option><option value="3">3</option><option value="3 1/2">3 1/2</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select>
-                    <select class="ing-unit" onchange="actualiserRaccourcisFractions(this.closest('.ingredient-row'))">
+                    <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
+                    <select class="ing-unit">
                         <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                         <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                         <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
@@ -2503,28 +2494,10 @@
         function choisirFractionIngredient(bouton, fraction) {
             const ligne = bouton.closest('.ingredient-row');
             if (!ligne) return;
-            ligne.querySelector('.ing-qty').value = fraction;
-        }
-
-        function actualiserRaccourcisFractions(ligne) {
-            const unite = ligne.querySelector('.ing-unit')?.value || '';
-            const fractionsPermises = ['c.à.s', 'c.à.c', 'tasse'].includes(unite);
-            const raccourcis = ligne.querySelector('.ing-fraction-shortcuts');
-            const quantite = ligne.querySelector('.ing-qty');
-            if (raccourcis) raccourcis.style.display = fractionsPermises ? 'flex' : 'none';
-            if (quantite) {
-                ['1/4', '1/3', '1/2', '3/4'].forEach(fraction => {
-                    const option = [...quantite.options].find(o => o.value === fraction);
-                    if (fractionsPermises && !option) {
-                        const nouvelleOption = document.createElement('option');
-                        nouvelleOption.value = fraction;
-                        nouvelleOption.textContent = fraction;
-                        quantite.add(nouvelleOption);
-                    } else if (!fractionsPermises && option && quantite.value !== fraction) {
-                        option.remove();
-                    }
-                });
-            }
+            const champQuantite = ligne.querySelector('.ing-qty');
+            const valeurActuelle = champQuantite.value.trim();
+            champQuantite.value = valeurActuelle ? `${valeurActuelle} ${fraction}` : fraction;
+            champQuantite.focus();
         }
 
         function ajouterLigneIngredient() {
@@ -2532,18 +2505,15 @@
             const row = document.createElement('div');
             row.className = 'ingredient-row';
             row.innerHTML = `
-                <select class="ing-qty" aria-label="Quantité">
-<option value="">Qté</option>
-<option value="1">1</option><option value="1 1/4">1 1/4</option><option value="1 1/3">1 1/3</option><option value="1 1/2">1 1/2</option><option value="1 3/4">1 3/4</option>
-<option value="2">2</option><option value="2 1/2">2 1/2</option><option value="3">3</option><option value="3 1/2">3 1/2</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select>
-                <select class="ing-unit" onchange="actualiserRaccourcisFractions(this.closest('.ingredient-row'))">
+                <input type="text" placeholder="Qté (ex. 1/2)" class="ing-qty">
+                <select class="ing-unit">
                     <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
                     <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
                     <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
                 </select>
                 <input type="text" placeholder="Ingrédient" class="ing-name"><div class="ing-fraction-shortcuts"><button type="button" onclick="choisirFractionIngredient(this, '1/2')">1/2</button><button type="button" onclick="choisirFractionIngredient(this, '1/4')">1/4</button><button type="button" onclick="choisirFractionIngredient(this, '1/3')">1/3</button><button type="button" onclick="choisirFractionIngredient(this, '3/4')">3/4</button></div>
             `;
-            container.appendChild(row);\n            actualiserRaccourcisFractions(row);
+            container.appendChild(row);
         }
 
         function ajouterLigneEtape() {
@@ -2552,7 +2522,7 @@
             const row = document.createElement('div');
             row.className = 'etape-row';
             row.innerHTML = `<span class="etape-num">${count}</span><textarea placeholder="Étape..."></textarea>`;
-            container.appendChild(row);\n            actualiserRaccourcisFractions(row);
+            container.appendChild(row);
         }
 
         function chargerApercuPhoto(event) {
