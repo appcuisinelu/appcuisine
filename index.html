@@ -336,12 +336,13 @@
             border-left:2px solid var(--accent-color); color:var(--text-muted);
             font-size:.78rem; line-height:1.35;
         }
-        .recipe-version-create {
+        .recipe-version-create, .recipe-version-deactivate {
             width:auto; margin:0; padding:4px 2px; border:0;
             color:var(--accent-color); background:transparent;
             font-size:.76rem; font-weight:500; text-decoration:underline;
             cursor:pointer;
         }
+        .recipe-version-deactivate { color:#c0392b; }
         .variant-form-fields {
             display:none; padding:12px; margin:0 0 14px;
             border:1px solid var(--accent-color); border-radius:10px;
@@ -1186,7 +1187,7 @@
             <div class="popup-header" style="justify-content: flex-end; margin-bottom: 10px;">
                 <button class="popup-close-btn" onclick="fermerModalSuppression()">&times;</button>
             </div>
-            <p id="deleteConfirmMessage" style="font-size: 0.95rem; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
+            <p style="font-size: 0.95rem; color: #e74c3c; font-weight: 600; margin-bottom: 20px;">
                 Confirmer la suppression ?
             </p>
             <div style="display: flex; gap: 10px;">
@@ -1889,8 +1890,8 @@
 
         function afficherDetailRecette(recipe, variantId = null) {
             recetteParenteAffichee = recipe;
+            varianteSelectionneeId = variantId;
             const variante = variantId && Array.isArray(recipe.variantes) ? recipe.variantes.find(v => v.id === variantId && v.statut !== 'INACTIVE') : null;
-            varianteSelectionneeId = variante ? variantId : null;
             recetteActiveEnCours = variante ? { ...recipe, ...variante, id: recipe.id, nom: recipe.nom, _parentId: recipe.id, _variantId: variante.id } : { ...recipe, _parentId: recipe.id, _variantId: null };
             portionsActuelles = parseFloat(recetteActiveEnCours.portions) || 4;
             construireContenuDetailRecette();
@@ -2094,8 +2095,8 @@
                         ${(recipe.variantes || []).filter(v => v.statut !== 'INACTIVE').map(v => `<option value="${v.id}" ${v.id === varianteSelectionneeId ? 'selected' : ''}>${v.nomVersion || 'Variante'}${v.profil ? ' — ' + v.profil : ''}</option>`).join('')}
                     </select>
                     <button type="button" class="recipe-version-create" onclick="commencerCreationVariante()">＋ Ajouter une variante</button>
-                    ${varianteSelectionneeId ? `<button type="button" class="recipe-version-create" onclick="actionModifierRecette()">✎ Modifier cette variante</button>` : ''}
-                    ${varianteSelectionneeId && (recipe.variantes || []).find(v => v.id === varianteSelectionneeId && v.statut !== 'INACTIVE')?.justification ? `<div class="recipe-version-reason">${(recipe.variantes || []).find(v => v.id === varianteSelectionneeId).justification}</div>` : ''}
+                    ${varianteSelectionneeId ? `<button type="button" class="recipe-version-create" onclick="actionModifierRecette()">✎ Modifier</button><button type="button" class="recipe-version-deactivate" onclick="actionSupprimerRecette()">Désactiver</button>` : ''}
+                    ${varianteSelectionneeId && (recipe.variantes || []).find(v => v.id === varianteSelectionneeId)?.justification ? `<div class="recipe-version-reason">${(recipe.variantes || []).find(v => v.id === varianteSelectionneeId).justification}</div>` : ''}
                 </div>
 
                 <div class="recipe-detail-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
@@ -2133,6 +2134,18 @@
             afficherDetailRecette(parent, variantId || null);
         }
 
+        function configurerChampsVariante(actif) {
+            const cacher = (element, cache) => { if (element) element.style.display = cache ? 'none' : ''; };
+            cacher(document.getElementById('recipeTitle')?.closest('.form-group'), actif);
+            cacher(document.getElementById('recipeTargetSection')?.closest('.form-row'), actif);
+            cacher(document.getElementById('recipeProfilGroup'), actif);
+            cacher(document.getElementById('recipeCategory')?.closest('.form-group'), actif);
+            cacher(document.getElementById('recipeTagsSummary')?.closest('.form-group'), actif);
+            cacher(document.getElementById('recipePortions')?.closest('.form-row'), actif);
+            cacher(document.querySelector('.form-tabs button[onclick="changerVoletForm(5)"]'), actif);
+            cacher(document.getElementById('volet-5'), actif);
+        }
+
         function commencerCreationVariante() {
             if (!recetteParenteAffichee) return;
             const parent = recetteParenteAffichee;
@@ -2144,6 +2157,7 @@
             idRecetteEnEdition = null;
             document.getElementById('formModalTitle').textContent = 'Créer une variante';
             document.getElementById('recipeTitle').value = parent.nom || '';
+            configurerChampsVariante(true);
             document.getElementById('recipeTargetSection').value = 'incontournables';
             document.getElementById('recipeCategory').value = Object.keys(categoryMeta).find(k => categoryMeta[k].nom === parent.categorie) || parent.riqueCategorie || 'desserts';
             document.getElementById('recipePortions').value = source.portions || parent.portions || 4;
@@ -2271,23 +2285,41 @@
 
         function actionModifierRecette() {
             if (!recetteActiveEnCours) return;
-            const estVariante = Boolean(recetteActiveEnCours._variantId && recetteParenteAffichee);
-            modeCreationVariante = false;
-            modeEditionVariante = estVariante;
-            recetteParenteVariante = estVariante ? recetteParenteAffichee : null;
-            idVarianteEnEdition = estVariante ? recetteActiveEnCours._variantId : null;
-            document.getElementById('variantFormFields').classList.toggle('active', estVariante);
-            document.getElementById('recipeTargetSection').disabled = estVariante;
-            idRecetteEnEdition = estVariante ? null : recetteActiveEnCours.id;
-
-            if (estVariante) {
-                document.getElementById('variantNameInput').value = recetteActiveEnCours.nomVersion || '';
-                document.getElementById('variantProfileInput').value = recetteActiveEnCours.profil || 'Lucie';
-                document.getElementById('variantReasonInput').value = recetteActiveEnCours.justification || '';
-                document.getElementById('recipeTargetSection').value = 'incontournables';
+            if (recetteActiveEnCours._variantId && recetteParenteAffichee) {
+                const parent = recetteParenteAffichee;
+                const variante = (parent.variantes || []).find(v => v.id === recetteActiveEnCours._variantId && v.statut !== 'INACTIVE');
+                if (!variante) return;
+                modeCreationVariante = false; modeEditionVariante = true; idVarianteEnEdition = variante.id; recetteParenteVariante = parent; idRecetteEnEdition = null;
+                configurerChampsVariante(true);
+                document.getElementById('formModalTitle').textContent = 'Modifier la variante';
+                document.getElementById('recipeTitle').value = parent.nom || '';
+                document.getElementById('variantNameInput').value = variante.nomVersion || '';
+                document.getElementById('variantProfileInput').value = variante.profil || 'Lucie';
+                document.getElementById('variantReasonInput').value = variante.justification || '';
+                document.getElementById('recipeNotes').value = variante.notes || '';
+                const ingContainer = document.getElementById('ingredientsContainer'); ingContainer.innerHTML = '';
+                (variante.ingredients || []).forEach(ing => {
+                    const row = document.createElement('div'); row.className = 'ingredient-row';
+                    row.innerHTML = `<div class="fraction-options"><button type="button" onclick="choisirFractionIngredient(this, '1/2')">1/2</button><button type="button" onclick="choisirFractionIngredient(this, '1/4')">1/4</button><button type="button" onclick="choisirFractionIngredient(this, '1/3')">1/3</button><button type="button" onclick="choisirFractionIngredient(this, '3/4')">3/4</button></div><input type="text" inputmode="decimal" class="ing-qty" placeholder="Qté"><select class="ing-unit"><option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option><option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option></select><input type="text" class="ing-name" placeholder="Ingrédient">`;
+                    ingContainer.appendChild(row); row.querySelector('.ing-qty').value = ing.qte || ''; row.querySelector('.ing-unit').value = ing.unit || ''; row.querySelector('.ing-name').value = ing.nom || '';
+                });
+                if (!variante.ingredients || !variante.ingredients.length) ajouterLigneIngredient();
+                const steps = document.getElementById('etapesContainer'); steps.innerHTML = '';
+                (variante.etapes || []).forEach((etape, i) => { const row = document.createElement('div'); row.className = 'etape-row'; row.innerHTML = `<span class="etape-num">${i+1}</span><textarea placeholder="Étape..."></textarea>`; row.querySelector('textarea').value = etape; steps.appendChild(row); });
+                if (!variante.etapes || !variante.etapes.length) ajouterLigneEtape();
+                imageRecetteActuelle = parent.img || '';
+                fermerDetailRecette(); document.getElementById('recipeFormModal').classList.add('active'); changerVoletForm(1); return;
             }
-            document.getElementById('formModalTitle').textContent = estVariante ? "Modifier la variante" : "Modifier la recette";
-
+            modeCreationVariante = false;
+            modeEditionVariante = false;
+            idVarianteEnEdition = null;
+            recetteParenteVariante = null;
+            configurerChampsVariante(false);
+            document.getElementById('variantFormFields').classList.remove('active');
+            document.getElementById('recipeTargetSection').disabled = false;
+            idRecetteEnEdition = recetteActiveEnCours.id;
+            
+            document.getElementById('formModalTitle').textContent = "Modifier la recette";
             document.getElementById('recipeTitle').value = recetteActiveEnCours.nom || "";
             document.getElementById('recipePortions').value = recetteActiveEnCours.portions || 4;
             document.getElementById('recipePrepTime').value = recetteActiveEnCours.prepTime || 15;
@@ -2390,12 +2422,8 @@
         }
 
         function actionSupprimerRecette() {
-            const message = document.getElementById('deleteConfirmMessage');
-            if (message) {
-                message.textContent = varianteSelectionneeId
-                    ? "Désactiver cette variante ? Elle ne sera plus proposée, mais ses données seront conservées."
-                    : "Confirmer la suppression ?";
-            }
+            const message = document.querySelector('#deleteConfirmModal p');
+            if (message) message.textContent = varianteSelectionneeId ? 'Désactiver cette variante ? Elle sera conservée dans les données, mais ne sera plus proposée dans la liste.' : 'Confirmer la suppression de cette recette ?';
             document.getElementById('deleteConfirmModal').classList.add('active');
         }
 
@@ -2408,10 +2436,7 @@
             if (confirme && recetteActiveEnCours) {
                 if (varianteSelectionneeId && recetteParenteAffichee) {
                     const variante = (recetteParenteAffichee.variantes || []).find(v => v.id === varianteSelectionneeId);
-                    if (variante) {
-                        variante.statut = 'INACTIVE';
-                        variante.dateDesactivation = new Date().toISOString();
-                    }
+                    if (variante) { variante.statut = 'INACTIVE'; variante.dateDesactivation = new Date().toISOString(); }
                     sauvegarderDatabase();
                     const parent = recetteParenteAffichee;
                     varianteSelectionneeId = null;
@@ -2693,6 +2718,7 @@
             modeEditionVariante = false;
             idVarianteEnEdition = null;
             recetteParenteVariante = null;
+            configurerChampsVariante(false);
             document.getElementById('variantFormFields').classList.remove('active');
             document.getElementById('recipeTargetSection').disabled = false;
         }
@@ -2898,44 +2924,18 @@
 
             if (modeEditionVariante && recetteParenteVariante && idVarianteEnEdition) {
                 const nomVersion = document.getElementById('variantNameInput').value.trim();
-                if (!nomVersion) {
-                    alert("Veuillez donner un nom à cette variante.");
-                    changerVoletForm(1);
-                    document.getElementById('variantNameInput').focus();
-                    return;
-                }
+                if (!nomVersion) { alert("Veuillez donner un nom à cette variante."); changerVoletForm(1); document.getElementById('variantNameInput').focus(); return; }
                 const variante = (recetteParenteVariante.variantes || []).find(v => v.id === idVarianteEnEdition);
-                if (!variante) {
-                    alert("Cette variante n'a pas été retrouvée.");
-                    return;
-                }
-                Object.assign(variante, {
-                    nomVersion,
-                    profil: document.getElementById('variantProfileInput').value,
-                    justification: document.getElementById('variantReasonInput').value.trim(),
-                    portions: document.getElementById('recipePortions').value || recetteParenteVariante.portions || 4,
-                    prepTime: document.getElementById('recipePrepTime').value || recetteParenteVariante.prepTime || 15,
-                    cookTime: document.getElementById('recipeCookTime').value || recetteParenteVariante.cookTime || 30,
-                    ingredients,
-                    etapes,
-                    notes: document.getElementById('recipeNotes').value.trim(),
-                    source: recetteParenteVariante.source || '',
-                    statut: 'ACTIVE'
-                });
+                if (!variante) { alert("Cette variante est introuvable."); return; }
+                Object.assign(variante, { nomVersion, profil: document.getElementById('variantProfileInput').value, justification: document.getElementById('variantReasonInput').value.trim(), ingredients, etapes, notes: document.getElementById('recipeNotes').value.trim(), statut: 'ACTIVE' });
                 sauvegarderDatabase();
-                const parent = recetteParenteVariante;
-                const variantId = variante.id;
-                modeEditionVariante = false;
-                idVarianteEnEdition = null;
-                recetteParenteVariante = null;
-                document.getElementById('variantFormFields').classList.remove('active');
-                document.getElementById('recipeTargetSection').disabled = false;
+                const parent = recetteParenteVariante; const id = idVarianteEnEdition;
+                modeEditionVariante = false; idVarianteEnEdition = null; recetteParenteVariante = null;
                 fermerFormulaireAjout();
-                imageRecetteActuelle = '';
-                alert("Variante modifiée !");
-                afficherDetailRecette(parent, variantId);
+                afficherDetailRecette(parent, id);
                 const ongletActif = document.querySelector('.top-menu .menu-item.active');
                 renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+                alert("Variante modifiée !");
                 return;
             }
 
@@ -2953,13 +2953,9 @@
                     nomVersion,
                     profil: document.getElementById('variantProfileInput').value,
                     justification: document.getElementById('variantReasonInput').value.trim(),
-                    portions: document.getElementById('recipePortions').value || recetteParenteVariante.portions || 4,
-                    prepTime: document.getElementById('recipePrepTime').value || recetteParenteVariante.prepTime || 15,
-                    cookTime: document.getElementById('recipeCookTime').value || recetteParenteVariante.cookTime || 30,
                     ingredients,
                     etapes,
-                    notes: document.getElementById('recipeNotes').value.trim(),
-                    source: recetteParenteVariante.source || ''
+                    notes: document.getElementById('recipeNotes').value.trim()
                 };
                 if (!Array.isArray(recetteParenteVariante.variantes)) recetteParenteVariante.variantes = [];
                 recetteParenteVariante.variantes.push(variante);
