@@ -319,26 +319,28 @@
             margin-left: auto;
         }
         .recipe-version-panel {
-            background: color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
-            border: 1px solid var(--border-color); border-radius: 12px;
-            padding: 12px; margin: 0 0 16px;
+            display:flex; align-items:center; flex-wrap:wrap; gap:7px;
+            margin: -2px 0 12px; padding: 0;
         }
         .recipe-version-panel label {
-            display:block; font-size:.78rem; color:var(--text-muted);
-            font-weight:600; margin-bottom:6px;
+            display:inline; margin:0; color:var(--text-muted);
+            font-size:.78rem; font-weight:600; white-space:nowrap;
         }
         .recipe-version-select {
-            width:100%; padding:10px 12px; border:1px solid var(--border-color);
-            border-radius:9px; background:var(--card-bg); color:var(--text-main);
-            font-size:.95rem;
+            flex:1; min-width:150px; max-width:100%; padding:7px 9px;
+            border:1px solid var(--border-color); border-radius:8px;
+            background:var(--card-bg); color:var(--text-main); font-size:.86rem;
         }
         .recipe-version-reason {
-            margin-top:9px; color:var(--text-muted); font-size:.86rem; line-height:1.45;
+            flex-basis:100%; margin:0 0 2px; padding:6px 9px;
+            border-left:2px solid var(--accent-color); color:var(--text-muted);
+            font-size:.78rem; line-height:1.35;
         }
         .recipe-version-create {
-            margin-top:9px; border:1px dashed var(--accent-color);
-            border-radius:9px; padding:9px 11px; color:var(--accent-color);
-            background:transparent; width:100%; font-weight:600; cursor:pointer;
+            width:auto; margin:0; padding:4px 2px; border:0;
+            color:var(--accent-color); background:transparent;
+            font-size:.76rem; font-weight:500; text-decoration:underline;
+            cursor:pointer;
         }
         .variant-form-fields {
             display:none; padding:12px; margin:0 0 14px;
@@ -1707,33 +1709,7 @@
                     `;
                     listContainer.appendChild(row);
 
-                    if (Array.isArray(recipe.variantes) && recipe.variantes.length) {
-                        const variantsWrap = document.createElement('div');
-                        variantsWrap.className = 'recipe-variants-list';
-                        const toggle = document.createElement('button');
-                        toggle.type = 'button';
-                        toggle.className = 'recipe-variants-toggle';
-                        toggle.setAttribute('aria-expanded', 'false');
-                        toggle.innerHTML = `<span class="variant-chevron">›</span><span>${recipe.variantes.length} variante${recipe.variantes.length > 1 ? 's' : ''}</span>`;
-                        const items = document.createElement('div');
-                        items.hidden = true;
-                        recipe.variantes.forEach(variant => {
-                            const item = document.createElement('div');
-                            item.className = 'recipe-variant-list-item';
-                            item.innerHTML = `<span>↳</span><span>${variant.nomVersion || 'Variante'}</span><span class="variant-profile">${variant.profil || ''}</span>`;
-                            item.onclick = () => afficherDetailRecette(recipe, variant.id);
-                            items.appendChild(item);
-                        });
-                        toggle.onclick = () => {
-                            const open = !items.hidden;
-                            items.hidden = open;
-                            toggle.setAttribute('aria-expanded', String(!open));
-                            toggle.querySelector('.variant-chevron').textContent = open ? '›' : '⌄';
-                        };
-                        variantsWrap.appendChild(toggle);
-                        variantsWrap.appendChild(items);
-                        listContainer.appendChild(variantsWrap);
-                    }
+
                 });
             }
         }
@@ -1780,39 +1756,11 @@
                         </div>
                     `;
                     listContainer.appendChild(row);
-                    ajouterListeVariantes(listContainer, recipe);
                 });
             }
         }
 
-        function ajouterListeVariantes(container, recipe) {
-            if (!Array.isArray(recipe.variantes) || !recipe.variantes.length) return;
-            const wrap = document.createElement('div');
-            wrap.className = 'recipe-variants-list';
-            const toggle = document.createElement('button');
-            toggle.type = 'button';
-            toggle.className = 'recipe-variants-toggle';
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.innerHTML = `<span class="variant-chevron">›</span><span>${recipe.variantes.length} variante${recipe.variantes.length > 1 ? 's' : ''}</span>`;
-            const items = document.createElement('div');
-            items.hidden = true;
-            recipe.variantes.forEach(variant => {
-                const item = document.createElement('div');
-                item.className = 'recipe-variant-list-item';
-                item.innerHTML = `<span>↳</span><span>${variant.nomVersion || 'Variante'}</span><span class="variant-profile">${variant.profil || ''}</span>`;
-                item.onclick = () => afficherDetailRecette(recipe, variant.id);
-                items.appendChild(item);
-            });
-            toggle.onclick = () => {
-                const open = !items.hidden;
-                items.hidden = open;
-                toggle.setAttribute('aria-expanded', String(!open));
-                toggle.querySelector('.variant-chevron').textContent = open ? '›' : '⌄';
-            };
-            wrap.appendChild(toggle);
-            wrap.appendChild(items);
-            container.appendChild(wrap);
-        }
+
 
         async function garderEcranAllume() {
             if (!('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
@@ -2138,13 +2086,13 @@
                 </div>
 
                 <div class="recipe-version-panel">
-                    <label for="recipeVersionSelect">Version à cuisiner</label>
+                    <label for="recipeVersionSelect">Version :</label>
                     <select id="recipeVersionSelect" class="recipe-version-select" onchange="selectionnerVersionRecette(this.value)">
-                        <option value="">Recette originale</option>
+                        <option value="">Originale</option>
                         ${(recipe.variantes || []).map(v => `<option value="${v.id}" ${v.id === varianteSelectionneeId ? 'selected' : ''}>${v.nomVersion || 'Variante'}${v.profil ? ' — ' + v.profil : ''}</option>`).join('')}
                     </select>
-                    ${varianteSelectionneeId && (recipe.variantes || []).find(v => v.id === varianteSelectionneeId)?.justification ? `<div class="recipe-version-reason"><strong>Pourquoi cette variante?</strong> ${(recipe.variantes || []).find(v => v.id === varianteSelectionneeId).justification}</div>` : ''}
-                    <button type="button" class="recipe-version-create" onclick="commencerCreationVariante()">＋ Créer une variante à partir de cette recette</button>
+                    <button type="button" class="recipe-version-create" onclick="commencerCreationVariante()">＋ Ajouter une variante</button>
+                    ${varianteSelectionneeId && (recipe.variantes || []).find(v => v.id === varianteSelectionneeId)?.justification ? `<div class="recipe-version-reason">${(recipe.variantes || []).find(v => v.id === varianteSelectionneeId).justification}</div>` : ''}
                 </div>
 
                 <div class="recipe-detail-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
@@ -2249,7 +2197,12 @@
             imageRecetteActuelle = parent.img || '';
             document.getElementById('photoPreviewContainer').innerHTML = imageRecetteActuelle ? `<img src="${imageRecetteActuelle}" style="width:100%;height:100%;object-fit:cover;">` : 'Aucune photo';
             fermerDetailRecette();
-            document.getElementById('recipeFormModal').classList.add('active');
+            const formModal = document.getElementById('recipeFormModal');
+            const formBody = formModal.querySelector('.fullscreen-body');
+            const formTabs = formModal.querySelector('.form-tabs');
+            if (formBody) formBody.scrollTop = 0;
+            if (formTabs) formTabs.scrollLeft = 0;
+            formModal.classList.add('active');
             changerVoletForm(1);
         }
 
@@ -2732,7 +2685,11 @@
             document.querySelectorAll('.form-volet').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('volet-' + num).classList.add('active');
-            document.querySelectorAll('.form-tab-btn')[num - 1].classList.add('active');
+            const activeTab = document.querySelectorAll('.form-tab-btn')[num - 1];
+            activeTab.classList.add('active');
+            activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            const formBody = document.querySelector('#recipeFormModal .fullscreen-body');
+            if (formBody) formBody.scrollTop = 0;
         }
 
         function choixAjout(type) {
