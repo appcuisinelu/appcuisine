@@ -2291,6 +2291,7 @@
                 if (!variante) return;
                 modeCreationVariante = false; modeEditionVariante = true; idVarianteEnEdition = variante.id; recetteParenteVariante = parent; idRecetteEnEdition = null;
                 configurerChampsVariante(true);
+                document.getElementById('variantFormFields').classList.add('active');
                 document.getElementById('formModalTitle').textContent = 'Modifier la variante';
                 document.getElementById('recipeTitle').value = parent.nom || '';
                 document.getElementById('variantNameInput').value = variante.nomVersion || '';
@@ -2423,7 +2424,7 @@
 
         function actionSupprimerRecette() {
             const message = document.querySelector('#deleteConfirmModal p');
-            if (message) message.textContent = varianteSelectionneeId ? 'Désactiver cette variante ? Elle sera conservée dans les données, mais ne sera plus proposée dans la liste.' : 'Confirmer la suppression de cette recette ?';
+            if (message) message.textContent = varianteSelectionneeId ? 'Confirmez-vous la désactivation de cette variante ?' : 'Confirmer la suppression de cette recette ?';
             document.getElementById('deleteConfirmModal').classList.add('active');
         }
 
