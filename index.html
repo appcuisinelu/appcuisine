@@ -294,6 +294,59 @@
             gap: 6px;
         }
 
+
+        /* Variantes de recettes : retrait et couleur d'accent */
+        .recipe-variants-list {
+            margin: -3px 0 12px 22px;
+            padding: 8px 10px 8px 14px;
+            border-left: 2px solid var(--accent-color);
+            background: color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
+            border-radius: 0 10px 10px 0;
+        }
+        .recipe-variants-toggle {
+            display: flex; align-items: center; gap: 7px;
+            width: 100%; border: 0; background: transparent;
+            color: var(--text-muted); padding: 7px 2px;
+            font-size: .82rem; text-align: left; cursor: pointer;
+        }
+        .recipe-variant-list-item {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 2px; cursor: pointer; font-size: .9rem;
+            color: var(--accent-color); font-weight: 600;
+        }
+        .recipe-variant-list-item .variant-profile {
+            color: var(--text-muted); font-size: .76rem; font-weight: 400;
+            margin-left: auto;
+        }
+        .recipe-version-panel {
+            background: color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
+            border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 12px; margin: 0 0 16px;
+        }
+        .recipe-version-panel label {
+            display:block; font-size:.78rem; color:var(--text-muted);
+            font-weight:600; margin-bottom:6px;
+        }
+        .recipe-version-select {
+            width:100%; padding:10px 12px; border:1px solid var(--border-color);
+            border-radius:9px; background:var(--card-bg); color:var(--text-main);
+            font-size:.95rem;
+        }
+        .recipe-version-reason {
+            margin-top:9px; color:var(--text-muted); font-size:.86rem; line-height:1.45;
+        }
+        .recipe-version-create {
+            margin-top:9px; border:1px dashed var(--accent-color);
+            border-radius:9px; padding:9px 11px; color:var(--accent-color);
+            background:transparent; width:100%; font-weight:600; cursor:pointer;
+        }
+        .variant-form-fields {
+            display:none; padding:12px; margin:0 0 14px;
+            border:1px solid var(--accent-color); border-radius:10px;
+            background:color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
+        }
+        .variant-form-fields.active { display:block; }
+
         .recipe-row-card {
             display: flex;
             align-items: center;
@@ -1250,6 +1303,25 @@
                         </select>
                     </div>
                 </div>
+                <div class="variant-form-fields" id="variantFormFields">
+                    <div class="form-group">
+                        <label>Nom de la variante</label>
+                        <input type="text" id="variantNameInput" placeholder="Ex. Version moins sucrée">
+                    </div>
+                    <div class="form-group">
+                        <label>Profil</label>
+                        <select id="variantProfileInput">
+                            <option value="Lucie">Lucie</option><option value="Clémence">Clémence</option>
+                            <option value="Adeline">Adeline</option><option value="Gwenaëlle">Gwenaëlle</option>
+                            <option value="Maman">Maman</option><option value="Malo">Malo</option><option value="Invité">Invité</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pourquoi cette variante? (facultatif)</label>
+                        <textarea id="variantReasonInput" rows="3" placeholder="Ex. On trouvait le gâteau trop sucré."></textarea>
+                    </div>
+                    <p style="font-size:.78rem;color:var(--text-muted);line-height:1.4;">Les modifications saisies dans les onglets Ingrédients et Préparation seront enregistrées dans cette variante. La recette originale restera intacte.</p>
+                </div>
                 <div class="form-group">
                     <label>Catégorie</label>
                     <select id="recipeCategory">
@@ -1422,7 +1494,7 @@
     </nav>
 
     <script>
-        const database = {
+        let database = {
             incontournables: {
                 apero: [
                     { 
@@ -1480,6 +1552,23 @@
             }
         };
 
+        // Chargement et sauvegarde locale des recettes et de leurs variantes.
+        try {
+            const baseSauvegardee = localStorage.getItem('mesRecettesDatabase');
+            if (baseSauvegardee) {
+                const parsed = JSON.parse(baseSauvegardee);
+                if (parsed && parsed.incontournables && parsed.famille) database = parsed;
+            }
+        } catch (e) { console.warn('Impossible de charger les recettes sauvegardées.', e); }
+
+        function sauvegarderDatabase() {
+            try {
+                localStorage.setItem('mesRecettesDatabase', JSON.stringify(database));
+            } catch (e) {
+                alert("Les recettes n'ont pas pu être sauvegardées sur cet appareil. Vérifiez l'espace de stockage disponible.");
+            }
+        }
+
         const categoryMeta = {
             apero: { nom: "Apéro", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
             plats: { nom: "Plats", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
@@ -1496,6 +1585,11 @@
         let afficherUnitesMetriques = false;
         let verrouEcranRecette = null;
         let idRecetteEnEdition = null;
+        let modeCreationVariante = false;
+        let recetteParenteVariante = null;
+        let recetteParenteAffichee = null;
+        let varianteSelectionneeId = null;
+
         const TAGS_DEFAUT = ['#camping', '#instantpot', '#noël', '#vegan', '#vitamix', '#thermomix'];
         let tagsDisponibles = chargerTagsDisponibles();
         let tagsSelectionnes = [];
@@ -1612,6 +1706,34 @@
                         </div>
                     `;
                     listContainer.appendChild(row);
+
+                    if (Array.isArray(recipe.variantes) && recipe.variantes.length) {
+                        const variantsWrap = document.createElement('div');
+                        variantsWrap.className = 'recipe-variants-list';
+                        const toggle = document.createElement('button');
+                        toggle.type = 'button';
+                        toggle.className = 'recipe-variants-toggle';
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.innerHTML = `<span class="variant-chevron">›</span><span>${recipe.variantes.length} variante${recipe.variantes.length > 1 ? 's' : ''}</span>`;
+                        const items = document.createElement('div');
+                        items.hidden = true;
+                        recipe.variantes.forEach(variant => {
+                            const item = document.createElement('div');
+                            item.className = 'recipe-variant-list-item';
+                            item.innerHTML = `<span>↳</span><span>${variant.nomVersion || 'Variante'}</span><span class="variant-profile">${variant.profil || ''}</span>`;
+                            item.onclick = () => afficherDetailRecette(recipe, variant.id);
+                            items.appendChild(item);
+                        });
+                        toggle.onclick = () => {
+                            const open = !items.hidden;
+                            items.hidden = open;
+                            toggle.setAttribute('aria-expanded', String(!open));
+                            toggle.querySelector('.variant-chevron').textContent = open ? '›' : '⌄';
+                        };
+                        variantsWrap.appendChild(toggle);
+                        variantsWrap.appendChild(items);
+                        listContainer.appendChild(variantsWrap);
+                    }
                 });
             }
         }
@@ -1658,8 +1780,38 @@
                         </div>
                     `;
                     listContainer.appendChild(row);
+                    ajouterListeVariantes(listContainer, recipe);
                 });
             }
+        }
+
+        function ajouterListeVariantes(container, recipe) {
+            if (!Array.isArray(recipe.variantes) || !recipe.variantes.length) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'recipe-variants-list';
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'recipe-variants-toggle';
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = `<span class="variant-chevron">›</span><span>${recipe.variantes.length} variante${recipe.variantes.length > 1 ? 's' : ''}</span>`;
+            const items = document.createElement('div');
+            items.hidden = true;
+            recipe.variantes.forEach(variant => {
+                const item = document.createElement('div');
+                item.className = 'recipe-variant-list-item';
+                item.innerHTML = `<span>↳</span><span>${variant.nomVersion || 'Variante'}</span><span class="variant-profile">${variant.profil || ''}</span>`;
+                item.onclick = () => afficherDetailRecette(recipe, variant.id);
+                items.appendChild(item);
+            });
+            toggle.onclick = () => {
+                const open = !items.hidden;
+                items.hidden = open;
+                toggle.setAttribute('aria-expanded', String(!open));
+                toggle.querySelector('.variant-chevron').textContent = open ? '›' : '⌄';
+            };
+            wrap.appendChild(toggle);
+            wrap.appendChild(items);
+            container.appendChild(wrap);
         }
 
         async function garderEcranAllume() {
@@ -1785,9 +1937,12 @@
             construireContenuDetailRecette();
         }
 
-        function afficherDetailRecette(recipe) {
-            recetteActiveEnCours = recipe;
-            portionsActuelles = parseFloat(recipe.portions) || 4;
+        function afficherDetailRecette(recipe, variantId = null) {
+            recetteParenteAffichee = recipe;
+            varianteSelectionneeId = variantId;
+            const variante = variantId && Array.isArray(recipe.variantes) ? recipe.variantes.find(v => v.id === variantId) : null;
+            recetteActiveEnCours = variante ? { ...recipe, ...variante, id: recipe.id, nom: recipe.nom, _parentId: recipe.id, _variantId: variante.id } : { ...recipe, _parentId: recipe.id, _variantId: null };
+            portionsActuelles = parseFloat(recetteActiveEnCours.portions) || 4;
             construireContenuDetailRecette();
 
             const pausedJSON = localStorage.getItem('recetteEnPause_' + recipe.id);
@@ -1830,7 +1985,8 @@
             });
 
             const pausedData = {
-                id: recetteActiveEnCours.id,
+                id: recetteParenteAffichee ? recetteParenteAffichee.id : recetteActiveEnCours.id,
+                varianteId: varianteSelectionneeId,
                 nom: recetteActiveEnCours.nom,
                 portions: portionsActuelles,
                 checkedIngredients: checkedIngredients,
@@ -1879,7 +2035,7 @@
                     }
                 }
                 if (recetteTrouvee) {
-                    afficherDetailRecette(recetteTrouvee);
+                    afficherDetailRecette(recetteTrouvee, data.varianteId || null);
                 } else {
                     effacerRecetteEnPause();
                 }
@@ -1981,6 +2137,16 @@
                     </div>
                 </div>
 
+                <div class="recipe-version-panel">
+                    <label for="recipeVersionSelect">Version à cuisiner</label>
+                    <select id="recipeVersionSelect" class="recipe-version-select" onchange="selectionnerVersionRecette(this.value)">
+                        <option value="">Recette originale</option>
+                        ${(recipe.variantes || []).map(v => `<option value="${v.id}" ${v.id === varianteSelectionneeId ? 'selected' : ''}>${v.nomVersion || 'Variante'}${v.profil ? ' — ' + v.profil : ''}</option>`).join('')}
+                    </select>
+                    ${varianteSelectionneeId && (recipe.variantes || []).find(v => v.id === varianteSelectionneeId)?.justification ? `<div class="recipe-version-reason"><strong>Pourquoi cette variante?</strong> ${(recipe.variantes || []).find(v => v.id === varianteSelectionneeId).justification}</div>` : ''}
+                    <button type="button" class="recipe-version-create" onclick="commencerCreationVariante()">＋ Créer une variante à partir de cette recette</button>
+                </div>
+
                 <div class="recipe-detail-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                     <span>Ingrédients</span>
                     <div class="unit-toggle" role="group" aria-label="Unités des ingrédients">
@@ -2007,6 +2173,84 @@
                     <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
                 ` : ''}
             `;
+        }
+
+
+        function selectionnerVersionRecette(variantId) {
+            if (!recetteParenteAffichee) return;
+            const parent = recetteParenteAffichee;
+            afficherDetailRecette(parent, variantId || null);
+        }
+
+        function commencerCreationVariante() {
+            if (!recetteParenteAffichee) return;
+            const parent = recetteParenteAffichee;
+            const source = recetteActiveEnCours;
+            modeCreationVariante = true;
+            recetteParenteVariante = parent;
+            idRecetteEnEdition = null;
+            document.getElementById('formModalTitle').textContent = 'Créer une variante';
+            document.getElementById('recipeTitle').value = parent.nom || '';
+            document.getElementById('recipeTargetSection').value = 'incontournables';
+            document.getElementById('recipeCategory').value = Object.keys(categoryMeta).find(k => categoryMeta[k].nom === parent.categorie) || parent.riqueCategorie || 'desserts';
+            document.getElementById('recipePortions').value = source.portions || parent.portions || 4;
+            document.getElementById('recipePrepTime').value = source.prepTime || parent.prepTime || 15;
+            document.getElementById('recipeCookTime').value = source.cookTime || parent.cookTime || 30;
+            document.getElementById('recipeNotes').value = source.notes || parent.notes || '';
+            document.getElementById('recipeSource').value = parent.source || '';
+            document.getElementById('variantNameInput').value = '';
+            document.getElementById('variantProfileInput').value = document.getElementById('familleSelect').value || 'Lucie';
+            document.getElementById('variantReasonInput').value = '';
+            document.getElementById('variantFormFields').classList.add('active');
+            document.getElementById('recipeTargetSection').disabled = true;
+            document.getElementById('recipeProfilGroup').style.display = 'none';
+            tagsSelectionnes = Array.isArray(parent.tags) ? [...parent.tags] : [];
+            afficherResumeTags();
+
+            const ingContainer = document.getElementById('ingredientsContainer');
+            ingContainer.innerHTML = '';
+            (source.ingredients || []).forEach(ing => {
+                const row = document.createElement('div');
+                row.className = 'ingredient-row';
+                row.innerHTML = `
+                    <div class="fraction-options" aria-label="Fractions">
+                        <button type="button" onclick="choisirFractionIngredient(this, '1/2')">1/2</button>
+                        <button type="button" onclick="choisirFractionIngredient(this, '1/4')">1/4</button>
+                        <button type="button" onclick="choisirFractionIngredient(this, '1/3')">1/3</button>
+                        <button type="button" onclick="choisirFractionIngredient(this, '3/4')">3/4</button>
+                    </div>
+                    <input type="text" inputmode="decimal" class="ing-qty" aria-label="Quantité" placeholder="Qté" oninput="synchroniserBoutonsFraction(this)">
+                    <select class="ing-unit" onchange="actualiserQuantitesIngredient(this)">
+                        <option value="">(unité)</option><option value="g">g</option><option value="kg">kg</option>
+                        <option value="ml">ml</option><option value="cl">cl</option><option value="L">L</option>
+                        <option value="c.à.s">c. à s.</option><option value="c.à.c">c. à c.</option><option value="tasse">tasse(s)</option><option value="pincée">pincée</option><option value="pièce">pièce(s)</option>
+                    </select>
+                    <input type="text" placeholder="Ingrédient" class="ing-name">
+                `;
+                ingContainer.appendChild(row);
+                row.querySelector('.ing-qty').value = ing.qte || '';
+                row.querySelector('.ing-unit').value = ing.unit || '';
+                row.querySelector('.ing-name').value = ing.nom || '';
+                actualiserQuantitesIngredient(row);
+            });
+            if (!source.ingredients || !source.ingredients.length) ajouterLigneIngredient();
+
+            const steps = document.getElementById('etapesContainer');
+            steps.innerHTML = '';
+            (source.etapes || []).forEach((etape, index) => {
+                const row = document.createElement('div');
+                row.className = 'etape-row';
+                row.innerHTML = `<span class="etape-num">${index + 1}</span><textarea placeholder="Étape..."></textarea>`;
+                row.querySelector('textarea').value = etape;
+                steps.appendChild(row);
+            });
+            if (!source.etapes || !source.etapes.length) ajouterLigneEtape();
+
+            imageRecetteActuelle = parent.img || '';
+            document.getElementById('photoPreviewContainer').innerHTML = imageRecetteActuelle ? `<img src="${imageRecetteActuelle}" style="width:100%;height:100%;object-fit:cover;">` : 'Aucune photo';
+            fermerDetailRecette();
+            document.getElementById('recipeFormModal').classList.add('active');
+            changerVoletForm(1);
         }
 
         function modifierPortions(delta) {
@@ -2069,6 +2313,14 @@
 
         function actionModifierRecette() {
             if (!recetteActiveEnCours) return;
+            if (recetteActiveEnCours._variantId) {
+                alert("Pour le moment, une variante peut être consultée et utilisée; sa modification directe sera ajoutée dans une prochaine mise à jour.");
+                return;
+            }
+            modeCreationVariante = false;
+            recetteParenteVariante = null;
+            document.getElementById('variantFormFields').classList.remove('active');
+            document.getElementById('recipeTargetSection').disabled = false;
             idRecetteEnEdition = recetteActiveEnCours.id;
             
             document.getElementById('formModalTitle').textContent = "Modifier la recette";
@@ -2184,12 +2436,24 @@
         function confirmerSuppressionRecette(confirme) {
             fermerModalSuppression();
             if (confirme && recetteActiveEnCours) {
+                if (varianteSelectionneeId && recetteParenteAffichee) {
+                    recetteParenteAffichee.variantes = (recetteParenteAffichee.variantes || []).filter(v => v.id !== varianteSelectionneeId);
+                    sauvegarderDatabase();
+                    const parent = recetteParenteAffichee;
+                    varianteSelectionneeId = null;
+                    afficherDetailRecette(parent);
+                    alert("Variante supprimée.");
+                    const ongletActif = document.querySelector('.top-menu .menu-item.active');
+                    renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+                    return;
+                }
                 for (const catKey in database.incontournables) {
                     database.incontournables[catKey] = database.incontournables[catKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
                 for (const profKey in database.famille) {
                     database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
+                sauvegarderDatabase();
                 fermerDetailRecette();
                 alert("Recette supprimée.");
                 retourAccueil();
@@ -2449,7 +2713,13 @@
             document.getElementById('addChoiceModal').classList.add('active'); 
         }
         function fermerMenuAjout() { document.getElementById('addChoiceModal').classList.remove('active'); }
-        function fermerFormulaireAjout() { document.getElementById('recipeFormModal').classList.remove('active'); }
+        function fermerFormulaireAjout() {
+            document.getElementById('recipeFormModal').classList.remove('active');
+            modeCreationVariante = false;
+            recetteParenteVariante = null;
+            document.getElementById('variantFormFields').classList.remove('active');
+            document.getElementById('recipeTargetSection').disabled = false;
+        }
         function fermerModalSite() { document.getElementById('siteImportModal').classList.remove('active'); }
         function fermerModalPhotoImport() { document.getElementById('photoImportPageModal').classList.remove('active'); }
         function fermerModalVideo() { document.getElementById('videoImportModal').classList.remove('active'); }
@@ -2468,6 +2738,11 @@
         function choixAjout(type) {
             fermerMenuAjout();
             if (type === 'manuel') {
+                modeCreationVariante = false;
+                recetteParenteVariante = null;
+                document.getElementById('variantFormFields').classList.remove('active');
+                document.getElementById('recipeTargetSection').disabled = false;
+                document.getElementById('formModalTitle').textContent = 'Nouvelle Recette';
                 document.getElementById('recipeFormModal').classList.add('active');
                 changerVoletForm(1);
             } else if (type === 'site') {
@@ -2641,6 +2916,44 @@
                 if (texte) etapes.push(texte);
             });
 
+            if (modeCreationVariante && recetteParenteVariante) {
+                const nomVersion = document.getElementById('variantNameInput').value.trim();
+                if (!nomVersion) {
+                    alert("Veuillez donner un nom à cette variante.");
+                    changerVoletForm(1);
+                    document.getElementById('variantNameInput').focus();
+                    return;
+                }
+                const variante = {
+                    id: 'variante_' + Date.now(),
+                    nomVersion,
+                    profil: document.getElementById('variantProfileInput').value,
+                    justification: document.getElementById('variantReasonInput').value.trim(),
+                    portions: document.getElementById('recipePortions').value || recetteParenteVariante.portions || 4,
+                    prepTime: document.getElementById('recipePrepTime').value || recetteParenteVariante.prepTime || 15,
+                    cookTime: document.getElementById('recipeCookTime').value || recetteParenteVariante.cookTime || 30,
+                    ingredients,
+                    etapes,
+                    notes: document.getElementById('recipeNotes').value.trim(),
+                    source: recetteParenteVariante.source || ''
+                };
+                if (!Array.isArray(recetteParenteVariante.variantes)) recetteParenteVariante.variantes = [];
+                recetteParenteVariante.variantes.push(variante);
+                sauvegarderDatabase();
+                const parent = recetteParenteVariante;
+                modeCreationVariante = false;
+                recetteParenteVariante = null;
+                document.getElementById('variantFormFields').classList.remove('active');
+                document.getElementById('recipeTargetSection').disabled = false;
+                fermerFormulaireAjout();
+                imageRecetteActuelle = '';
+                alert("Variante enregistrée !");
+                afficherDetailRecette(parent, variante.id);
+                const ongletActif = document.querySelector('.top-menu .menu-item.active');
+                renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
+                return;
+            }
+
             if (idRecetteEnEdition) {
                 let recetteMiseAJour = null;
                 for (const catKey in database.incontournables) {
@@ -2692,6 +3005,7 @@
                     }
                 }
                 
+                sauvegarderDatabase();
                 alert("Modifications enregistrées !");
                 fermerFormulaireAjout();
                 idRecetteEnEdition = null;
@@ -2725,6 +3039,7 @@
                     if (!database.famille[membre]) database.famille[membre] = [];
                     database.famille[membre].push(nouvelleRecette);
                 }
+                sauvegarderDatabase();
                 alert("Recette enregistrée !");
                 fermerFormulaireAjout();
             }
