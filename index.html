@@ -1855,6 +1855,13 @@
             return Number.isFinite(dec) ? dec : NaN;
         }
 
+        // Reconnaît les œufs entiers sans toucher aux blancs ni aux jaunes.
+        function estOeufEntier(ingredient) {
+            const nom = String(ingredient?.nom || '').toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return /\boeufs?\b/.test(nom) && !/\b(blancs?|jaunes?)\b/.test(nom);
+        }
+
         function formaterQuantiteFraction(valeur) {
             if (!Number.isFinite(valeur)) return '';
             const entier = Math.trunc(valeur);
@@ -2065,7 +2072,9 @@
                     let qteAffichee = ing.qte || '';
                     let uniteAffichee = ing.unit || '';
                     if (qteAffichee !== '' && Number.isFinite(parserQuantite(qteAffichee))) {
-                        const valNum = parserQuantite(qteAffichee) * ratio;
+                        let valNum = parserQuantite(qteAffichee) * ratio;
+                        // Les œufs entiers sont toujours affichés en quantité entière.
+                        if (estOeufEntier(ing)) valNum = Math.round(valNum);
                         if (afficherUnitesMetriques) {
                             const converti = convertirIngredientEnMetrique(ing, valNum);
                             if (converti) { qteAffichee = converti.qte; uniteAffichee = converti.unit; }
