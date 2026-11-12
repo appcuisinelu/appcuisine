@@ -2368,6 +2368,28 @@
             document.getElementById('variantFormFields').classList.remove('active');
             document.getElementById('recipeTargetSection').disabled = false;
             idRecetteEnEdition = recetteActiveEnCours.id;
+
+            // Retrouver l'emplacement actuel pour préremplir correctement la destination et le profil.
+            let emplacementActuel = null;
+            for (const [catKey, recettes] of Object.entries(database.incontournables || {})) {
+                if (Array.isArray(recettes) && recettes.some(r => r.id === idRecetteEnEdition)) {
+                    emplacementActuel = { cible: 'incontournables', categorie: catKey };
+                    break;
+                }
+            }
+            if (!emplacementActuel) {
+                for (const [profil, recettes] of Object.entries(database.famille || {})) {
+                    if (Array.isArray(recettes) && recettes.some(r => r.id === idRecetteEnEdition)) {
+                        emplacementActuel = { cible: 'famille', profil };
+                        break;
+                    }
+                }
+            }
+            document.getElementById('recipeTargetSection').value = emplacementActuel?.cible || (recetteActiveEnCours.membre && recetteActiveEnCours.membre !== 'Incontournables' ? 'famille' : 'incontournables');
+            document.getElementById('recipeProfilSelect').value = emplacementActuel?.profil || recetteActiveEnCours.membre || document.getElementById('familleSelect').value || 'Lucie';
+            gererVisibiliteProfil(document.getElementById('recipeTargetSection').value);
+            const categorieActuelle = emplacementActuel?.categorie || Object.keys(categoryMeta).find(k => categoryMeta[k].nom === recetteActiveEnCours.categorie) || recetteActiveEnCours.riqueCategorie || 'desserts';
+            document.getElementById('recipeCategory').value = categorieActuelle;
             
             document.getElementById('formModalTitle').textContent = "Modifier la recette";
             document.getElementById('recipeTitle').value = recetteActiveEnCours.nom || "";
@@ -3025,64 +3047,59 @@
             }
 
             if (idRecetteEnEdition) {
-                let recetteMiseAJour = null;
-                for (const catKey in database.incontournables) {
-                    database.incontournables[catKey] = database.incontournables[catKey].map(r => {
-                        if (r.id === idRecetteEnEdition) {
-                            recetteMiseAJour = {
-                                ...r,
-                                nom: titre,
-                                categorie: nomCat,
-                                tags: tags,
-                                membre: membreVal,
-                                img: imageRecetteActuelle || r.img,
-                                portions: document.getElementById('recipePortions').value || 4,
-                                prepTime: document.getElementById('recipePrepTime').value || 15,
-                                cookTime: document.getElementById('recipeCookTime').value || 30,
-                                ingredients: ingredients,
-                                etapes: etapes,
-                                notes: document.getElementById('recipeNotes').value.trim(),
-                                source: document.getElementById('recipeSource').value.trim()
-                            };
-                            return recetteMiseAJour;
-                        }
-                        return r;
-                    });
+                let recetteOriginale = null;
+                // Retirer la recette de tous les emplacements avant de la replacer : aucun doublon possible.
+                for (const [catKey, recettes] of Object.entries(database.incontournables || {})) {
+                    if (!Array.isArray(recettes)) continue;
+                    const index = recettes.findIndex(r => r.id === idRecetteEnEdition);
+                    if (index !== -1) recetteOriginale = recettes.splice(index, 1)[0];
                 }
-                if (!recetteMiseAJour) {
-                    for (const profKey in database.famille) {
-                        database.famille[profKey] = database.famille[profKey].map(r => {
-                            if (r.id === idRecetteEnEdition) {
-                                recetteMiseAJour = {
-                                    ...r,
-                                    nom: titre,
-                                    categorie: nomCat,
-                                    tags: tags,
-                                    membre: profKey,
-                                    img: imageRecetteActuelle || r.img,
-                                    portions: document.getElementById('recipePortions').value || 4,
-                                    prepTime: document.getElementById('recipePrepTime').value || 15,
-                                    cookTime: document.getElementById('recipeCookTime').value || 30,
-                                    ingredients: ingredients,
-                                    etapes: etapes,
-                                    notes: document.getElementById('recipeNotes').value.trim(),
-                                    source: document.getElementById('recipeSource').value.trim()
-                                };
-                                return recetteMiseAJour;
-                            }
-                            return r;
-                        });
-                    }
+                for (const [profil, recettes] of Object.entries(database.famille || {})) {
+                    if (!Array.isArray(recettes)) continue;
+                    const index = recettes.findIndex(r => r.id === idRecetteEnEdition);
+                    if (index !== -1) recetteOriginale = recettes.splice(index, 1)[0];
                 }
-                
+
+                if (!recetteOriginale) {
+                    alert("Impossible de retrouver cette recette dans la base de données.");
+                    return;
+                }
+
+                const recetteMiseAJour = {
+                    ...recetteOriginale,
+                    nom: titre,
+                    categorie: nomCat,
+                    tags: tags,
+                    membre: membreVal,
+                    img: imageRecetteActuelle || recetteOriginale.img,
+                    portions: document.getElementById('recipePortions').value || 4,
+                    prepTime: document.getElementById('recipePrepTime').value || 15,
+                    cookTime: document.getElementById('recipeCookTime').value || 30,
+                    ingredients: ingredients,
+                    etapes: etapes,
+                    notes: document.getElementById('recipeNotes').value.trim(),
+                    source: document.getElementById('recipeSource').value.trim()
+                };
+
+                if (cible === 'incontournables') {
+                    if (!Array.isArray(database.incontournables[categorie])) database.incontournables[categorie] = [];
+                    database.incontournables[categorie].push(recetteMiseAJour);
+                } else {
+                    const profilChoisi = document.getElementById('recipeProfilSelect').value;
+                    if (!Array.isArray(database.famille[profilChoisi])) database.famille[profilChoisi] = [];
+                    recetteMiseAJour.membre = profilChoisi;
+                    database.famille[profilChoisi].push(recetteMiseAJour);
+                }
+
                 sauvegarderDatabase();
                 alert("Modifications enregistrées !");
                 fermerFormulaireAjout();
                 idRecetteEnEdition = null;
-
-                if (recetteMiseAJour) {
-                    afficherDetailRecette(recetteMiseAJour);
-                }
+                recetteActiveEnCours = recetteMiseAJour;
+                recetteParenteAffichee = recetteMiseAJour;
+                afficherDetailRecette(recetteMiseAJour);
+                const ongletActif = document.querySelector('.top-menu .menu-item.active');
+                renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
             } else {
                 const nouvelleRecette = {
                     id: 'recette_' + Date.now(),
