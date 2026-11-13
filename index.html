@@ -1953,6 +1953,25 @@
             construireContenuDetailRecette();
         }
 
+        function afficherSourceRecette(source) {
+            const texte = String(source ?? '').trim();
+            if (!texte) return '';
+            const echapper = valeur => valeur.replace(/[&<>"']/g, caractere => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[caractere]);
+            try {
+                const url = new URL(texte);
+                if (url.protocol === 'http:' || url.protocol === 'https:') {
+                    const href = echapper(url.href);
+                    const libelle = echapper(texte);
+                    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: underline;">${libelle}</a>`;
+                }
+            } catch (erreur) {
+                // Une source qui n'est pas une adresse Web reste affichée comme texte.
+            }
+            return echapper(texte);
+        }
+
         function afficherDetailRecette(recipe, variantId = null) {
             recetteParenteAffichee = recipe;
             varianteSelectionneeId = variantId;
@@ -2210,7 +2229,7 @@
 
                 ${recipe.source ? `
                     <div class="recipe-detail-section-title">Source</div>
-                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.source}</p>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4; overflow-wrap: anywhere;">${afficherSourceRecette(recipe.source)}</p>
                 ` : ''}
             `;
         }
