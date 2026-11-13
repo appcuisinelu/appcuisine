@@ -2080,7 +2080,13 @@
                     let uniteAffichee = ing.unit || '';
                     if (qteAffichee !== '' && Number.isFinite(parserQuantite(qteAffichee))) {
                         const valNum = parserQuantite(qteAffichee) * ratio;
-                        if (afficherUnitesMetriques) {
+                        const nomIngredient = String(ing.nom || '').toLocaleLowerCase('fr');
+                        const estOeufEntier = /[œo]uf/.test(nomIngredient) && !/(blanc|jaune)/.test(nomIngredient);
+                        const uniteIngredient = String(ing.unit || '').toLocaleLowerCase('fr').replace(/[.\s]/g, '');
+                        if (estOeufEntier && ['piece(s)', 'piece', 'unite(s)', 'unite'].includes(uniteIngredient)) {
+                            // Les œufs entiers sont toujours affichés en nombre entier.
+                            qteAffichee = Math.max(0, Math.round(valNum));
+                        } else if (afficherUnitesMetriques) {
                             const converti = convertirIngredientEnMetrique(ing, valNum);
                             if (converti) { qteAffichee = converti.qte; uniteAffichee = converti.unit; }
                             else qteAffichee = formaterQuantiteFraction(valNum);
@@ -2180,7 +2186,7 @@
 
                 ${recipe.notes ? `
                     <div class="recipe-detail-section-title">Notes & Astuces</div>
-                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4;">${recipe.notes}</p>
+                    <p style="font-size: 0.95rem; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; line-height: 1.4; white-space: pre-wrap;">${recipe.notes}</p>
                 ` : ''}
 
                 ${recipe.source ? `
