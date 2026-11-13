@@ -1977,6 +1977,21 @@
                         if (stepCards[idx]) stepCards[idx].classList.add('checked');
                     });
                 }
+
+                // La recette est maintenant reprise : conserver l'état dans l'écran,
+                // mais retirer la sauvegarde de pause pour qu'une fermeture sans pause
+                // réinitialise les portions à la prochaine ouverture.
+                localStorage.removeItem('recetteEnPause_' + recipe.id);
+                const dernierePause = localStorage.getItem('derniereRecetteEnPause');
+                if (dernierePause) {
+                    try {
+                        if (JSON.parse(dernierePause).id === recipe.id) {
+                            localStorage.removeItem('derniereRecetteEnPause');
+                        }
+                    } catch (erreur) {
+                        localStorage.removeItem('derniereRecetteEnPause');
+                    }
+                }
             }
 
             afficherUnitesMetriques = false;
