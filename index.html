@@ -867,7 +867,7 @@
 
         .ingredient-row {
             display: grid;
-            grid-template-columns: 78px 95px minmax(0, 1fr);
+            grid-template-columns: 78px 95px minmax(0, 1fr) 32px;
             gap: 6px;
             margin-bottom: 12px;
             align-items: center;
@@ -905,7 +905,21 @@
         }
         .ing-qty { width: 78px !important; min-width: 0; text-align: center; }
         .ing-unit { width: 95px !important; }
-        .ing-name { flex-grow: 1; }
+        .ing-name { flex-grow: 1; min-width: 0; }
+        .row-delete-btn {
+            width: 30px; height: 30px; padding: 0;
+            border: 1px solid var(--border-color); border-radius: 8px;
+            background: var(--card-bg); color: var(--text-muted);
+            font-size: 1.1rem; line-height: 1; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .row-delete-btn:hover { color: #c0392b; border-color: #c0392b; }
+        .etape-row .row-delete-btn { margin-top: 6px; flex-shrink: 0; }
+        @media (max-width: 420px) {
+            .ingredient-row { grid-template-columns: 65px 82px minmax(0, 1fr) 30px; gap: 4px; }
+            .ing-qty { width: 65px !important; }
+            .ing-unit { width: 82px !important; }
+        }
 
         .etape-row {
             display: flex;
@@ -1855,13 +1869,6 @@
             return Number.isFinite(dec) ? dec : NaN;
         }
 
-        // Reconnaît les œufs entiers sans toucher aux blancs ni aux jaunes.
-        function estOeufEntier(ingredient) {
-            const nom = String(ingredient?.nom || '').toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            return /\boeufs?\b/.test(nom) && !/\b(blancs?|jaunes?)\b/.test(nom);
-        }
-
         function formaterQuantiteFraction(valeur) {
             if (!Number.isFinite(valeur)) return '';
             const entier = Math.trunc(valeur);
@@ -2072,9 +2079,7 @@
                     let qteAffichee = ing.qte || '';
                     let uniteAffichee = ing.unit || '';
                     if (qteAffichee !== '' && Number.isFinite(parserQuantite(qteAffichee))) {
-                        let valNum = parserQuantite(qteAffichee) * ratio;
-                        // Les œufs entiers sont toujours affichés en quantité entière.
-                        if (estOeufEntier(ing)) valNum = Math.round(valNum);
+                        const valNum = parserQuantite(qteAffichee) * ratio;
                         if (afficherUnitesMetriques) {
                             const converti = convertirIngredientEnMetrique(ing, valNum);
                             if (converti) { qteAffichee = converti.qte; uniteAffichee = converti.unit; }
@@ -2922,6 +2927,44 @@
             });
         }
 
+        // Ajoute une commande de suppression à chaque ligne, y compris celles
+        // créées lors du chargement d'une recette ou d'une variante.
+        function installerSuppressionLignes() {
+            const configurer = (ligne, type) => {
+                if (ligne.querySelector('.row-delete-btn')) return;
+                const bouton = document.createElement('button');
+                bouton.type = 'button';
+                bouton.className = 'row-delete-btn';
+                bouton.textContent = '×';
+                bouton.title = type === 'ingredient' ? 'Supprimer cet ingrédient' : 'Supprimer cette étape';
+                bouton.setAttribute('aria-label', bouton.title);
+                ligne.appendChild(bouton);
+            };
+            const ingredients = document.getElementById('ingredientsContainer');
+            const etapes = document.getElementById('etapesContainer');
+            [ingredients, etapes].forEach((container, index) => {
+                if (!container || container.dataset.suppressionInstallee) return;
+                const type = index === 0 ? 'ingredient' : 'etape';
+                const traiter = () => container.querySelectorAll(index === 0 ? '.ingredient-row' : '.etape-row').forEach(ligne => configurer(ligne, type));
+                traiter();
+                new MutationObserver(traiter).observe(container, { childList: true, subtree: true });
+                container.addEventListener('click', event => {
+                    const bouton = event.target.closest('.row-delete-btn');
+                    if (!bouton) return;
+                    const ligne = bouton.closest(index === 0 ? '.ingredient-row' : '.etape-row');
+                    if (!ligne) return;
+                    ligne.remove();
+                    if (index === 1) {
+                        container.querySelectorAll('.etape-row').forEach((row, i) => {
+                            const numero = row.querySelector('.etape-num');
+                            if (numero) numero.textContent = String(i + 1);
+                        });
+                    }
+                });
+                container.dataset.suppressionInstallee = 'true';
+            });
+        }
+
         function ajouterLigneIngredient() {
             const container = document.getElementById('ingredientsContainer');
             const row = document.createElement('div');
@@ -3150,6 +3193,7 @@
         function exporterRecettes() { alert("Exportation déclenchée !"); }
 
         window.addEventListener('DOMContentLoaded', () => {
+            installerSuppressionLignes();
             const champNouveauTag = document.getElementById('newRecipeTag');
             if (champNouveauTag) champNouveauTag.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); ajouterNouveauTag(); } });
             document.getElementById('searchInput').addEventListener('input', event => {
