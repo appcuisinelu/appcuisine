@@ -1609,6 +1609,8 @@
         let recetteParenteVariante = null;
         let recetteParenteAffichee = null;
         let varianteSelectionneeId = null;
+        // Empêche la fermeture déclenchée par le bouton Pause d’effacer la sauvegarde.
+        let fermetureDetailPourPause = false;
 
         const TAGS_DEFAUT = ['#camping', '#instantpot', '#noël', '#vegan', '#vitamix', '#thermomix'];
         let tagsDisponibles = chargerTagsDisponibles();
@@ -2026,7 +2028,9 @@
             localStorage.setItem('recetteEnPause_' + recetteActiveEnCours.id, JSON.stringify(pausedData));
             localStorage.setItem('derniereRecetteEnPause', JSON.stringify(pausedData));
 
+            fermetureDetailPourPause = true;
             fermerDetailRecette();
+            fermetureDetailPourPause = false;
             verifierRecetteEnPause();
         }
 
@@ -2331,6 +2335,23 @@
         }
 
         function fermerDetailRecette() {
+            // Une fermeture normale signifie que la recette n’est plus en pause.
+            // Seule la fermeture automatique déclenchée par le bouton « Mettre en pause »
+            // conserve les données de reprise.
+            if (!fermetureDetailPourPause && recetteParenteAffichee) {
+                const idRecette = recetteParenteAffichee.id;
+                localStorage.removeItem('recetteEnPause_' + idRecette);
+                const dernierePause = localStorage.getItem('derniereRecetteEnPause');
+                if (dernierePause) {
+                    try {
+                        if (JSON.parse(dernierePause).id === idRecette) {
+                            localStorage.removeItem('derniereRecetteEnPause');
+                        }
+                    } catch (erreur) {
+                        localStorage.removeItem('derniereRecetteEnPause');
+                    }
+                }
+            }
             document.getElementById('recipeDetailModal').classList.remove('active');
             libererVerrouEcran();
             afficherUnitesMetriques = false;
