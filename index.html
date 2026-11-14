@@ -1555,27 +1555,46 @@
         <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerModalCouleurs()">Retour aux paramètres</button></div>
     </div>
 
-    <!-- ADMINISTRATION : interface préparatoire; authentification à ajouter -->
+    <!-- ADMINISTRATION : menu de sous-options -->
     <div class="fullscreen-modal" id="adminModal">
         <div class="fullscreen-header"><h3>Administration</h3><button class="popup-close-btn" onclick="fermerAdministration()">&times;</button></div>
+        <div class="fullscreen-body settings-menu-list">
+            <button class="settings-menu-card" onclick="ouvrirGestionCategories()">
+                <span class="settings-menu-icon">▦</span>
+                <span class="settings-menu-copy"><strong>Gestion des catégories</strong><small>Ajouter et organiser les catégories de recettes</small></span>
+                <span class="settings-menu-arrow">›</span>
+            </button>
+            <div class="settings-menu-card" style="cursor:default; opacity:.72;">
+                <span class="settings-menu-icon">♙</span>
+                <span class="settings-menu-copy"><strong>Comptes et accès</strong><small>Une prochaine option d’administration</small></span>
+                <span class="settings-menu-arrow">›</span>
+            </div>
+            <p style="color:var(--text-muted); line-height:1.5; margin:8px 2px 0; font-size:.85rem;"><strong>Accès administrateur :</strong> l'accès sera réellement réservé à Lucie lorsque les comptes et l'authentification seront mis en place.</p>
+        </div>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="retourParametresDepuisAdmin()">Retour aux paramètres</button></div>
+    </div>
+
+    <!-- SOUS-MENU : GESTION DES CATÉGORIES -->
+    <div class="fullscreen-modal" id="adminCategoriesModal">
+        <div class="fullscreen-header"><h3>Gestion des catégories</h3><button class="popup-close-btn" onclick="fermerGestionCategories()">&times;</button></div>
         <div class="fullscreen-body">
-            <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:14px; padding:18px;">
-                <h4 style="color:var(--accent-color); margin-bottom:10px;">Gestion des catégories</h4>
-                <p style="color:var(--text-muted); line-height:1.5; margin-bottom:14px;">Ajoute ici une catégorie qui pourra ensuite être choisie lors de la création d'une recette.</p>
+            <section class="appearance-section">
+                <h4>Ajouter une catégorie</h4>
+                <p class="appearance-hint">La catégorie sera disponible dans le formulaire de création d'une recette. Elle apparaîtra dans les profils lorsqu'une recette lui sera associée.</p>
                 <div class="form-group" style="margin-bottom:10px;">
                     <label for="nouvelleCategorieNom">Nom de la nouvelle catégorie</label>
                     <input id="nouvelleCategorieNom" type="text" maxlength="40" placeholder="Ex. : Soupes et potages" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-color); color:var(--text-main);">
                 </div>
                 <button class="primary-btn" style="width:100%;" onclick="ajouterCategorie()">＋ Ajouter la catégorie</button>
                 <p id="categorieAdminMessage" role="status" style="font-size:.88rem; margin:10px 0 0; color:var(--text-muted);"></p>
-                <div style="border-top:1px solid var(--border-color); margin-top:18px; padding-top:14px;">
-                    <h4 style="margin-bottom:10px;">Catégories disponibles</h4>
-                    <div id="listeCategoriesAdmin" style="display:grid; gap:7px;"></div>
-                </div>
-                <p style="color:var(--text-muted); line-height:1.5; margin-top:16px; font-size:.85rem;"><strong>Accès administrateur :</strong> l'accès sera réellement réservé à Lucie lorsque les comptes et l'authentification seront mis en place.</p>
-            </div>
+            </section>
+            <section class="appearance-section">
+                <h4>Catégories disponibles</h4>
+                <p class="appearance-hint">Les catégories personnalisées non utilisées restent disponibles pour la création.</p>
+                <div id="listeCategoriesAdmin" style="display:grid; gap:7px;"></div>
+            </section>
         </div>
-        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerAdministration()">Retour aux paramètres</button></div>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="retourMenuAdministration()">Retour à Administration</button></div>
     </div>
 
     <nav class="bottom-nav">
@@ -1692,7 +1711,7 @@
                 if (!selectCategorie.querySelector(`option[value="${key}"]`)) {
                     const option = document.createElement('option');
                     option.value = key;
-                    option.textContent = `${meta.nom} (inactive)`;
+                    option.textContent = `${meta.nom} (disponible à la création)`;
                     selectCategorie.appendChild(option);
                 }
             });
@@ -1789,7 +1808,7 @@
                 nom.textContent = meta.nom;
                 const statut = document.createElement('small');
                 statut.style.color = 'var(--text-muted)';
-                statut.textContent = meta.personnalisee ? (categoriePossedeRecette(key) ? 'Active' : 'Inactive – disponible à la création') : 'Existante';
+                statut.textContent = meta.personnalisee ? (categoriePossedeRecette(key) ? 'Active' : 'Disponible à la création') : 'Existante';
                 ligne.append(nom, statut);
                 liste.appendChild(ligne);
             });
@@ -1810,7 +1829,7 @@
             if (selectCategorie) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = `${nom} (inactive)`;
+                option.textContent = `${nom} (disponible à la création)`;
                 selectCategorie.appendChild(option);
             }
             try {
@@ -2859,11 +2878,27 @@
         function ouvrirAdministration() {
             fermerParametres();
             document.getElementById('adminModal').classList.add('active');
-            actualiserListeCategoriesAdmin();
         }
         function fermerAdministration() { document.getElementById('adminModal').classList.remove('active'); }
+        function ouvrirGestionCategories() {
+            fermerAdministration();
+            document.getElementById('adminCategoriesModal').classList.add('active');
+            actualiserListeCategoriesAdmin();
+        }
+        function fermerGestionCategories() { document.getElementById('adminCategoriesModal').classList.remove('active'); }
+        function retourMenuAdministration() {
+            fermerGestionCategories();
+            document.getElementById('adminModal').classList.add('active');
+        }
+        function retourParametresDepuisAdmin() {
+            fermerAdministration();
+            document.getElementById('settingsModal').classList.add('active');
+        }
         function ouvrirModalCouleurs() { ouvrirApparence(); }
-        function fermerModalCouleurs() { document.getElementById('colorModal').classList.remove('active'); }
+        function fermerModalCouleurs() {
+            document.getElementById('colorModal').classList.remove('active');
+            document.getElementById('settingsModal').classList.add('active');
+        }
 
         function changerCouleur(couleur) {
             document.body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
