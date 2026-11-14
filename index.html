@@ -1560,9 +1560,19 @@
         <div class="fullscreen-header"><h3>Administration</h3><button class="popup-close-btn" onclick="fermerAdministration()">&times;</button></div>
         <div class="fullscreen-body">
             <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:14px; padding:18px;">
-                <h4 style="color:var(--accent-color); margin-bottom:10px;">Gestion de l'application</h4>
-                <p style="color:var(--text-muted); line-height:1.5;">Cette section accueillera les outils d'administration, notamment la gestion des catégories.</p>
-                <p style="color:var(--text-muted); line-height:1.5; margin-top:12px;"><strong>Accès administrateur :</strong> réservé à Lucie lorsque les comptes et l'authentification seront mis en place.</p>
+                <h4 style="color:var(--accent-color); margin-bottom:10px;">Gestion des catégories</h4>
+                <p style="color:var(--text-muted); line-height:1.5; margin-bottom:14px;">Ajoute ici une catégorie qui pourra ensuite être choisie lors de la création d'une recette.</p>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label for="nouvelleCategorieNom">Nom de la nouvelle catégorie</label>
+                    <input id="nouvelleCategorieNom" type="text" maxlength="40" placeholder="Ex. : Soupes et potages" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-color); color:var(--text-main);">
+                </div>
+                <button class="primary-btn" style="width:100%;" onclick="ajouterCategorie()">＋ Ajouter la catégorie</button>
+                <p id="categorieAdminMessage" role="status" style="font-size:.88rem; margin:10px 0 0; color:var(--text-muted);"></p>
+                <div style="border-top:1px solid var(--border-color); margin-top:18px; padding-top:14px;">
+                    <h4 style="margin-bottom:10px;">Catégories disponibles</h4>
+                    <div id="listeCategoriesAdmin" style="display:grid; gap:7px;"></div>
+                </div>
+                <p style="color:var(--text-muted); line-height:1.5; margin-top:16px; font-size:.85rem;"><strong>Accès administrateur :</strong> l'accès sera réellement réservé à Lucie lorsque les comptes et l'authentification seront mis en place.</p>
             </div>
         </div>
         <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerAdministration()">Retour aux paramètres</button></div>
@@ -1666,6 +1676,28 @@
             cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
         };
 
+        // Catégories ajoutées dans l'administration : conservées sur cet appareil.
+        try {
+            const categoriesPersonnalisees = JSON.parse(localStorage.getItem('mesRecettesCategoriesPersonnalisees') || '{}');
+            Object.entries(categoriesPersonnalisees).forEach(([key, meta]) => {
+                if (meta && meta.nom && !categoryMeta[key]) categoryMeta[key] = { nom: meta.nom, img: meta.img || categoryMeta.basiques.img, personnalisee: true, inactive: true };
+            });
+        } catch (e) { console.warn('Les catégories personnalisées n’ont pas pu être chargées.', e); }
+
+        // Rend les catégories personnalisées disponibles dans le formulaire de recette.
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectCategorie = document.getElementById('recipeCategory');
+            if (!selectCategorie) return;
+            Object.entries(categoryMeta).filter(([key, meta]) => meta.personnalisee).forEach(([key, meta]) => {
+                if (!selectCategorie.querySelector(`option[value="${key}"]`)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `${meta.nom} (inactive)`;
+                    selectCategorie.appendChild(option);
+                }
+            });
+        });
+
         let imageRecetteActuelle = "";
         let recetteActiveEnCours = null;
         let portionsActuelles = 4;
@@ -1731,6 +1763,69 @@
             input.value = ''; afficherChoixTags(); afficherResumeTags(); input.focus();
         }
 
+        function categoriePossedeRecette(catKey) {
+            const nom = categoryMeta[catKey]?.nom;
+            if (!nom) return false;
+            const contient = valeur => {
+                if (!valeur) return false;
+                if (Array.isArray(valeur)) return valeur.some(contient);
+                if (typeof valeur === 'object') {
+                    if ((valeur.categorie === nom || valeur.categorieKey === catKey || valeur.riqueCategorie === catKey) && !valeur.desactivee) return true;
+                    return Object.values(valeur).some(contient);
+                }
+                return false;
+            };
+            return contient(database);
+        }
+
+        function actualiserListeCategoriesAdmin() {
+            const liste = document.getElementById('listeCategoriesAdmin');
+            if (!liste) return;
+            liste.innerHTML = '';
+            Object.entries(categoryMeta).sort((a,b) => a[1].nom.localeCompare(b[1].nom, 'fr', { sensitivity: 'base' })).forEach(([key, meta]) => {
+                const ligne = document.createElement('div');
+                ligne.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; border:1px solid var(--border-color); border-radius:9px;';
+                const nom = document.createElement('span');
+                nom.textContent = meta.nom;
+                const statut = document.createElement('small');
+                statut.style.color = 'var(--text-muted)';
+                statut.textContent = meta.personnalisee ? (categoriePossedeRecette(key) ? 'Active' : 'Inactive – disponible à la création') : 'Existante';
+                ligne.append(nom, statut);
+                liste.appendChild(ligne);
+            });
+        }
+
+        function ajouterCategorie() {
+            const champ = document.getElementById('nouvelleCategorieNom');
+            const message = document.getElementById('categorieAdminMessage');
+            const nom = (champ?.value || '').trim().replace(/\s+/g, ' ');
+            if (!nom) { message.textContent = 'Entre un nom de catégorie.'; return; }
+            const existe = Object.values(categoryMeta).some(meta => meta.nom.localeCompare(nom, 'fr', { sensitivity: 'base' }) === 0);
+            if (existe) { message.textContent = 'Cette catégorie existe déjà.'; return; }
+            const base = nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'categorie';
+            let key = base, suffixe = 2;
+            while (categoryMeta[key]) key = `${base}_${suffixe++}`;
+            categoryMeta[key] = { nom, img: categoryMeta.basiques?.img || '', personnalisee: true, inactive: true };
+            const selectCategorie = document.getElementById('recipeCategory');
+            if (selectCategorie) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${nom} (inactive)`;
+                selectCategorie.appendChild(option);
+            }
+            try {
+                const personnalisees = {};
+                Object.entries(categoryMeta).forEach(([k, meta]) => { if (meta.personnalisee) personnalisees[k] = { nom: meta.nom, img: meta.img }; });
+                localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
+                message.textContent = `La catégorie « ${nom} » a été ajoutée.`;
+                champ.value = '';
+                actualiserListeCategoriesAdmin();
+            } catch (e) {
+                delete categoryMeta[key];
+                message.textContent = 'Impossible de sauvegarder cette catégorie sur cet appareil.';
+            }
+        }
+
         function renderCategories(onglet) {
             verifierRecetteEnPause();
             if (onglet === 'famille') {
@@ -1751,6 +1846,7 @@
             if (listContainer) listContainer.classList.remove('active');
 
             for (const [catKey, meta] of Object.entries(categoryMeta)) {
+                if (meta.personnalisee && !categoriePossedeRecette(catKey)) continue;
                 const card = document.createElement('div');
                 card.className = 'category-card';
                 card.onclick = () => ouvrirCategorie(onglet, catKey);
@@ -2763,6 +2859,7 @@
         function ouvrirAdministration() {
             fermerParametres();
             document.getElementById('adminModal').classList.add('active');
+            actualiserListeCategoriesAdmin();
         }
         function fermerAdministration() { document.getElementById('adminModal').classList.remove('active'); }
         function ouvrirModalCouleurs() { ouvrirApparence(); }
