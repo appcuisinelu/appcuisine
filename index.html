@@ -1473,41 +1473,66 @@
         </div>
     </div>
 
-    <!-- MODALE COULEURS -->
-    <div class="fullscreen-modal" id="colorModal">
-        <div class="fullscreen-header">
-            <h3>Choisir une couleur</h3>
-            <button class="popup-close-btn" onclick="fermerModalCouleurs()">&times;</button>
+    <!-- PARAMÈTRES -->
+    <div class="fullscreen-modal" id="settingsModal">
+        <div class="fullscreen-header"><h3>Paramètres</h3><button class="popup-close-btn" onclick="fermerParametres()">&times;</button></div>
+        <div class="fullscreen-body" style="display:flex; flex-direction:column; gap:14px;">
+            <button class="primary-btn" style="display:flex; align-items:center; justify-content:flex-start; gap:12px; text-align:left; padding:18px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color);" onclick="ouvrirApparence()">
+                <span style="font-size:1.35rem;">🎨</span><span><strong>Apparence</strong><br><small style="font-weight:400; color:var(--text-muted);">Thème de couleurs et mode clair ou sombre</small></span>
+            </button>
+            <button class="primary-btn" style="display:flex; align-items:center; justify-content:flex-start; gap:12px; text-align:left; padding:18px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color);" onclick="ouvrirAdministration()">
+                <span style="font-size:1.35rem;">⚙️</span><span><strong>Administration</strong><br><small style="font-weight:400; color:var(--text-muted);">Gestion des catégories et des paramètres administrateur</small></span>
+            </button>
         </div>
-        <div class="fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
-            <div class="color-options" style="width: 100%; max-width: 300px;">
-                <button class="color-circle" style="background-color: #1abc9c;" onclick="changerCouleur('turquoise')"></button>
-                <button class="color-circle" style="background-color: #e67e22;" onclick="changerCouleur('orange')"></button>
-                <button class="color-circle" style="background-color: #2ecc71;" onclick="changerCouleur('vert')"></button>
-                <button class="color-circle" style="background-color: #9b59b6;" onclick="changerCouleur('mauve')"></button>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerParametres()">Fermer</button></div>
+    </div>
+
+    <!-- APPARENCE -->
+    <div class="fullscreen-modal" id="colorModal">
+        <div class="fullscreen-header"><h3>Apparence</h3><button class="popup-close-btn" onclick="fermerModalCouleurs()">&times;</button></div>
+        <div class="fullscreen-body" style="display:flex; flex-direction:column; align-items:center; gap:28px; padding-top:24px;">
+            <section style="width:100%; max-width:360px; text-align:center;">
+                <h4 style="margin-bottom:16px; color:var(--text-main);">Thème de couleurs</h4>
+                <div class="color-options" style="width:100%; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+                    <button class="color-circle" aria-label="Turquoise" title="Turquoise" style="background-color:#1abc9c;" onclick="changerCouleur('turquoise')"></button>
+                    <button class="color-circle" aria-label="Orange" title="Orange" style="background-color:#e67e22;" onclick="changerCouleur('orange')"></button>
+                    <button class="color-circle" aria-label="Vert" title="Vert" style="background-color:#2ecc71;" onclick="changerCouleur('vert')"></button>
+                    <button class="color-circle" aria-label="Mauve" title="Mauve" style="background-color:#9b59b6;" onclick="changerCouleur('mauve')"></button>
+                </div>
+            </section>
+            <section style="width:100%; max-width:360px;">
+                <h4 style="margin-bottom:14px; text-align:center; color:var(--text-main);">Mode d'affichage</h4>
+                <div style="display:flex; gap:10px;">
+                    <button class="primary-btn" style="flex:1; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color);" onclick="definirMode('clair')">☀️ Clair</button>
+                    <button class="primary-btn" style="flex:1; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color);" onclick="definirMode('sombre')">🌙 Sombre</button>
+                </div>
+            </section>
+        </div>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerModalCouleurs()">Retour aux paramètres</button></div>
+    </div>
+
+    <!-- ADMINISTRATION : interface préparatoire; authentification à ajouter -->
+    <div class="fullscreen-modal" id="adminModal">
+        <div class="fullscreen-header"><h3>Administration</h3><button class="popup-close-btn" onclick="fermerAdministration()">&times;</button></div>
+        <div class="fullscreen-body">
+            <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:14px; padding:18px;">
+                <h4 style="color:var(--accent-color); margin-bottom:10px;">Gestion de l'application</h4>
+                <p style="color:var(--text-muted); line-height:1.5;">Cette section accueillera les outils d'administration, notamment la gestion des catégories.</p>
+                <p style="color:var(--text-muted); line-height:1.5; margin-top:12px;"><strong>Accès administrateur :</strong> réservé à Lucie lorsque les comptes et l'authentification seront mis en place.</p>
             </div>
         </div>
-        <div class="fullscreen-footer">
-            <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalCouleurs()">Fermer</button>
-        </div>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="fermerAdministration()">Retour aux paramètres</button></div>
     </div>
 
     <nav class="bottom-nav">
         <button class="nav-item" onclick="retourAccueil()">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            <span>Accueil</span>
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Accueil</span>
         </button>
-        <button class="nav-item" id="themeToggleBtn" onclick="toggleTheme()">
-            <svg id="themeIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            <span>Mode</span>
-        </button>
-        <button class="nav-item" onclick="ouvrirModalCouleurs()">
-            <svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.504 5.555-5.55C21.996 6.45 17.5 2 12 2z"></path></svg>
-            <span>Couleurs</span>
+        <button class="nav-item" onclick="ouvrirParametres()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.02a1.7 1.7 0 0 0-1.76.58l-.05.07h-3.4l-.05-.07a1.7 1.7 0 0 0-1.76-.58l-.08.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 9.6 15l-.08-.04v-3.4l.08-.04a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.7-2.94.08.02a1.7 1.7 0 0 0 1.76-.58l.05-.07h3.4l.05.07a1.7 1.7 0 0 0 1.76.58l.08-.02 1.7 2.94-.06.06A1.7 1.7 0 0 0 19.4 12l.08.04v3.4z"></path></svg><span>Paramètres</span>
         </button>
         <button class="nav-item" onclick="exporterRecettes()">
-            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-            <span>Exporter</span>
+            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg><span>Exporter</span>
         </button>
     </nav>
 
@@ -2660,24 +2685,31 @@
             changerOnglet('incontournables', document.querySelector('.top-menu .menu-item'));
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            const iconSvg = document.getElementById('themeIconSvg');
-            if (isLight) {
-                iconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-            } else {
-                iconSvg.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-            }
+        function definirMode(mode) {
+            document.body.classList.toggle('light-mode', mode === 'clair');
         }
 
-        function ouvrirModalCouleurs() { document.getElementById('colorModal').classList.add('active'); }
+        function toggleTheme() {
+            definirMode(document.body.classList.contains('light-mode') ? 'sombre' : 'clair');
+        }
+
+        function ouvrirParametres() { document.getElementById('settingsModal').classList.add('active'); }
+        function fermerParametres() { document.getElementById('settingsModal').classList.remove('active'); }
+        function ouvrirApparence() {
+            fermerParametres();
+            document.getElementById('colorModal').classList.add('active');
+        }
+        function ouvrirAdministration() {
+            fermerParametres();
+            document.getElementById('adminModal').classList.add('active');
+        }
+        function fermerAdministration() { document.getElementById('adminModal').classList.remove('active'); }
+        function ouvrirModalCouleurs() { ouvrirApparence(); }
         function fermerModalCouleurs() { document.getElementById('colorModal').classList.remove('active'); }
 
         function changerCouleur(couleur) {
             document.body.classList.remove('theme-turquoise', 'theme-orange', 'theme-vert', 'theme-mauve');
             document.body.classList.add('theme-' + couleur);
-            fermerModalCouleurs();
         }
 
         let recetteOuverteDepuisRecherche = false;
