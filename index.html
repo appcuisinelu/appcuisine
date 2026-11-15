@@ -1140,6 +1140,82 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
+
+        /* Mode cuisine : affichage pas à pas */
+        .cooking-mode-modal {
+            display:none; position:fixed; inset:0; z-index:2600;
+            background:var(--bg-color); color:var(--text-main);
+            padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+            flex-direction:column;
+        }
+        .cooking-mode-modal.active { display:flex; }
+        .cooking-mode-header {
+            display:flex; align-items:center; justify-content:space-between;
+            gap:12px; padding:14px 0; border-bottom:1px solid var(--border-color);
+        }
+        .cooking-mode-header h2 { color:var(--accent-color); font-size:1.1rem; }
+        .cooking-mode-close {
+            border:0; background:transparent; color:var(--text-muted);
+            font-size:1.7rem; cursor:pointer; padding:2px 8px;
+        }
+        .cooking-mode-progress { margin:18px 0 10px; }
+        .cooking-mode-progress-label {
+            display:flex; justify-content:space-between; gap:10px;
+            color:var(--text-muted); font-size:.85rem; margin-bottom:8px;
+        }
+        .cooking-mode-progress-track {
+            height:7px; background:var(--border-color); border-radius:99px; overflow:hidden;
+        }
+        .cooking-mode-progress-fill {
+            height:100%; width:0; background:var(--accent-color);
+            border-radius:99px; transition:width .2s ease;
+        }
+        .cooking-mode-step {
+            flex:1; min-height:0; display:flex; flex-direction:column;
+            justify-content:center; padding:18px 4px; overflow-y:auto;
+        }
+        .cooking-mode-step-number {
+            color:var(--accent-color); font-size:.9rem; font-weight:700;
+            text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;
+        }
+        .cooking-mode-step-text {
+            font-size:clamp(1.25rem, 4vw, 1.8rem); line-height:1.55;
+            white-space:pre-wrap; overflow-wrap:anywhere;
+        }
+        .cooking-mode-ingredients {
+            border:1px solid var(--border-color); border-radius:13px;
+            background:var(--card-bg); margin:8px 0 14px; overflow:hidden;
+        }
+        .cooking-mode-ingredients summary {
+            cursor:pointer; padding:13px 15px; color:var(--accent-color);
+            font-weight:700; font-size:.92rem;
+        }
+        .cooking-mode-ingredients ul {
+            list-style:none; padding:0 15px 12px;
+        }
+        .cooking-mode-ingredients li {
+            padding:7px 0; border-top:1px solid var(--border-color);
+            font-size:.9rem; line-height:1.4;
+        }
+        .cooking-mode-footer {
+            display:flex; gap:10px; padding:12px 0;
+            border-top:1px solid var(--border-color);
+        }
+        .cooking-mode-footer button {
+            min-height:48px; border-radius:11px; font-size:.95rem;
+            font-weight:700; cursor:pointer; padding:10px 14px;
+        }
+        .cooking-mode-prev {
+            flex:1; border:1px solid var(--border-color);
+            background:var(--card-bg); color:var(--text-main);
+        }
+        .cooking-mode-next {
+            flex:2; border:0; background:var(--accent-color); color:white;
+        }
+        .cooking-mode-prev:disabled {
+            opacity:.35; cursor:not-allowed;
+        }
+
     </style>
     <link rel="apple-touch-icon" href="icone_app_cuisine4.png">
 </head>
@@ -1474,6 +1550,9 @@
             <button class="recipe-nav-item" onclick="quitterRecetteVersAccueil()" title="Accueil" aria-label="Accueil">
                 <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V21h13V9.5"></path><path d="M9 21v-7h6v7"></path></svg>
             </button>
+            <button class="recipe-nav-item" onclick="ouvrirModeCuisine()" title="Mode cuisine" aria-label="Mode cuisine">
+                <svg viewBox="0 0 24 24"><path d="M6 3v7"></path><path d="M3 3v4a3 3 0 0 0 6 0V3"></path><path d="M6 10v11"></path><path d="M17 3c-2 2-3 4-3 7v2h4V3z"></path><path d="M16 12v9"></path></svg>
+            </button>
             <button class="recipe-nav-item" onclick="actionModifierRecette()" title="Modifier">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
@@ -1487,6 +1566,31 @@
                 <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </button>
         </nav>
+    </div>
+
+    <!-- MODE CUISINE : une étape à la fois -->
+    <div class="cooking-mode-modal" id="cookingModeModal" role="dialog" aria-modal="true" aria-label="Mode cuisine">
+        <div class="cooking-mode-header">
+            <h2 id="cookingModeRecipeTitle">Mode cuisine</h2>
+            <button class="cooking-mode-close" type="button" onclick="fermerModeCuisine()" aria-label="Fermer le mode cuisine">&times;</button>
+        </div>
+        <div class="cooking-mode-progress">
+            <div class="cooking-mode-progress-label">
+                <span id="cookingModeProgressText">Étape 1 sur 1</span>
+                <span id="cookingModeProgressPercent">0 %</span>
+            </div>
+            <div class="cooking-mode-progress-track"><div class="cooking-mode-progress-fill" id="cookingModeProgressFill"></div></div>
+        </div>
+        <div class="cooking-mode-step" id="cookingModeStepContent"></div>
+        <details class="cooking-mode-ingredients" id="cookingModeIngredients">
+            <summary>Voir les ingrédients et les quantités</summary>
+            <ul id="cookingModeIngredientsList"></ul>
+        </details>
+        <div class="cooking-mode-footer">
+            <button type="button" class="cooking-mode-prev" id="cookingModePrev" onclick="changerEtapeCuisine(-1)">Précédent</button>
+            <button type="button" class="cooking-mode-next" id="cookingModeNext" onclick="changerEtapeCuisine(1)">Suivant</button>
+        </div>
+        <button type="button" class="secondary-btn" style="margin:0 0 10px;" onclick="pauserDepuisModeCuisine()">Mettre en pause et quitter</button>
     </div>
 
     <!-- MODALE CALCULATEUR -->
@@ -1765,6 +1869,8 @@
         let varianteSelectionneeId = null;
         // Empêche la fermeture déclenchée par le bouton Pause d’effacer la sauvegarde.
         let fermetureDetailPourPause = false;
+        let etapeCuisineActuelle = 0;
+        let pauseDepuisModeCuisine = false;
 
         const TAGS_DEFAUT = ['#camping', '#instantpot', '#noël', '#vegan', '#vitamix', '#thermomix'];
         let tagsDisponibles = chargerTagsDisponibles();
@@ -2269,12 +2375,14 @@
             const variante = variantId && Array.isArray(recipe.variantes) ? recipe.variantes.find(v => v.id === variantId && v.statut !== 'INACTIVE') : null;
             recetteActiveEnCours = variante ? { ...recipe, ...variante, id: recipe.id, nom: recipe.nom, _parentId: recipe.id, _variantId: variante.id } : { ...recipe, _parentId: recipe.id, _variantId: null };
             portionsActuelles = parseFloat(recetteActiveEnCours.portions) || 4;
+            etapeCuisineActuelle = 0;
             construireContenuDetailRecette();
 
             const pausedJSON = localStorage.getItem('recetteEnPause_' + recipe.id);
             if (pausedJSON) {
                 const pausedData = JSON.parse(pausedJSON);
                 portionsActuelles = pausedData.portions || portionsActuelles;
+                etapeCuisineActuelle = Number.isInteger(pausedData.etapeCuisine) ? pausedData.etapeCuisine : 0;
                 construireContenuDetailRecette();
 
                 if (pausedData.checkedIngredients) {
@@ -2332,6 +2440,8 @@
                 portions: portionsActuelles,
                 checkedIngredients: checkedIngredients,
                 checkedSteps: checkedSteps,
+                etapeCuisine: etapeCuisineActuelle,
+                modeCuisine: pauseDepuisModeCuisine,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
@@ -2341,6 +2451,7 @@
             fermetureDetailPourPause = true;
             fermerDetailRecette();
             fermetureDetailPourPause = false;
+            pauseDepuisModeCuisine = false;
             verifierRecetteEnPause();
         }
 
@@ -2379,6 +2490,7 @@
                 }
                 if (recetteTrouvee) {
                     afficherDetailRecette(recetteTrouvee, data.varianteId || null);
+                    if (data.modeCuisine) ouvrirModeCuisine();
                 } else {
                     effacerRecetteEnPause();
                 }
@@ -2526,6 +2638,96 @@
         }
 
 
+
+        function obtenirTexteEtapeCuisine(etape) {
+            if (typeof etape === 'string') return etape;
+            if (etape && typeof etape === 'object') return etape.texte || etape.description || '';
+            return String(etape || '');
+        }
+
+        function ouvrirModeCuisine() {
+            if (!recetteActiveEnCours) return;
+            const etapes = Array.isArray(recetteActiveEnCours.etapes) ? recetteActiveEnCours.etapes : [];
+            if (!etapes.length) {
+                alert('Aucune étape de préparation n’est renseignée pour cette recette.');
+                return;
+            }
+            etapeCuisineActuelle = Math.max(0, Math.min(etapeCuisineActuelle, etapes.length - 1));
+            actualiserModeCuisine();
+            document.getElementById('cookingModeModal').classList.add('active');
+            garderEcranAllume();
+        }
+
+        function fermerModeCuisine() {
+            document.getElementById('cookingModeModal').classList.remove('active');
+        }
+
+        function changerEtapeCuisine(delta) {
+            if (!recetteActiveEnCours) return;
+            const total = (recetteActiveEnCours.etapes || []).length;
+            etapeCuisineActuelle = Math.max(0, Math.min(total - 1, etapeCuisineActuelle + delta));
+            actualiserModeCuisine();
+        }
+
+        function actualiserModeCuisine() {
+            if (!recetteActiveEnCours) return;
+            const etapes = Array.isArray(recetteActiveEnCours.etapes) ? recetteActiveEnCours.etapes : [];
+            const total = etapes.length;
+            if (!total) return;
+            etapeCuisineActuelle = Math.max(0, Math.min(total - 1, etapeCuisineActuelle));
+
+            const pourcentage = Math.round(((etapeCuisineActuelle + 1) / total) * 100);
+            document.getElementById('cookingModeRecipeTitle').textContent = recetteActiveEnCours.nom || 'Mode cuisine';
+            document.getElementById('cookingModeProgressText').textContent = `Étape ${etapeCuisineActuelle + 1} sur ${total}`;
+            document.getElementById('cookingModeProgressPercent').textContent = `${pourcentage} %`;
+            document.getElementById('cookingModeProgressFill').style.width = `${pourcentage}%`;
+
+            const texte = obtenirTexteEtapeCuisine(etapes[etapeCuisineActuelle]);
+            document.getElementById('cookingModeStepContent').innerHTML = `
+                <div class="cooking-mode-step-number">Étape ${etapeCuisineActuelle + 1}</div>
+                <div class="cooking-mode-step-text"></div>`;
+            document.querySelector('#cookingModeStepContent .cooking-mode-step-text').textContent = texte || 'Aucune consigne pour cette étape.';
+
+            const precedent = document.getElementById('cookingModePrev');
+            const suivant = document.getElementById('cookingModeNext');
+            precedent.disabled = etapeCuisineActuelle === 0;
+            suivant.textContent = etapeCuisineActuelle === total - 1 ? 'Terminer' : 'Suivant';
+            suivant.onclick = etapeCuisineActuelle === total - 1
+                ? fermerModeCuisine
+                : () => changerEtapeCuisine(1);
+
+            const liste = document.getElementById('cookingModeIngredientsList');
+            liste.innerHTML = '';
+            const basePortions = parseFloat(recetteActiveEnCours.portions) || 4;
+            const ratio = portionsActuelles / basePortions;
+            (recetteActiveEnCours.ingredients || []).forEach(ingredient => {
+                let quantite = ingredient.qte || '';
+                let unite = ingredient.unit || '';
+                const valeur = parserQuantite(quantite);
+                if (quantite !== '' && Number.isFinite(valeur)) {
+                    const calculee = valeur * ratio;
+                    quantite = ['tasse', 'c.à.s', 'c.à.c'].includes(String(unite).toLowerCase())
+                        ? formaterQuantiteFraction(calculee)
+                        : (Number.isInteger(calculee) ? calculee : parseFloat(calculee.toFixed(2)));
+                }
+                const li = document.createElement('li');
+                li.textContent = [quantite, unite, ingredient.nom || ''].filter(Boolean).join(' ');
+                liste.appendChild(li);
+            });
+            if (!(recetteActiveEnCours.ingredients || []).length) {
+                const li = document.createElement('li');
+                li.textContent = 'Aucun ingrédient renseigné.';
+                liste.appendChild(li);
+            }
+        }
+
+        function pauserDepuisModeCuisine() {
+            if (!recetteActiveEnCours) return;
+            pauseDepuisModeCuisine = true;
+            fermerModeCuisine();
+            pauserRecetteActuelle();
+        }
+
         function selectionnerVersionRecette(variantId) {
             if (!recetteParenteAffichee) return;
             const parent = recetteParenteAffichee;
@@ -2662,6 +2864,7 @@
                     }
                 }
             }
+            document.getElementById('cookingModeModal')?.classList.remove('active');
             document.getElementById('recipeDetailModal').classList.remove('active');
             libererVerrouEcran();
             afficherUnitesMetriques = false;
