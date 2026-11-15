@@ -1471,6 +1471,9 @@
     <div class="fullscreen-modal" id="recipeDetailModal" style="padding-bottom: 60px;">
         <div class="fullscreen-body" id="detailRecipeBody" style="padding-top: 0;"></div>
         <nav class="recipe-bottom-nav">
+            <button class="recipe-nav-item" onclick="quitterRecetteVersAccueil()" title="Accueil" aria-label="Accueil">
+                <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V21h13V9.5"></path><path d="M9 21v-7h6v7"></path></svg>
+            </button>
             <button class="recipe-nav-item" onclick="actionModifierRecette()" title="Modifier">
                 <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
@@ -2946,6 +2949,14 @@
 
         function retourAccueil() {
             changerOnglet('incontournables', document.querySelector('.top-menu .menu-item'));
+        }
+
+        // Depuis une fiche recette, ferme proprement la fiche puis revient à l'accueil.
+        // La fermeture normale applique les mêmes règles de réinitialisation que le bouton Fermer.
+        function quitterRecetteVersAccueil() {
+            fermerDetailRecette();
+            retourAccueil();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function definirMode(mode) {
