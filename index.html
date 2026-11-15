@@ -1367,18 +1367,24 @@
 
     <div class="fullscreen-modal" id="siteImportModal">
         <div class="fullscreen-header">
-            <h3>Importer depuis un site web</h3>
-            <button class="popup-close-btn" onclick="fermerModalSite()">&times;</button>
+            <h3>Préparer une recette depuis un site</h3>
+            <button class="popup-close-btn" onclick="fermerModalSite()" aria-label="Fermer">&times;</button>
         </div>
         <div class="fullscreen-body">
             <div class="form-group">
-                <label>Collez le lien (URL)</label>
-                <input type="url" id="recipeUrlInput" placeholder="https://...">
+                <label for="recipeUrlInput">Lien de la recette (URL)</label>
+                <input type="url" id="recipeUrlInput" placeholder="https://exemple.com/ma-recette" autocomplete="url" inputmode="url" oninput="effacerErreurImportUrl()">
+                <p id="recipeUrlError" role="alert" style="display:none; color:#d9534f; font-size:0.85rem; margin-top:7px;"></p>
             </div>
+            <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:14px; padding:15px; margin-top:8px;">
+                <div style="font-weight:700; color:var(--accent-color); margin-bottom:7px;">À savoir</div>
+                <p style="font-size:0.9rem; line-height:1.5; color:var(--text-main);">Pour le moment, le lien sera conservé dans la fiche comme source. L'extraction automatique du titre, des ingrédients et des étapes sera connectée lors de la création de la PWA.</p>
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:14px;">Tu pourras ensuite compléter ou corriger la fiche avant de l'enregistrer.</p>
         </div>
         <div class="fullscreen-footer">
             <button class="primary-btn" style="background-color: var(--border-color); color: var(--text-main);" onclick="fermerModalSite()">Annuler</button>
-            <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Importer</button>
+            <button class="primary-btn" onclick="importerRecetteDepuisUrl()">Continuer vers la fiche</button>
         </div>
     </div>
 
@@ -3646,12 +3652,31 @@
             }
         }
 
+        function effacerErreurImportUrl() {
+            const erreur = document.getElementById('recipeUrlError');
+            if (erreur) { erreur.textContent = ''; erreur.style.display = 'none'; }
+        }
+
         function importerRecetteDepuisUrl() {
-            const url = document.getElementById('recipeUrlInput').value.trim();
-            if (!url) { alert("Veuillez entrer un lien URL valide."); return; }
+            const champUrl = document.getElementById('recipeUrlInput');
+            const erreur = document.getElementById('recipeUrlError');
+            const valeur = champUrl.value.trim();
+            let url;
+            try {
+                url = new URL(valeur);
+                if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Protocole non pris en charge');
+            } catch (e) {
+                erreur.textContent = valeur ? 'Entre une adresse Web valide qui commence par https:// ou http://' : 'Colle le lien de la recette pour continuer.';
+                erreur.style.display = 'block';
+                champUrl.focus();
+                return;
+            }
+
+            // À cette étape, le lien est conservé comme source. L'extraction automatique
+            // du contenu sera branchée au service sécurisé lors du passage à la PWA.
+            document.getElementById('recipeTitle').value = '';
+            document.getElementById('recipeSource').value = url.href;
             fermerModalSite();
-            document.getElementById('recipeTitle').value = "Recette importée du web";
-            document.getElementById('recipeSource').value = url;
             document.getElementById('recipeFormModal').classList.add('active');
             changerVoletForm(1);
         }
