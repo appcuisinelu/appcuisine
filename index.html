@@ -2976,8 +2976,16 @@
             const profils = Object.keys(database.famille || {}).filter(nom =>
                 inclureInactifs || database.profilsMeta?.[nom]?.actif !== false
             );
-            return profils.filter(nom => nom !== 'Invité').sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }))
-                .concat(profils.includes('Invité') ? ['Invité'] : []);
+            // Tri français recalculé à chaque affichage, sans dépendre de l'ordre
+            // dans lequel les profils sont enregistrés dans l'objet database.
+            const collateurProfils = new Intl.Collator('fr-CA', {
+                usage: 'sort', sensitivity: 'base', numeric: true
+            });
+            const profilsAlphabetiques = profils
+                .filter(nom => nom !== 'Invité')
+                .sort((a, b) => collateurProfils.compare(String(a), String(b)));
+            if (profils.includes('Invité')) profilsAlphabetiques.push('Invité');
+            return profilsAlphabetiques;
         }
 
         function actualiserOrdreProfils() {
@@ -3086,8 +3094,9 @@
 
             if ((localStorage.getItem('profilFamillePreere') || 'Lucie') === ancienNom) localStorage.setItem('profilFamillePreere', nomNettoye);
             sauvegarderDatabase();
-            actualiserListeProfilsAdmin();
+            // Reconstruire immédiatement les listes avec les noms et l'ordre à jour.
             actualiserOrdreProfils();
+            actualiserListeProfilsAdmin();
             const selectProfil = document.getElementById('familleSelect');
             if (selectProfil && selectProfil.value === ancienNom) selectProfil.value = nomNettoye;
             const profilCourant = localStorage.getItem('profilFamillePreere') || 'Lucie';
