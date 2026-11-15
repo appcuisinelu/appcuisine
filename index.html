@@ -1837,6 +1837,18 @@
             localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
         }
 
+        function actualiserNomCategorieDansInterface(ancienNom, nouveauNom) {
+            // Met à jour immédiatement les libellés déjà affichés, sans recharger la page.
+            const parcours = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let noeud;
+            while ((noeud = parcours.nextNode())) {
+                if (noeud.nodeValue.trim() === ancienNom) noeud.nodeValue = noeud.nodeValue.replace(ancienNom, nouveauNom);
+            }
+            document.querySelectorAll('.category-img').forEach(image => {
+                if (image.alt === ancienNom) image.alt = nouveauNom;
+            });
+        }
+
         function modifierNomCategorie(key) {
             const meta = categoryMeta[key];
             if (!meta) return;
@@ -1859,6 +1871,7 @@
             };
             mettreAJourRecettes(database);
             meta.nom = nouveauNom;
+            actualiserNomCategorieDansInterface(ancienNom, nouveauNom);
 
             try {
                 sauvegarderNomsCategories();
