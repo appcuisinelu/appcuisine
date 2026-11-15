@@ -1608,7 +1608,7 @@
         <div class="fullscreen-body">
             <section class="appearance-section">
                 <h4>Profils disponibles</h4>
-                <p class="appearance-hint">Les profils sont affichés en ordre alphabétique. Le profil Invité reste toujours à la fin. La modification des noms sera ajoutée dans une prochaine étape.</p>
+                <p class="appearance-hint">Les profils actifs sont affichés en ordre alphabétique. Invité reste toujours à la fin. Un profil peut être désactivé sans supprimer ses recettes, puis réactivé au besoin.</p>
                 <div id="listeProfilsAdmin" style="display:grid; gap:7px;"></div>
             </section>
         </div>
@@ -1702,6 +1702,17 @@
                 alert("Les recettes n'ont pas pu être sauvegardées sur cet appareil. Vérifiez l'espace de stockage disponible.");
             }
         }
+
+        // Métadonnées des profils : l'identifiant reste stable même si le profil est désactivé.
+        if (!database.profilsMeta || typeof database.profilsMeta !== 'object') database.profilsMeta = {};
+        Object.keys(database.famille || {}).forEach(nom => {
+            if (!database.profilsMeta[nom]) {
+                database.profilsMeta[nom] = { id: 'profil_' + nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_'), actif: true };
+            } else if (typeof database.profilsMeta[nom].actif !== 'boolean') {
+                database.profilsMeta[nom].actif = true;
+            }
+        });
+        sauvegarderDatabase();
 
         const categoryMeta = {
             apero: { nom: "Apéro", img: "https://images.unsplash.com/photo-1541529086526-db283c563270" },
@@ -1938,7 +1949,11 @@
             if (onglet === 'famille') {
                 actualiserOrdreProfils();
                 document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => actualiserQuantitesIngredient(row));
-            const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            let profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
+                if (!obtenirProfilsTries().includes(profilEnregistre)) {
+                    profilEnregistre = obtenirProfilsTries()[0] || 'Invité';
+                    localStorage.setItem('profilFamillePreere', profilEnregistre);
+                }
                 document.getElementById('familleSelect').value = profilEnregistre;
                 MettreAJourTexteBoutonProfil(profilEnregistre);
                 filtrerFamille(profilEnregistre);
@@ -2957,8 +2972,10 @@
             definirMode(document.body.classList.contains('light-mode') ? 'sombre' : 'clair');
         }
 
-        function obtenirProfilsTries() {
-            const profils = Object.keys(database.famille || {});
+        function obtenirProfilsTries(inclureInactifs = false) {
+            const profils = Object.keys(database.famille || {}).filter(nom =>
+                inclureInactifs || database.profilsMeta?.[nom]?.actif !== false
+            );
             return profils.filter(nom => nom !== 'Invité').sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }))
                 .concat(profils.includes('Invité') ? ['Invité'] : []);
         }
@@ -2977,6 +2994,7 @@
                     select.appendChild(option);
                 });
                 if (profils.includes(valeur)) select.value = valeur;
+                else if (profils.length) select.value = profils[0];
             });
         }
 
@@ -2985,14 +3003,57 @@
             const liste = document.getElementById('listeProfilsAdmin');
             if (!liste) return;
             liste.innerHTML = '';
-            obtenirProfilsTries().forEach(nom => {
+            obtenirProfilsTries(true).forEach(nom => {
+                const actif = database.profilsMeta?.[nom]?.actif !== false;
                 const ligne = document.createElement('div');
                 ligne.className = 'settings-menu-card';
                 ligne.style.cursor = 'default';
-                ligne.innerHTML = `<span class="settings-menu-icon">♙</span><span class="settings-menu-copy"><strong></strong></span>`;
-                ligne.querySelector('strong').textContent = nom;
+                ligne.style.opacity = actif ? '1' : '.68';
+                const icone = document.createElement('span');
+                icone.className = 'settings-menu-icon';
+                icone.textContent = '♙';
+                const copie = document.createElement('span');
+                copie.className = 'settings-menu-copy';
+                const titre = document.createElement('strong');
+                titre.textContent = nom;
+                const statut = document.createElement('small');
+                statut.textContent = actif ? 'Actif' : 'Désactivé — recettes conservées';
+                copie.append(titre, statut);
+                const action = document.createElement('button');
+                action.type = 'button';
+                action.className = 'secondary-btn';
+                action.style.cssText = 'margin-left:auto; padding:8px 11px; border-radius:9px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); font-weight:600;';
+                action.textContent = actif ? 'Désactiver' : 'Réactiver';
+                action.onclick = () => changerStatutProfil(nom, !actif);
+                ligne.append(icone, copie, action);
                 liste.appendChild(ligne);
             });
+        }
+
+        function changerStatutProfil(nom, activer) {
+            if (!activer && obtenirProfilsTries().length <= 1) {
+                alert('Il faut conserver au moins un profil actif. Réactivez un autre profil avant de désactiver celui-ci.');
+                return;
+            }
+            const question = activer
+                ? `Réactiver le profil « ${nom} » ? Il redeviendra disponible dans les listes.`
+                : `Désactiver le profil « ${nom} » ? Ses recettes seront conservées et le profil pourra être réactivé plus tard.`;
+            if (!confirm(question)) return;
+            if (!database.profilsMeta[nom]) database.profilsMeta[nom] = { id: 'profil_' + nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_') };
+            database.profilsMeta[nom].actif = activer;
+            sauvegarderDatabase();
+            actualiserListeProfilsAdmin();
+            const profilCourant = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            if (!activer && profilCourant === nom) {
+                const disponibles = obtenirProfilsTries();
+                if (disponibles.length) {
+                    localStorage.setItem('profilFamillePreere', disponibles[0]);
+                    const select = document.getElementById('familleSelect');
+                    if (select) select.value = disponibles[0];
+                    MettreAJourTexteBoutonProfil(disponibles[0]);
+                    filtrerFamille(disponibles[0]);
+                }
+            }
         }
 
         function ouvrirGestionProfils() {
