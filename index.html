@@ -1608,7 +1608,7 @@
         <div class="fullscreen-body">
             <section class="appearance-section">
                 <h4>Profils disponibles</h4>
-                <p class="appearance-hint">Les profils actifs sont affichés en ordre alphabétique. Invité reste toujours à la fin. Un profil peut être désactivé sans supprimer ses recettes, puis réactivé au besoin.</p>
+                <p class="appearance-hint">Les profils actifs sont affichés en ordre alphabétique. Invité reste toujours à la fin. Tu peux modifier leur nom ou les désactiver sans supprimer leurs recettes.</p>
                 <div id="listeProfilsAdmin" style="display:grid; gap:7px;"></div>
             </section>
         </div>
@@ -3019,15 +3019,83 @@
                 const statut = document.createElement('small');
                 statut.textContent = actif ? 'Actif' : 'Désactivé — recettes conservées';
                 copie.append(titre, statut);
+                const actions = document.createElement('div');
+                actions.style.cssText = 'margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;';
+                if (nom !== 'Invité') {
+                    const modifier = document.createElement('button');
+                    modifier.type = 'button';
+                    modifier.className = 'secondary-btn';
+                    modifier.style.cssText = 'padding:8px 11px; border-radius:9px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); font-weight:600;';
+                    modifier.textContent = 'Modifier';
+                    modifier.onclick = () => modifierNomProfil(nom);
+                    actions.appendChild(modifier);
+                }
                 const action = document.createElement('button');
                 action.type = 'button';
                 action.className = 'secondary-btn';
-                action.style.cssText = 'margin-left:auto; padding:8px 11px; border-radius:9px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); font-weight:600;';
+                action.style.cssText = 'padding:8px 11px; border-radius:9px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); font-weight:600;';
                 action.textContent = actif ? 'Désactiver' : 'Réactiver';
                 action.onclick = () => changerStatutProfil(nom, !actif);
-                ligne.append(icone, copie, action);
+                actions.appendChild(action);
+                ligne.append(icone, copie, actions);
                 liste.appendChild(ligne);
             });
+        }
+
+        function modifierNomProfil(ancienNom) {
+            if (ancienNom === 'Invité') return;
+            const nouveauNom = prompt(`Nouveau nom pour le profil « ${ancienNom} » :`, ancienNom);
+            if (nouveauNom === null) return;
+            const nomNettoye = nouveauNom.trim().replace(/\s+/g, ' ');
+            if (!nomNettoye) {
+                alert('Le nom du profil ne peut pas être vide.');
+                return;
+            }
+            if (nomNettoye.toLocaleLowerCase('fr') === 'invité' || Object.keys(database.famille || {}).some(n => n !== ancienNom && n.toLocaleLowerCase('fr') === nomNettoye.toLocaleLowerCase('fr'))) {
+                alert('Ce nom est déjà utilisé par un autre profil. Choisis un nom différent.');
+                return;
+            }
+            if (nomNettoye === ancienNom) return;
+            if (!confirm(`Confirmer le changement de nom « ${ancienNom} » en « ${nomNettoye} » ? Les recettes et variantes resteront associées à ce profil.`)) return;
+
+            // Déplacer le groupe de recettes sans toucher à son contenu ni à l'identifiant permanent.
+            const profils = database.famille || {};
+            const recettesProfil = profils[ancienNom];
+            const meta = database.profilsMeta?.[ancienNom] || {};
+            const nouvellesEntrees = {};
+            Object.entries(profils).forEach(([nom, recettes]) => {
+                nouvellesEntrees[nom === ancienNom ? nomNettoye : nom] = recettes;
+            });
+            database.famille = nouvellesEntrees;
+            if (!database.profilsMeta) database.profilsMeta = {};
+            delete database.profilsMeta[ancienNom];
+            database.profilsMeta[nomNettoye] = meta;
+
+            // Mettre à jour les références textuelles du profil dans les recettes et variantes.
+            const parcourir = valeur => {
+                if (!valeur || typeof valeur !== 'object') return;
+                if (Array.isArray(valeur)) { valeur.forEach(parcourir); return; }
+                Object.keys(valeur).forEach(cle => {
+                    if (['profil', 'membre', 'profile', 'profilFamille'].includes(cle) && valeur[cle] === ancienNom) valeur[cle] = nomNettoye;
+                    else parcourir(valeur[cle]);
+                });
+            };
+            parcourir(database.incontournables);
+            parcourir(recettesProfil);
+            Object.values(database.famille).forEach(parcourir);
+
+            if ((localStorage.getItem('profilFamillePreere') || 'Lucie') === ancienNom) localStorage.setItem('profilFamillePreere', nomNettoye);
+            sauvegarderDatabase();
+            actualiserListeProfilsAdmin();
+            actualiserOrdreProfils();
+            const selectProfil = document.getElementById('familleSelect');
+            if (selectProfil && selectProfil.value === ancienNom) selectProfil.value = nomNettoye;
+            const profilCourant = localStorage.getItem('profilFamillePreere') || 'Lucie';
+            if (selectProfil && profilCourant === nomNettoye) {
+                selectProfil.value = nomNettoye;
+                MettreAJourTexteBoutonProfil(nomNettoye);
+                filtrerFamille(nomNettoye);
+            }
         }
 
         function changerStatutProfil(nom, activer) {
