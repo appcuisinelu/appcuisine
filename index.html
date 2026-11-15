@@ -1695,13 +1695,15 @@
             cosmetiques: { nom: "Cosmétiques", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03" }
         };
 
-        // Catégories ajoutées dans l'administration : conservées sur cet appareil.
+        // Catégories ajoutées et noms modifiés dans l'administration : conservés sur cet appareil.
         try {
             const categoriesPersonnalisees = JSON.parse(localStorage.getItem('mesRecettesCategoriesPersonnalisees') || '{}');
             Object.entries(categoriesPersonnalisees).forEach(([key, meta]) => {
                 if (meta && meta.nom && !categoryMeta[key]) categoryMeta[key] = { nom: meta.nom, img: meta.img || categoryMeta.basiques.img, personnalisee: true, inactive: true };
             });
-        } catch (e) { console.warn('Les catégories personnalisées n’ont pas pu être chargées.', e); }
+            const nomsModifies = JSON.parse(localStorage.getItem('mesRecettesNomsCategories') || '{}');
+            Object.entries(nomsModifies).forEach(([key, nom]) => { if (categoryMeta[key] && typeof nom === 'string' && nom.trim()) categoryMeta[key].nom = nom.trim(); });
+        } catch (e) { console.warn('Les catégories sauvegardées n’ont pas pu être chargées.', e); }
 
         // Rend les catégories personnalisées disponibles dans le formulaire de recette.
         document.addEventListener('DOMContentLoaded', () => {
@@ -1809,9 +1811,66 @@
                 const statut = document.createElement('small');
                 statut.style.color = 'var(--text-muted)';
                 statut.textContent = meta.personnalisee ? (categoriePossedeRecette(key) ? 'Active' : 'Disponible à la création') : 'Existante';
-                ligne.append(nom, statut);
+                const actions = document.createElement('div');
+                actions.style.cssText = 'display:flex; align-items:center; gap:9px; flex-shrink:0;';
+                const modifier = document.createElement('button');
+                modifier.type = 'button';
+                modifier.textContent = 'Modifier';
+                modifier.style.cssText = 'border:1px solid var(--border-color); background:var(--card-bg); color:var(--accent-color); border-radius:8px; padding:7px 10px; font-weight:600; cursor:pointer;';
+                modifier.onclick = () => modifierNomCategorie(key);
+                actions.append(statut, modifier);
+                ligne.append(nom, actions);
                 liste.appendChild(ligne);
             });
+        }
+
+        function sauvegarderNomsCategories() {
+            const noms = {};
+            Object.entries(categoryMeta).forEach(([key, meta]) => {
+                if (!meta.personnalisee) noms[key] = meta.nom;
+            });
+            localStorage.setItem('mesRecettesNomsCategories', JSON.stringify(noms));
+            const personnalisees = {};
+            Object.entries(categoryMeta).forEach(([key, meta]) => {
+                if (meta.personnalisee) personnalisees[key] = { nom: meta.nom, img: meta.img };
+            });
+            localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
+        }
+
+        function modifierNomCategorie(key) {
+            const meta = categoryMeta[key];
+            if (!meta) return;
+            const ancienNom = meta.nom;
+            const nouveauNomSaisi = prompt(`Modifier le nom de la catégorie « ${ancienNom} » :`, ancienNom);
+            if (nouveauNomSaisi === null) return;
+            const nouveauNom = nouveauNomSaisi.trim().replace(/\s+/g, ' ');
+            if (!nouveauNom) { alert('Le nom de la catégorie ne peut pas être vide.'); return; }
+            const doublon = Object.entries(categoryMeta).some(([autreKey, autreMeta]) => autreKey !== key && autreMeta.nom.localeCompare(nouveauNom, 'fr', { sensitivity: 'base' }) === 0);
+            if (doublon) { alert('Une catégorie porte déjà ce nom.'); return; }
+            if (nouveauNom === ancienNom) return;
+
+            // Met à jour les recettes et leurs variantes sans changer leurs identifiants ni leur classement.
+            const mettreAJourRecettes = valeur => {
+                if (!valeur) return;
+                if (Array.isArray(valeur)) { valeur.forEach(mettreAJourRecettes); return; }
+                if (typeof valeur !== 'object') return;
+                if (valeur.categorie === ancienNom) valeur.categorie = nouveauNom;
+                Object.values(valeur).forEach(mettreAJourRecettes);
+            };
+            mettreAJourRecettes(database);
+            meta.nom = nouveauNom;
+
+            try {
+                sauvegarderNomsCategories();
+                sauvegarderDatabase();
+                const option = document.querySelector(`#recipeCategory option[value="${CSS.escape(key)}"]`);
+                if (option) option.textContent = `${nouveauNom}${meta.personnalisee && !categoriePossedeRecette(key) ? ' (disponible à la création)' : ''}`;
+                actualiserListeCategoriesAdmin();
+                const message = document.getElementById('categorieAdminMessage');
+                if (message) message.textContent = `La catégorie « ${ancienNom} » a été renommée « ${nouveauNom} ».`;
+            } catch (e) {
+                alert('Le nouveau nom n’a pas pu être sauvegardé sur cet appareil.');
+            }
         }
 
         function ajouterCategorie() {
@@ -1833,9 +1892,7 @@
                 selectCategorie.appendChild(option);
             }
             try {
-                const personnalisees = {};
-                Object.entries(categoryMeta).forEach(([k, meta]) => { if (meta.personnalisee) personnalisees[k] = { nom: meta.nom, img: meta.img }; });
-                localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
+                sauvegarderNomsCategories();
                 message.textContent = `La catégorie « ${nom} » a été ajoutée.`;
                 champ.value = '';
                 actualiserListeCategoriesAdmin();
