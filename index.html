@@ -1564,6 +1564,11 @@
                 <span class="settings-menu-copy"><strong>Gestion des catégories</strong><small>Ajouter et organiser les catégories de recettes</small></span>
                 <span class="settings-menu-arrow">›</span>
             </button>
+            <button class="settings-menu-card" onclick="ouvrirGestionProfils()">
+                <span class="settings-menu-icon">♙</span>
+                <span class="settings-menu-copy"><strong>Gestion des profils</strong><small>Consulter les profils et leur ordre d’affichage</small></span>
+                <span class="settings-menu-arrow">›</span>
+            </button>
             <div class="settings-menu-card" style="cursor:default; opacity:.72;">
                 <span class="settings-menu-icon">♙</span>
                 <span class="settings-menu-copy"><strong>Comptes et accès</strong><small>Une prochaine option d’administration</small></span>
@@ -1595,6 +1600,19 @@
             </section>
         </div>
         <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="retourMenuAdministration()">Retour à Administration</button></div>
+    </div>
+
+    <!-- SOUS-MENU : GESTION DES PROFILS -->
+    <div class="fullscreen-modal" id="adminProfilesModal">
+        <div class="fullscreen-header"><h3>Gestion des profils</h3><button class="popup-close-btn" onclick="fermerGestionProfils()">&times;</button></div>
+        <div class="fullscreen-body">
+            <section class="appearance-section">
+                <h4>Profils disponibles</h4>
+                <p class="appearance-hint">Les profils sont affichés en ordre alphabétique. Le profil Invité reste toujours à la fin. La modification des noms sera ajoutée dans une prochaine étape.</p>
+                <div id="listeProfilsAdmin" style="display:grid; gap:7px;"></div>
+            </section>
+        </div>
+        <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="retourMenuAdministrationDepuisProfils()">Retour à Administration</button></div>
     </div>
 
     <nav class="bottom-nav">
@@ -1918,6 +1936,7 @@
         function renderCategories(onglet) {
             verifierRecetteEnPause();
             if (onglet === 'famille') {
+                actualiserOrdreProfils();
                 document.querySelectorAll('#ingredientsContainer .ingredient-row').forEach(row => actualiserQuantitesIngredient(row));
             const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
                 document.getElementById('familleSelect').value = profilEnregistre;
@@ -2938,6 +2957,55 @@
             definirMode(document.body.classList.contains('light-mode') ? 'sombre' : 'clair');
         }
 
+        function obtenirProfilsTries() {
+            const profils = Object.keys(database.famille || {});
+            return profils.filter(nom => nom !== 'Invité').sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }))
+                .concat(profils.includes('Invité') ? ['Invité'] : []);
+        }
+
+        function actualiserOrdreProfils() {
+            const profils = obtenirProfilsTries();
+            ['familleSelect', 'recipeProfilSelect', 'variantProfileInput'].forEach(id => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                const valeur = select.value;
+                select.innerHTML = '';
+                profils.forEach(nom => {
+                    const option = document.createElement('option');
+                    option.value = nom;
+                    option.textContent = nom;
+                    select.appendChild(option);
+                });
+                if (profils.includes(valeur)) select.value = valeur;
+            });
+        }
+
+        function actualiserListeProfilsAdmin() {
+            actualiserOrdreProfils();
+            const liste = document.getElementById('listeProfilsAdmin');
+            if (!liste) return;
+            liste.innerHTML = '';
+            obtenirProfilsTries().forEach(nom => {
+                const ligne = document.createElement('div');
+                ligne.className = 'settings-menu-card';
+                ligne.style.cursor = 'default';
+                ligne.innerHTML = `<span class="settings-menu-icon">♙</span><span class="settings-menu-copy"><strong></strong></span>`;
+                ligne.querySelector('strong').textContent = nom;
+                liste.appendChild(ligne);
+            });
+        }
+
+        function ouvrirGestionProfils() {
+            fermerAdministration();
+            document.getElementById('adminProfilesModal').classList.add('active');
+            actualiserListeProfilsAdmin();
+        }
+        function fermerGestionProfils() { document.getElementById('adminProfilesModal').classList.remove('active'); }
+        function retourMenuAdministrationDepuisProfils() {
+            fermerGestionProfils();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
         function ouvrirParametres() { document.getElementById('settingsModal').classList.add('active'); }
         function fermerParametres() { document.getElementById('settingsModal').classList.remove('active'); }
         function ouvrirApparence() {
@@ -3557,6 +3625,7 @@
                 rechercherRecettes(event.target.value);
                 actualiserBoutonEffacerRecherche();
             });
+            actualiserOrdreProfils();
             const profilEnregistre = localStorage.getItem('profilFamillePreere') || 'Lucie';
             document.getElementById('familleSelect').value = profilEnregistre;
             MettreAJourTexteBoutonProfil(profilEnregistre);
