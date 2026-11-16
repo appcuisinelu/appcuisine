@@ -4128,7 +4128,9 @@ async function creerEtPartagerPDF(){
    pagebreak:{mode:['css','legacy']}
   };
   const blob=await html2pdf().set(options).from(element).outputPdf('blob');
-  const nomFichier=nomBase+'_'+(format==='letter'?'Lettre':'A4')+'.pdf';
+  const maintenant=new Date();
+  const dateFichier=maintenant.getFullYear()+'-'+String(maintenant.getMonth()+1).padStart(2,'0')+'-'+String(maintenant.getDate()).padStart(2,'0');
+  const nomFichier=nomBase+'_'+dateFichier+'_'+(format==='letter'?'Lettre':'A4')+'.pdf';
   if(surMobile){
    const file=new File([blob],nomFichier,{type:'application/pdf'});
    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
