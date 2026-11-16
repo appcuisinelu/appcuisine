@@ -4104,13 +4104,22 @@ async function creerEtPartagerPDF(){
   element=document.createElement('div');
   element.className='pdf-export-mode';
   document.querySelectorAll('.recipe-page').forEach(page=>element.appendChild(page.cloneNode(true)));
-  element.style.position='absolute';
+  element.style.position='fixed';
   element.style.left='0';
   element.style.top='0';
   element.style.width=largeur;
-  element.style.zIndex='-1';
+  element.style.zIndex='2147483647';
   element.style.background='#ffffff';
+  element.style.visibility='visible';
+  element.style.opacity='1';
   document.body.appendChild(element);
+  // Laisser le navigateur appliquer les styles et terminer le rendu avant la capture.
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  await Promise.all(Array.from(element.querySelectorAll('img')).map(img=>{
+   if(img.complete) return Promise.resolve();
+   return new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;});
+  }));
   const options={
    margin:[12,12,12,12],
    image:{type:'jpeg',quality:0.98},
