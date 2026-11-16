@@ -2579,7 +2579,7 @@
                     <div class="recipe-detail-overlay">
                         <div class="recipe-detail-title-block">
                             <div class="recipe-detail-title-overlay">${recipe.nom}</div>
-                            <div class="recipe-detail-sub-info">${recipe.membre || 'Incontournables'} • ${recipe.categorie || 'Autre'}${Array.isArray(recipe.tags) && recipe.tags.length ? ' • ' + recipe.tags.join(' • ') : ''}</div>
+                            <div class="recipe-detail-sub-info">${recipe.membre || 'Incontournables'} | ${recipe.categorie || 'Autre'}${Array.isArray(recipe.tags) && recipe.tags.length ? ' | ' + recipe.tags.join(' | ') : ''}</div>
                         </div>
                     </div>
                 </div>
@@ -4029,7 +4029,7 @@
             const profil = echapperPDF(recette.profil || recette.membre || '');
             const categorie = echapperPDF(recette.categorie || '');
             const notes = recette.notes ? `<section class="notes"><h2>Notes</h2><p>${echapperPDF(recette.notes).replace(/\n/g, '<br>')}</p></section>` : '';
-            const source = recette.source ? `<p class="source">Source : ${echapperPDF(recette.source)}</p>` : '';
+            const source = profil ? `<p class="source">Source : ${profil}</p>` : '';
             const fenetre = window.open('', '_blank');
             if (!fenetre) {
                 alert('La fenêtre d’impression a été bloquée. Autorise les fenêtres contextuelles pour cette page, puis réessaie.');
@@ -4040,7 +4040,7 @@
 <style>
 @page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.35}.header{border-bottom:1.5px solid #222;padding-bottom:8px;margin-bottom:10px}.header h1{font-size:21pt;line-height:1.12;margin:0 0 5px;font-weight:700}.meta{font-size:8.5pt;color:#555}.version{font-size:8pt;color:#555;margin-top:3px}.columns{display:grid;grid-template-columns:36% 1fr;gap:18px;align-items:start}.left{min-width:0}.right{min-width:0}.photo{display:block;width:100%;max-height:105px;object-fit:cover;margin:0 0 10px;border-radius:2px}.section-title{font-size:11pt;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:0 0 7px}.ingredients{list-style:none;padding:0;margin:0}.ingredients li{padding:4px 0;border-bottom:1px solid #eee;font-size:9pt;break-inside:avoid}.qty{font-weight:700}.steps{list-style:none;padding:0;margin:0}.steps li{display:flex;gap:8px;margin:0 0 9px;font-size:9.3pt;break-inside:avoid}.numero{flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700}.notes{margin-top:12px;padding-top:7px;border-top:1px solid #bbb}.notes h2{font-size:9pt;text-transform:uppercase;margin:0 0 4px}.notes p{font-size:8.5pt;margin:0}.source{font-size:7.5pt;color:#666;margin-top:8px;overflow-wrap:anywhere}.footer{margin-top:10px;padding-top:5px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:7pt}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}@media screen{body{max-width:210mm;margin:20px auto;padding:12mm;box-shadow:0 1px 12px #bbb}.print-hint{font-size:12px;color:#666;margin-bottom:12px}}
 </style></head><body><div class="print-hint">Aperçu de la fiche — choisissez « Enregistrer au format PDF » dans les options d’impression.</div>
-<header class="header"><h1>${titre}</h1><div class="meta">${[profil,categorie].filter(Boolean).join(' · ')} · ${echapperPDF(portionsPDF)} portion(s) · Préparation : ${echapperPDF(recette.prepTime || '—')} min · Cuisson : ${echapperPDF(recette.cookTime || '—')} min</div><div class="version">Version : ${echapperPDF(nomVersion)}</div></header>
+<header class="header"><h1>${titre}</h1><div class="meta">${[categorie, `${echapperPDF(portionsPDF)} portion(s)`, `Préparation : ${echapperPDF(recette.prepTime || '—')} min`, `Cuisson : ${echapperPDF(recette.cookTime || '—')} min`].filter(Boolean).join(' | ')}</div><div class="version">Version : ${echapperPDF(nomVersion)}</div></header>
 <div class="columns"><aside class="left">${photo}<h2 class="section-title">Ingrédients</h2><ul class="ingredients">${ingredients || '<li>Aucun ingrédient renseigné.</li>'}</ul></aside><main class="right"><h2 class="section-title">Préparation</h2><ol class="steps">${etapes || '<li>Aucune étape renseignée.</li>'}</ol></main></div>${notes}${source}<div class="footer">Mes recettes</div><script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=r;i.onerror=r}))).then(()=>setTimeout(()=>window.print(),250));});<\/script></body></html>`);
             fenetre.document.close();
         }
