@@ -4088,29 +4088,64 @@ async function chargerGenerateurPDF(){
  await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=resolve;s.onerror=()=>reject(new Error("Le générateur PDF n’a pas pu être chargé. Vérifie la connexion Internet."));document.head.appendChild(s);});
 }
 async function creerEtPartagerPDF(){
- const bouton=document.querySelector('.print-action'); const statut=document.getElementById('pdf-status');
+ const bouton=document.querySelector('.print-action');
+ const statut=document.getElementById('pdf-status');
  const surMobile=window.matchMedia('(max-width: 600px)').matches;
  const nomBase=(document.title||'Recettes').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_');
- bouton.disabled=true; bouton.textContent='Préparation du PDF…';
+ bouton.disabled=true;
+ bouton.textContent='Préparation du PDF…';
+ let element=null;
  try{
   await chargerGenerateurPDF();
-  const element=document.createElement('div'); element.className='pdf-export-mode';
+  element=document.createElement('div');
+  element.className='pdf-export-mode';
   document.querySelectorAll('.recipe-page').forEach(page=>element.appendChild(page.cloneNode(true)));
-  element.style.position='fixed'; element.style.left='-10000px'; element.style.top='0'; document.body.appendChild(element);
-  const options={margin:[12,12,12,12],image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
-  let blob; try { blob=await html2pdf().set(options).from(element).outputPdf('blob'); } finally { element.remove(); }
-  const file=new File([blob],nomBase+'.pdf',{type:'application/pdf'});
-  if(surMobile && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-   await navigator.share({files:[file],title:document.title||'Recueil de recettes',text:'Voici le recueil de recettes en PDF.'});
-   statut.textContent='Choisis Mail dans la feuille de partage pour envoyer le PDF.';
+  // Garder le contenu dans la zone de rendu : hors écran, html2canvas peut créer une page blanche.
+  element.style.position='absolute';
+  element.style.left='0';
+  element.style.top='0';
+  element.style.width='186mm';
+  element.style.zIndex='-1';
+  element.style.background='#ffffff';
+  document.body.appendChild(element);
+  const options={
+   margin:[12,12,12,12],
+   image:{type:'jpeg',quality:0.98},
+   html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:element.scrollWidth,windowHeight:element.scrollHeight},
+   jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+   pagebreak:{mode:['css','legacy']}
+  };
+  if(surMobile){
+   const blob=await html2pdf().set(options).from(element).outputPdf('blob');
+   const file=new File([blob],nomBase+'.pdf',{type:'application/pdf'});
+   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:document.title||'Recueil de recettes',text:'Voici le recueil de recettes en PDF.'});
+    statut.textContent='Choisis Mail dans la feuille de partage pour envoyer le PDF.';
+   }else{
+    const url=URL.createObjectURL(blob);
+    const lien=document.createElement('a');
+    lien.href=url;lien.download=nomBase+'.pdf';
+    document.body.appendChild(lien);lien.click();lien.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    statut.textContent='Le PDF a été créé et téléchargé.';
+   }
   }else{
-   const url=URL.createObjectURL(blob); const lien=document.createElement('a'); lien.href=url; lien.download=nomBase+'.pdf'; document.body.appendChild(lien); lien.click(); lien.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
-   statut.textContent='Le PDF a été téléchargé. Tu peux ensuite le joindre à un courriel.';
+   await html2pdf().set({...options,filename:nomBase+'.pdf'}).from(element).save();
+   statut.textContent='Le PDF a été téléchargé sur ton ordinateur.';
   }
- }catch(e){ if(e && e.name==='AbortError') statut.textContent='Partage annulé.'; else statut.textContent=(e&&e.message)||'Impossible de créer le PDF. Réessaie.'; }
- finally{bouton.disabled=false;bouton.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';}
+ }catch(e){
+  if(e && e.name==='AbortError') statut.textContent='Partage annulé.';
+  else statut.textContent=(e&&e.message)||'Impossible de créer le PDF. Réessaie.';
+ }finally{
+  if(element)element.remove();
+  bouton.disabled=false;
+  bouton.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';
+ }
 }
-window.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('.print-action');if(b)b.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';});
+window.addEventListener('DOMContentLoaded',()=>{
+ const b=document.querySelector('.print-action');
+ if(b)b.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';
+});
 <\/script></body></html>`);
             fenetre.document.close();
         }
