@@ -4104,30 +4104,45 @@ async function creerEtPartagerPDF(){
   element=document.createElement('div');
   element.className='pdf-export-mode';
   document.querySelectorAll('.recipe-page').forEach(page=>element.appendChild(page.cloneNode(true)));
-  element.style.position='fixed';
+  // Le conteneur doit rester dans le flux rendu du document : position:fixed
+  // peut provoquer une capture vide lorsque html2canvas reconstruit la page.
+  element.style.position='absolute';
   element.style.left='0';
   element.style.top='0';
   element.style.width=largeur;
-  element.style.zIndex='2147483647';
-  element.style.background='#ffffff';
+  element.style.zIndex='9999';
+  element.style.display='block';
   element.style.visibility='visible';
   element.style.opacity='1';
+  element.style.transform='none';
+  element.style.overflow='visible';
+  element.style.background='#ffffff';
   document.body.appendChild(element);
-  // Laisser le navigateur appliquer les styles et terminer le rendu avant la capture.
+  // Attendre le rendu réel du contenu et des images avant la capture.
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
   await Promise.all(Array.from(element.querySelectorAll('img')).map(img=>{
-   if(img.complete) return Promise.resolve();
+   if(img.complete && img.naturalWidth>0) return Promise.resolve();
    return new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;});
   }));
+  const hauteurCapture=Math.max(element.scrollHeight,element.getBoundingClientRect().height,document.documentElement.clientHeight);
+  const largeurCapture=Math.max(element.scrollWidth,element.getBoundingClientRect().width,document.documentElement.clientWidth);
   const options={
    margin:[12,12,12,12],
    image:{type:'jpeg',quality:0.98},
-   html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:element.scrollWidth,windowHeight:element.scrollHeight},
+   html2canvas:{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,windowWidth:Math.ceil(largeurCapture),windowHeight:Math.ceil(hauteurCapture),onclone:(doc)=>{
+    const copie=doc.querySelector('.pdf-export-mode');
+    if(copie){copie.style.position='static';copie.style.left='auto';copie.style.top='auto';copie.style.zIndex='auto';copie.style.visibility='visible';copie.style.opacity='1';copie.style.display='block';}
+    doc.documentElement.style.background='#ffffff';
+    doc.body.style.background='#ffffff';
+   }},
    jsPDF:{unit:'mm',format:formatJsPDF,orientation:'portrait'},
    pagebreak:{mode:['css','legacy']}
   };
-  const blob=await html2pdf().set(options).from(element).outputPdf('blob');
+  // Forcer explicitement les étapes canvas puis PDF évite une sortie blob
+  // produite avant la fin de la capture dans certains navigateurs.
+  const blob=await html2pdf().set(options).from(element).toCanvas().toPdf().outputPdf('blob');
+  if(!(blob instanceof Blob) || blob.size<1000) throw new Error('Le PDF généré est vide. Réessaie après avoir rechargé la page.');
   const maintenant=new Date();
   const dateFichier=maintenant.getFullYear()+'-'+String(maintenant.getMonth()+1).padStart(2,'0')+'-'+String(maintenant.getDate()).padStart(2,'0');
   const nomFichier=nomBase+'_'+dateFichier+'_'+(format==='letter'?'Lettre':'A4')+'.pdf';
