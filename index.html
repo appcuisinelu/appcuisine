@@ -4080,9 +4080,9 @@
             fenetre.document.open();
             fenetre.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>${echapperPDF(titreDocument)}</title>
 <style>
-@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.38;-webkit-text-size-adjust:100%;text-size-adjust:100%}.recipe-page{position:relative;min-height:270mm;page-break-after:always;break-after:page}.recipe-page:last-child{page-break-after:auto;break-after:auto}.header{display:grid;grid-template-columns:minmax(0,1fr) 34%;gap:14px;align-items:start;border-bottom:1px solid #bbb;padding-bottom:9px;margin-bottom:14px;min-height:78px}.header-copy{min-width:0}.header h1{font-size:21pt;line-height:1.12;margin:0 0 6px;font-weight:700}.meta{font-size:8.5pt;color:#555}.version-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:6px;font-size:9pt;color:#555}.source{text-align:right;margin-left:auto;overflow-wrap:anywhere}.header-photo{width:100%;height:86px}.photo{display:block;width:100%;height:86px;object-fit:cover}.photo-placeholder{width:100%;height:86px}.columns{display:grid;grid-template-columns:36% minmax(0,1fr);gap:18px;align-items:start}.left,.right{min-width:0}.section-title{font-size:11pt;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:0 0 7px}.ingredients{list-style:none;padding:0;margin:0}.ingredients li{padding:4px 0;border-bottom:1px solid #eee;font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;break-inside:avoid}.qty{font-weight:700}.steps{list-style:none;padding:0;margin:0}.steps li{display:flex;gap:8px;margin:0 0 9px;font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;break-inside:avoid}.numero{flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700}.notes,.notes p,.notes strong,.notes span,.notes div{font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}.notes{margin-top:14px;padding-top:8px;border-top:1px solid #bbb}.notes strong{font-weight:700}.notes p{margin:4px 0 0;font-weight:400}.footer{position:static;margin-top:14px;padding-top:5px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:7pt}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.print-hint{display:none}.recipe-page{min-height:0}.ingredients li,.steps li,.notes,.notes p,.notes strong,.notes span,.notes div{font-size:11pt!important;line-height:1.38!important}}@media screen{body{max-width:210mm;margin:20px auto;padding:12mm;box-shadow:0 1px 12px #bbb}.recipe-page{min-height:0;margin-bottom:24px;padding-bottom:8px}.print-hint{font-size:12px;color:#666;margin-bottom:12px}.print-action{display:inline-block;margin-top:10px;padding:10px 16px;border:0;border-radius:8px;background:#333;color:#fff;font-size:14px}.print-action:disabled{opacity:.6}#pdf-status{margin-top:8px;font-size:12px;color:#555}.pdf-export-mode{width:186mm;margin:0 auto;background:#fff;color:#222}.pdf-export-mode .ingredients li,.pdf-export-mode .steps li,.pdf-export-mode .notes,.pdf-export-mode .notes p,.pdf-export-mode .notes strong,.pdf-export-mode .notes span,.pdf-export-mode .notes div{font-size:11pt!important;line-height:1.38!important}.pdf-export-mode .recipe-page{min-height:0;margin:0;padding:0;box-shadow:none}}
+@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.38;-webkit-text-size-adjust:100%;text-size-adjust:100%}.recipe-page{position:relative;min-height:270mm;page-break-after:always;break-after:page}.recipe-page:last-child{page-break-after:auto;break-after:auto}.header{display:grid;grid-template-columns:minmax(0,1fr) 34%;gap:14px;align-items:start;border-bottom:1px solid #bbb;padding-bottom:9px;margin-bottom:14px;min-height:78px}.header-copy{min-width:0}.header h1{font-size:21pt;line-height:1.12;margin:0 0 6px;font-weight:700}.meta{font-size:8.5pt;color:#555}.version-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:6px;font-size:9pt;color:#555}.source{text-align:right;margin-left:auto;overflow-wrap:anywhere}.header-photo{width:100%;height:86px}.photo{display:block;width:100%;height:86px;object-fit:cover}.photo-placeholder{width:100%;height:86px}.columns{display:grid;grid-template-columns:36% minmax(0,1fr);gap:18px;align-items:start}.left,.right{min-width:0}.section-title{font-size:11pt;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:0 0 7px}.ingredients{list-style:none;padding:0;margin:0}.ingredients li{padding:4px 0;border-bottom:1px solid #eee;font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;break-inside:avoid}.qty{font-weight:700}.steps{list-style:none;padding:0;margin:0}.steps li{display:flex;gap:8px;margin:0 0 9px;font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;break-inside:avoid}.numero{flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700}.notes,.notes p,.notes strong,.notes span,.notes div{font-size:11pt!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1.38!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}.notes{margin-top:14px;padding-top:8px;border-top:1px solid #bbb}.notes strong{font-weight:700}.notes p{margin:4px 0 0;font-weight:400}.footer{position:static;margin-top:14px;padding-top:5px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:7pt}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.print-hint{display:none}.recipe-page{min-height:0}.ingredients li,.steps li,.notes,.notes p,.notes strong,.notes span,.notes div{font-size:11pt!important;line-height:1.38!important}}@media screen{body{max-width:210mm;margin:20px auto;padding:12mm;box-shadow:0 1px 12px #bbb}.recipe-page{min-height:0;margin-bottom:24px;padding-bottom:8px}.print-hint{font-size:13px;color:#444;margin:0 auto 18px;padding:14px 16px;background:#f3f4f6;border:1px solid #d7d9dd;border-radius:10px;max-width:760px}.print-hint select{margin:0 0 8px 10px;padding:8px 10px;border:1px solid #999;border-radius:6px;background:#fff;color:#222;font:inherit}.print-action{display:inline-block;margin-top:12px;padding:12px 20px;border:0;border-radius:8px;background:#245b45;color:#fff;font-size:15px;font-weight:700;cursor:pointer}.print-action:disabled{opacity:.6}#pdf-status{margin-top:8px;font-size:12px;color:#555}.pdf-export-mode{width:186mm;margin:0 auto;background:#fff;color:#222}.pdf-export-mode .ingredients li,.pdf-export-mode .steps li,.pdf-export-mode .notes,.pdf-export-mode .notes p,.pdf-export-mode .notes strong,.pdf-export-mode .notes span,.pdf-export-mode .notes div{font-size:11pt!important;line-height:1.38!important}.pdf-export-mode .recipe-page{min-height:0;margin:0;padding:0;box-shadow:none}}
 @media screen and (max-width:600px){.ingredients li,.steps li,.notes,.notes p,.notes strong,.notes span,.notes div{font-size:9pt!important;line-height:1.32!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}.section-title{font-size:10pt!important}.header h1{font-size:17pt;line-height:1.12}.meta,.version-line{font-size:8pt}body{width:auto;max-width:none;padding:16px;margin:0;box-shadow:none}.recipe-page{min-height:0;margin:0 0 28px;padding:0 0 12px;border-bottom:1px solid #ddd}.header{grid-template-columns:minmax(0,1fr) 30%;gap:10px}.header-photo,.photo,.photo-placeholder{height:72px}.columns{grid-template-columns:36% minmax(0,1fr);gap:10px}.steps li{gap:6px;margin-bottom:7px}.numero{flex-basis:18px;width:18px;height:18px}.footer{margin-top:10px}.print-action{display:inline-block}}
-</style></head><body><div class="print-hint">Aperçu des recettes. Sur iPhone, vérifie la présentation, puis touche le bouton pour créer le PDF.<br><button class="print-action" type="button" onclick="creerEtPartagerPDF()">Créer le PDF</button><div id="pdf-status" role="status" aria-live="polite"></div></div>${pages}<script>
+</style></head><body><div class="print-hint"><strong>Format du PDF</strong> <select id="pdf-format" aria-label="Format du PDF"><option value="a4">A4 — 210 × 297 mm</option><option value="letter">Lettre — 8,5 × 11 po</option></select><br><span>Choisis le format souhaité, puis crée ton PDF.</span><br><button class="print-action" type="button" onclick="creerEtPartagerPDF()">Télécharger le PDF</button><div id="pdf-status" role="status" aria-live="polite"></div></div>${pages}<script>
 async function chargerGenerateurPDF(){
  if(typeof html2pdf!=="undefined") return;
  await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";s.onload=resolve;s.onerror=()=>reject(new Error("Le générateur PDF n’a pas pu être chargé. Vérifie la connexion Internet."));document.head.appendChild(s);});
@@ -4091,20 +4091,23 @@ async function creerEtPartagerPDF(){
  const bouton=document.querySelector('.print-action');
  const statut=document.getElementById('pdf-status');
  const surMobile=window.matchMedia('(max-width: 600px)').matches;
+ const format=document.getElementById('pdf-format')?.value || 'a4';
+ const formatJsPDF=format==='letter'?'letter':'a4';
+ const largeur=format==='letter'?'191.9mm':'186mm';
  const nomBase=(document.title||'Recettes').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_');
  bouton.disabled=true;
- bouton.textContent='Préparation du PDF…';
+ bouton.textContent='Création du PDF…';
  let element=null;
+ let url=null;
  try{
   await chargerGenerateurPDF();
   element=document.createElement('div');
   element.className='pdf-export-mode';
   document.querySelectorAll('.recipe-page').forEach(page=>element.appendChild(page.cloneNode(true)));
-  // Garder le contenu dans la zone de rendu : hors écran, html2canvas peut créer une page blanche.
   element.style.position='absolute';
   element.style.left='0';
   element.style.top='0';
-  element.style.width='186mm';
+  element.style.width=largeur;
   element.style.zIndex='-1';
   element.style.background='#ffffff';
   document.body.appendChild(element);
@@ -4112,39 +4115,42 @@ async function creerEtPartagerPDF(){
    margin:[12,12,12,12],
    image:{type:'jpeg',quality:0.98},
    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:element.scrollWidth,windowHeight:element.scrollHeight},
-   jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+   jsPDF:{unit:'mm',format:formatJsPDF,orientation:'portrait'},
    pagebreak:{mode:['css','legacy']}
   };
+  const blob=await html2pdf().set(options).from(element).outputPdf('blob');
+  const nomFichier=nomBase+'_'+(format==='letter'?'Lettre':'A4')+'.pdf';
   if(surMobile){
-   const blob=await html2pdf().set(options).from(element).outputPdf('blob');
-   const file=new File([blob],nomBase+'.pdf',{type:'application/pdf'});
+   const file=new File([blob],nomFichier,{type:'application/pdf'});
    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
     await navigator.share({files:[file],title:document.title||'Recueil de recettes',text:'Voici le recueil de recettes en PDF.'});
-    statut.textContent='Choisis Mail dans la feuille de partage pour envoyer le PDF.';
+    statut.textContent='PDF créé en format '+(format==='letter'?'Lettre':'A4')+'. Choisis Mail dans la feuille de partage pour l’envoyer.';
    }else{
-    const url=URL.createObjectURL(blob);
-    const lien=document.createElement('a');
-    lien.href=url;lien.download=nomBase+'.pdf';
+    url=URL.createObjectURL(blob);
+    const lien=document.createElement('a');lien.href=url;lien.download=nomFichier;
     document.body.appendChild(lien);lien.click();lien.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
-    statut.textContent='Le PDF a été créé et téléchargé.';
+    statut.textContent='PDF créé en format '+(format==='letter'?'Lettre':'A4')+'.';
    }
   }else{
-   await html2pdf().set({...options,filename:nomBase+'.pdf'}).from(element).save();
-   statut.textContent='Le PDF a été téléchargé sur ton ordinateur.';
+   url=URL.createObjectURL(blob);
+   const lien=document.createElement('a');
+   lien.href=url;lien.download=nomFichier;lien.style.display='none';
+   document.body.appendChild(lien);lien.click();lien.remove();
+   statut.textContent='Téléchargement lancé : '+nomFichier;
   }
  }catch(e){
   if(e && e.name==='AbortError') statut.textContent='Partage annulé.';
   else statut.textContent=(e&&e.message)||'Impossible de créer le PDF. Réessaie.';
  }finally{
   if(element)element.remove();
+  if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);
   bouton.disabled=false;
-  bouton.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';
+  bouton.textContent=surMobile?'Créer et partager le PDF':'Télécharger le PDF';
  }
 }
 window.addEventListener('DOMContentLoaded',()=>{
  const b=document.querySelector('.print-action');
- if(b)b.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer le PDF et partager':'Créer le PDF et télécharger';
+ if(b)b.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer et partager le PDF':'Télécharger le PDF';
 });
 <\/script></body></html>`);
             fenetre.document.close();
