@@ -1216,6 +1216,17 @@
             opacity:.35; cursor:not-allowed;
         }
 
+    
+        .export-profile-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:18px}
+        .export-profile-overlay.active{display:flex}
+        .export-profile-dialog{width:min(460px,100%);max-height:82vh;overflow:auto;background:var(--card-bg);color:var(--text-main);border:1px solid var(--border-color);border-radius:16px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+        .export-profile-dialog h2{font-size:1.15rem;margin:0 0 7px}
+        .export-profile-dialog p{font-size:.9rem;color:var(--text-muted);line-height:1.45;margin:0 0 15px}
+        .export-profile-choice{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:13px 14px;margin:7px 0;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg);color:var(--text-main);text-align:left;cursor:pointer;font:inherit}
+        .export-profile-choice:hover{border-color:var(--accent-color);background:color-mix(in srgb,var(--accent-color) 7%,var(--card-bg))}
+        .export-profile-choice small{color:var(--text-muted);white-space:nowrap}
+        .export-profile-actions{display:flex;justify-content:flex-end;margin-top:14px}
+
     </style>
     <link rel="apple-touch-icon" href="icone_app_cuisine4.png">
 </head>
@@ -1728,6 +1739,15 @@
         <div class="fullscreen-footer"><button class="primary-btn" style="background-color:var(--border-color); color:var(--text-main);" onclick="retourMenuAdministrationDepuisProfils()">Retour à Administration</button></div>
     </div>
 
+    <div class="export-profile-overlay" id="exportProfileModal" role="dialog" aria-modal="true" aria-labelledby="exportProfileTitle" onclick="if(event.target===this) fermerSelectionExportation()">
+        <div class="export-profile-dialog">
+            <h2 id="exportProfileTitle">Exporter un recueil</h2>
+            <p>Choisis le profil. Toutes ses recettes seront rassemblées dans un seul document, avec leurs variantes à la suite de chaque recette originale.</p>
+            <div id="exportProfileChoices"></div>
+            <div class="export-profile-actions"><button class="secondary-btn" type="button" onclick="fermerSelectionExportation()">Annuler</button></div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <button class="nav-item" onclick="retourAccueil()">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Accueil</span>
@@ -1735,7 +1755,7 @@
         <button class="nav-item" onclick="ouvrirParametres()">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.75,3.60 L9.15,1.37 L14.85,1.37 L14.25,3.60 L15.33,3.96 L16.35,4.47 L17.50,2.47 L21.53,6.50 L19.53,7.65 L20.04,8.67 L20.40,9.75 L22.63,9.15 L22.63,14.85 L20.40,14.25 L20.04,15.33 L19.53,16.35 L21.53,17.50 L17.50,21.53 L16.35,19.53 L15.33,20.04 L14.25,20.40 L14.85,22.63 L9.15,22.63 L9.75,20.40 L8.67,20.04 L7.65,19.53 L6.50,21.53 L2.47,17.50 L4.47,16.35 L3.96,15.33 L3.60,14.25 L1.37,14.85 L1.37,9.15 L3.60,9.75 L3.96,8.67 L4.47,7.65 L2.47,6.50 L6.50,2.47 L7.65,4.47 L8.67,3.96 Z"></path><circle cx="12" cy="12" r="3.2"></circle></svg><span>Paramètres</span>
         </button>
-        <button class="nav-item" onclick="exporterRecettes()">
+        <button class="nav-item" onclick="ouvrirSelectionExportation()">
             <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg><span>Exporter</span>
         </button>
     </nav>
@@ -2570,9 +2590,6 @@
                         <button class="recipe-detail-pause-btn" onclick="pauserRecetteActuelle()" title="Mettre en pause">
                             <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
                         </button>
-                        <button class="recipe-detail-pause-btn" onclick="exporterRecettes()" title="Exporter cette version en PDF" aria-label="Exporter cette version en PDF">
-                            <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v6h5M9 15h6M9 18h6"></path></svg>
-                        </button>
                         <button class="recipe-detail-close-overlay" onclick="fermerDetailRecette()" title="Fermer">&times;</button>
                     </div>
                     <img src="${recipe.img}" alt="${recipe.nom}" class="recipe-detail-img">
@@ -3031,44 +3048,10 @@
             changerVoletForm(1);
         }
 
-        async function actionPartagerRecette() {
+        function actionPartagerRecette() {
             if (!recetteActiveEnCours) return;
-            let textePartage = `Recette : ${recetteActiveEnCours.nom}\n\nIngrédients :\n`;
-            if (recetteActiveEnCours.ingredients) {
-                recetteActiveEnCours.ingredients.forEach(i => {
-                    textePartage += `- ${i.qte || ''} ${i.unit || ''} ${i.nom}\n`;
-                });
-            }
-            textePartage += `\nPréparation :\n`;
-            if (recetteActiveEnCours.etapes) {
-                recetteActiveEnCours.etapes.forEach((e, idx) => {
-                    textePartage += `${idx + 1}. ${e}\n`;
-                });
-            }
-            if (recetteActiveEnCours.source) {
-                textePartage += `\nSource : ${recetteActiveEnCours.source}`;
-            }
-
-            if (navigator.share) {
-                try {
-                    let shareData = { title: recetteActiveEnCours.nom, text: textePartage };
-                    if (recetteActiveEnCours.img) {
-                        try {
-                            const response = await fetch(recetteActiveEnCours.img);
-                            const blob = await response.blob();
-                            const file = new File([blob], 'recette.jpg', { type: blob.type });
-                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                shareData.files = [file];
-                            }
-                        } catch (imgErr) {}
-                    }
-                    await navigator.share(shareData);
-                } catch (err) {}
-            } else {
-                navigator.clipboard.writeText(textePartage).then(() => {
-                    alert("Recette copiée dans le presse-papier !");
-                });
-            }
+            // Le partage est préparé en PDF imprimable, jamais en texte brut.
+            exporterRecettes();
         }
 
         function actionSupprimerRecette() {
@@ -3995,53 +3978,109 @@
             renderCategories(ongletActif && ongletActif.textContent.includes('Profil') ? 'famille' : 'incontournables');
         }
 
-        function exporterRecettes() {
-            const recette = recetteActiveEnCours;
-            if (!recette) {
-                alert('Ouvre d’abord une recette pour exporter sa fiche PDF.');
+        function ouvrirSelectionExportation() {
+            const modal = document.getElementById('exportProfileModal');
+            const conteneur = document.getElementById('exportProfileChoices');
+            const profils = obtenirProfilsTries();
+            conteneur.innerHTML = '';
+            if (!profils.length) {
+                conteneur.innerHTML = '<div class="search-empty">Aucun profil disponible.</div>';
+            }
+            profils.forEach(profil => {
+                const recettes = Array.isArray(database.famille?.[profil]) ? database.famille[profil] : [];
+                const nbVersions = recettes.reduce((total, recette) => total + 1 + (recette.variantes || []).filter(v => v.statut !== 'INACTIVE').length, 0);
+                const bouton = document.createElement('button');
+                bouton.type = 'button';
+                bouton.className = 'export-profile-choice';
+                bouton.innerHTML = `<span>${echapperTexteHTML(profil)}</span><small>${recettes.length} recette(s) · ${nbVersions} version(s)</small>`;
+                bouton.addEventListener('click', () => exporterRecueilProfil(profil));
+                conteneur.appendChild(bouton);
+            });
+            modal.classList.add('active');
+        }
+
+        function fermerSelectionExportation() {
+            document.getElementById('exportProfileModal')?.classList.remove('active');
+        }
+
+        function echapperTexteHTML(valeur) {
+            return String(valeur ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function exporterRecueilProfil(profil) {
+            const recettes = Array.isArray(database.famille?.[profil]) ? database.famille[profil] : [];
+            const versions = [];
+            recettes.forEach(recette => {
+                versions.push({ recette: { ...recette, _profilImpression: profil }, nomVersion: 'Originale', profil });
+                (recette.variantes || []).filter(v => v.statut !== 'INACTIVE').forEach(variante => {
+                    const recetteVariante = { ...recette, ...variante, id: recette.id, nom: recette.nom, _variantId: variante.id, _profilImpression: variante.profil || profil };
+                    versions.push({ recette: recetteVariante, nomVersion: variante.nomVersion || 'Variante', profil: variante.profil || profil });
+                });
+            });
+            fermerSelectionExportation();
+            if (!versions.length) {
+                alert(`Le profil « ${profil} » ne contient aucune recette à exporter.`);
                 return;
             }
+            ouvrirDocumentImpression(versions, `Recettes — ${profil}`);
+        }
 
-            const echapperPDF = valeur => String(valeur ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            const portionsBase = parseFloat(recette.portions) || 4;
-            const portionsPDF = Number.isFinite(portionsActuelles) && portionsActuelles > 0 ? portionsActuelles : portionsBase;
-            const ratio = portionsPDF / portionsBase;
-            const ingredients = (recette.ingredients || []).map(ing => {
-                let qte = ing.qte ?? '';
-                const valeur = parserQuantite(qte);
-                if (qte !== '' && Number.isFinite(valeur)) {
-                    const ajustee = valeur * ratio;
-                    qte = ['tasse','c.à.s','c.à.c'].includes(String(ing.unit || '').toLowerCase())
-                        ? formaterQuantiteFraction(ajustee)
-                        : (Number.isInteger(ajustee) ? String(ajustee) : String(Number(ajustee.toFixed(2))));
-                }
-                return `<li><span class="qty">${echapperPDF(qte)} ${echapperPDF(ing.unit || '')}</span> ${echapperPDF(ing.nom || '')}</li>`;
+        function exporterRecettes() {
+            // Conservée pour les actions de partage depuis une fiche : préparer un PDF imprimable de la version affichée.
+            if (!recetteActiveEnCours) return;
+            const parent = recetteParenteAffichee || recetteActiveEnCours;
+            const variante = recetteActiveEnCours._variantId
+                ? (parent.variantes || []).find(v => v.id === recetteActiveEnCours._variantId)
+                : null;
+            const profil = variante?.profil || parent.membre || recetteActiveEnCours.membre || '';
+            ouvrirDocumentImpression([{ recette: { ...recetteActiveEnCours, _profilImpression: profil }, nomVersion: variante?.nomVersion || 'Originale', profil }], recetteActiveEnCours.nom || 'Recette');
+        }
+
+        function ouvrirDocumentImpression(versions, titreDocument) {
+            const echapperPDF = echapperTexteHTML;
+            const pages = versions.map((element, index) => {
+                const recette = element.recette;
+                const portionsBase = parseFloat(recette.portions) || 4;
+                const portionsPDF = portionsBase;
+                const ratio = portionsPDF / portionsBase;
+                const ingredients = (recette.ingredients || []).map(ing => {
+                    let qte = ing.qte ?? '';
+                    const valeur = parserQuantite(qte);
+                    if (qte !== '' && Number.isFinite(valeur)) {
+                        const ajustee = valeur * ratio;
+                        qte = ['tasse','c.à.s','c.à.c'].includes(String(ing.unit || '').toLowerCase())
+                            ? formaterQuantiteFraction(ajustee)
+                            : (Number.isInteger(ajustee) ? String(ajustee) : String(Number(ajustee.toFixed(2))));
+                    }
+                    return `<li><span class="qty">${echapperPDF(qte)} ${echapperPDF(ing.unit || '')}</span> ${echapperPDF(ing.nom || '')}</li>`;
+                }).join('');
+                const etapes = (recette.etapes || []).map((etape, i) => {
+                    const texte = obtenirTexteEtapeCuisine(etape);
+                    return `<li><span class="numero">${i + 1}</span><span>${echapperPDF(texte)}</span></li>`;
+                }).join('');
+                const titre = echapperPDF(recette.nom || 'Recette sans titre');
+                const photo = recette.img ? `<img class="photo" src="${echapperPDF(recette.img)}" alt="${titre}">` : '<div class="photo-placeholder"></div>';
+                const categorie = echapperPDF(recette.categorie || '');
+                const profilSource = echapperPDF(element.profil || recette._profilImpression || recette.profil || recette.membre || '');
+                const nomVersion = echapperPDF(element.nomVersion || 'Originale');
+                const notes = recette.notes ? `<section class="notes"><strong>Notes</strong><p>${echapperPDF(recette.notes).replace(/\n/g, '<br>')}</p></section>` : '';
+                const source = profilSource ? `<span class="source">Source : ${profilSource}</span>` : '';
+                return `<article class="recipe-page ${index ? 'new-page' : ''}">
+                    <header class="header"><div class="header-copy"><h1>${titre}</h1><div class="meta">${[categorie, `${echapperPDF(portionsPDF)} portion(s)`, `Préparation : ${echapperPDF(recette.prepTime || '—')} min`, `Cuisson : ${echapperPDF(recette.cookTime || '—')} min`].filter(Boolean).join(' | ')}</div><div class="version-line"><span>Version : ${nomVersion}</span>${source}</div></div><div class="header-photo">${photo}</div></header>
+                    <div class="columns"><aside class="left"><h2 class="section-title">Ingrédients</h2><ul class="ingredients">${ingredients || '<li>Aucun ingrédient renseigné.</li>'}</ul></aside><main class="right"><h2 class="section-title">Préparation</h2><ol class="steps">${etapes || '<li>Aucune étape renseignée.</li>'}</ol></main></div>${notes}
+                    <div class="footer">${index + 1} / ${versions.length}</div></article>`;
             }).join('');
-            const etapes = (recette.etapes || []).map((etape, i) => {
-                const texte = obtenirTexteEtapeCuisine(etape);
-                return `<li><span class="numero">${i + 1}</span><span>${echapperPDF(texte)}</span></li>`;
-            }).join('');
-            const nomVersion = recette._variantId
-                ? ((recetteParenteAffichee?.variantes || []).find(v => v.id === recette._variantId)?.nomVersion || 'Variante')
-                : 'Originale';
-            const titre = echapperPDF(recette.nom || 'Recette sans titre');
-            const photo = recette.img ? `<img class="photo" src="${echapperPDF(recette.img)}" alt="${titre}">` : '';
-            const profil = echapperPDF(recette.profil || recette.membre || '');
-            const categorie = echapperPDF(recette.categorie || '');
-            const notes = recette.notes ? `<section class="notes"><h2>Notes</h2><p>${echapperPDF(recette.notes).replace(/\n/g, '<br>')}</p></section>` : '';
-            const source = profil ? `<p class="source">Source : ${profil}</p>` : '';
+
             const fenetre = window.open('', '_blank');
             if (!fenetre) {
                 alert('La fenêtre d’impression a été bloquée. Autorise les fenêtres contextuelles pour cette page, puis réessaie.');
                 return;
             }
             fenetre.document.open();
-            fenetre.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${titre}</title>
+            fenetre.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${echapperPDF(titreDocument)}</title>
 <style>
-@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.35}.header{border-bottom:1.5px solid #222;padding-bottom:8px;margin-bottom:10px}.header h1{font-size:21pt;line-height:1.12;margin:0 0 5px;font-weight:700}.meta{font-size:8.5pt;color:#555}.version{font-size:8pt;color:#555;margin-top:3px}.columns{display:grid;grid-template-columns:36% 1fr;gap:18px;align-items:start}.left{min-width:0}.right{min-width:0}.photo{display:block;width:100%;max-height:105px;object-fit:cover;margin:0 0 10px;border-radius:2px}.section-title{font-size:11pt;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:0 0 7px}.ingredients{list-style:none;padding:0;margin:0}.ingredients li{padding:4px 0;border-bottom:1px solid #eee;font-size:9pt;break-inside:avoid}.qty{font-weight:700}.steps{list-style:none;padding:0;margin:0}.steps li{display:flex;gap:8px;margin:0 0 9px;font-size:9.3pt;break-inside:avoid}.numero{flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700}.notes{margin-top:12px;padding-top:7px;border-top:1px solid #bbb}.notes h2{font-size:9pt;text-transform:uppercase;margin:0 0 4px}.notes p{font-size:8.5pt;margin:0}.source{font-size:7.5pt;color:#666;margin-top:8px;overflow-wrap:anywhere}.footer{margin-top:10px;padding-top:5px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:7pt}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}@media screen{body{max-width:210mm;margin:20px auto;padding:12mm;box-shadow:0 1px 12px #bbb}.print-hint{font-size:12px;color:#666;margin-bottom:12px}}
-</style></head><body><div class="print-hint">Aperçu de la fiche — choisissez « Enregistrer au format PDF » dans les options d’impression.</div>
-<header class="header"><h1>${titre}</h1><div class="meta">${[categorie, `${echapperPDF(portionsPDF)} portion(s)`, `Préparation : ${echapperPDF(recette.prepTime || '—')} min`, `Cuisson : ${echapperPDF(recette.cookTime || '—')} min`].filter(Boolean).join(' | ')}</div><div class="version">Version : ${echapperPDF(nomVersion)}</div></header>
-<div class="columns"><aside class="left">${photo}<h2 class="section-title">Ingrédients</h2><ul class="ingredients">${ingredients || '<li>Aucun ingrédient renseigné.</li>'}</ul></aside><main class="right"><h2 class="section-title">Préparation</h2><ol class="steps">${etapes || '<li>Aucune étape renseignée.</li>'}</ol></main></div>${notes}${source}<div class="footer">Mes recettes</div><script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=r;i.onerror=r}))).then(()=>setTimeout(()=>window.print(),250));});<\/script></body></html>`);
+@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.38}.recipe-page{position:relative;min-height:270mm;page-break-after:always;break-after:page}.recipe-page:last-child{page-break-after:auto;break-after:auto}.header{display:grid;grid-template-columns:minmax(0,1fr) 34%;gap:14px;align-items:start;border-bottom:1px solid #bbb;padding-bottom:9px;margin-bottom:14px;min-height:78px}.header-copy{min-width:0}.header h1{font-size:21pt;line-height:1.12;margin:0 0 6px;font-weight:700}.meta{font-size:8.5pt;color:#555}.version-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:6px;font-size:9pt;color:#555}.source{text-align:right;margin-left:auto;overflow-wrap:anywhere}.header-photo{width:100%;height:86px}.photo{display:block;width:100%;height:86px;object-fit:cover}.photo-placeholder{width:100%;height:86px}.columns{display:grid;grid-template-columns:36% minmax(0,1fr);gap:18px;align-items:start}.left,.right{min-width:0}.section-title{font-size:11pt;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #aaa;padding-bottom:4px;margin:0 0 7px}.ingredients{list-style:none;padding:0;margin:0}.ingredients li{padding:4px 0;border-bottom:1px solid #eee;font-size:10pt;break-inside:avoid}.qty{font-weight:700}.steps{list-style:none;padding:0;margin:0}.steps li{display:flex;gap:8px;margin:0 0 9px;font-size:10pt;break-inside:avoid}.numero{flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700}.notes{margin-top:14px;padding-top:8px;border-top:1px solid #bbb;font-size:10pt}.notes strong{font-weight:700}.notes p{font-size:10pt;margin:4px 0 0}.footer{position:absolute;bottom:0;left:0;right:0;padding-top:5px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:7pt}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.print-hint{display:none}}@media screen{body{max-width:210mm;margin:20px auto;padding:12mm;box-shadow:0 1px 12px #bbb}.recipe-page{min-height:273mm}.print-hint{font-size:12px;color:#666;margin-bottom:12px}}
+</style></head><body><div class="print-hint">Aperçu PDF — pour partager la recette ou le recueil, choisissez « Enregistrer au format PDF », puis partagez le fichier enregistré.</div>${pages}<script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=r;i.onerror=r}))).then(()=>setTimeout(()=>window.print(),300));});<\/script></body></html>`);
             fenetre.document.close();
         }
 
