@@ -4193,18 +4193,23 @@ async function creerEtPartagerPDF(){
   bouton.textContent=surMobile?'Créer et partager le PDF':'Télécharger le PDF';
  }
 }
-// Exposer explicitement la fonction au bouton de la fenêtre d'aperçu.
+// Exposer la fonction et relier le bouton immédiatement.
+// Le bouton est déjà présent dans le document à cet endroit du script;
+// on ne dépend donc pas de l'événement DOMContentLoaded de la fenêtre créée.
 window.creerEtPartagerPDF = creerEtPartagerPDF;
-window.addEventListener('DOMContentLoaded',()=>{
- const b=document.querySelector('.print-action');
- if(b){
-  b.textContent=window.matchMedia('(max-width: 600px)').matches?'Créer et partager le PDF':'Télécharger le PDF';
-  b.addEventListener('click', (event)=>{
-   event.preventDefault();
-   window.creerEtPartagerPDF();
+const boutonPDF = document.querySelector('.print-action');
+if (boutonPDF) {
+ boutonPDF.textContent = window.matchMedia('(max-width: 600px)').matches
+  ? 'Créer et partager le PDF'
+  : 'Télécharger le PDF';
+ boutonPDF.addEventListener('click', function(event) {
+  event.preventDefault();
+  window.creerEtPartagerPDF().catch(function(erreur) {
+   const statut = document.getElementById('pdf-status');
+   if (statut) statut.textContent = erreur?.message || 'Une erreur empêche la création du PDF.';
   });
- }
-});
+ });
+}
 <\/script></body></html>`);
             fenetre.document.close();
         }
