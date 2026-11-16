@@ -4127,21 +4127,40 @@ async function creerEtPartagerPDF(){
   }));
   const hauteurCapture=Math.max(element.scrollHeight,element.getBoundingClientRect().height,document.documentElement.clientHeight);
   const largeurCapture=Math.max(element.scrollWidth,element.getBoundingClientRect().width,document.documentElement.clientWidth);
-  const options={
-   margin:[12,12,12,12],
+  const JsPDF=window.jspdf?.jsPDF || window.jsPDF;
+  if(typeof JsPDF!=='function') throw new Error('Le module PDF est incomplet. Recharge la page et réessaie.');
+  // Capturer chaque fiche séparément, puis l'insérer explicitement dans jsPDF.
+  // Cela évite le chemin html2pdf().toPdf() qui produisait ici un PDF sans image.
+  const pdf=new JsPDF({unit:'mm',format:formatJsPDF,orientation:'portrait'});
+  const fiches=Array.from(element.querySelectorAll('.recipe-page'));
+  if(!fiches.length) throw new Error('Aucune fiche recette à exporter.');
+  const optionsCapture={
+   margin:0,
    image:{type:'jpeg',quality:0.98},
-   html2canvas:{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,windowWidth:Math.ceil(largeurCapture),windowHeight:Math.ceil(hauteurCapture),onclone:(doc)=>{
-    const copie=doc.querySelector('.pdf-export-mode');
-    if(copie){copie.style.position='static';copie.style.left='auto';copie.style.top='auto';copie.style.zIndex='auto';copie.style.visibility='visible';copie.style.opacity='1';copie.style.display='block';}
-    doc.documentElement.style.background='#ffffff';
-    doc.body.style.background='#ffffff';
-   }},
-   jsPDF:{unit:'mm',format:formatJsPDF,orientation:'portrait'},
-   pagebreak:{mode:['css','legacy']}
+   html2canvas:{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,windowWidth:Math.ceil(largeurCapture),windowHeight:Math.ceil(hauteurCapture)}
   };
-  // Forcer explicitement les étapes canvas puis PDF évite une sortie blob
-  // produite avant la fin de la capture dans certains navigateurs.
-  const blob=await html2pdf().set(options).from(element).toCanvas().toPdf().outputPdf('blob');
+  for(let i=0;i<fiches.length;i++){
+   const canvas=await html2pdf().set(optionsCapture).from(fiches[i]).toCanvas().get('canvas');
+   if(!canvas || canvas.width<10 || canvas.height<10) throw new Error('La capture de la fiche '+(i+1)+' a échoué.');
+   const ctx=canvas.getContext('2d');
+   const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+   let contenuVisible=false;
+   for(let k=0;k<pixels.length;k+=Math.max(4,Math.floor(pixels.length/5000/4)*4)){
+    if(pixels[k]<245 || pixels[k+1]<245 || pixels[k+2]<245){contenuVisible=true;break;}
+   }
+   if(!contenuVisible) throw new Error('La fiche '+(i+1)+' a été capturée blanche. Le PDF n’a pas été téléchargé.');
+   if(i>0) pdf.addPage(formatJsPDF,'portrait');
+   const pageW=pdf.internal.pageSize.getWidth();
+   const pageH=pdf.internal.pageSize.getHeight();
+   const marge=12;
+   const ratio=Math.min((pageW-2*marge)/canvas.width,(pageH-2*marge)/canvas.height);
+   const imgW=canvas.width*ratio;
+   const imgH=canvas.height*ratio;
+   const imgX=(pageW-imgW)/2;
+   const imgY=marge;
+   pdf.addImage(canvas.toDataURL('image/jpeg',0.98),'JPEG',imgX,imgY,imgW,imgH,undefined,'FAST');
+  }
+  const blob=pdf.output('blob');
   if(!(blob instanceof Blob) || blob.size<1000) throw new Error('Le PDF généré est vide. Réessaie après avoir rechargé la page.');
   const maintenant=new Date();
   const dateFichier=maintenant.getFullYear()+'-'+String(maintenant.getMonth()+1).padStart(2,'0')+'-'+String(maintenant.getDate()).padStart(2,'0');
