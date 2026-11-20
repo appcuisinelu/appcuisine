@@ -1719,7 +1719,7 @@
             </section>
             <section class="appearance-section">
                 <h4>Catégories disponibles</h4>
-                <p class="appearance-hint">Les catégories personnalisées non utilisées restent disponibles pour la création.</p>
+                <p class="appearance-hint">Les catégories personnalisées non utilisées peuvent être supprimées. Une catégorie déjà associée à une recette doit être désactivée plutôt que supprimée.</p>
                 <div id="listeCategoriesAdmin" style="display:grid; gap:7px;"></div>
             </section>
         </div>
@@ -2001,9 +2001,52 @@
                 modifier.style.cssText = 'border:1px solid var(--border-color); background:var(--card-bg); color:var(--accent-color); border-radius:8px; padding:7px 10px; font-weight:600; cursor:pointer;';
                 modifier.onclick = () => modifierNomCategorie(key);
                 actions.append(statut, modifier);
+
+                // Seules les catégories personnalisées sans recette associée peuvent être supprimées.
+                if (meta.personnalisee && !categoriePossedeRecette(key)) {
+                    const supprimer = document.createElement('button');
+                    supprimer.type = 'button';
+                    supprimer.textContent = 'Supprimer';
+                    supprimer.style.cssText = 'border:1px solid #c65b5b; background:var(--card-bg); color:#c65b5b; border-radius:8px; padding:7px 10px; font-weight:600; cursor:pointer;';
+                    supprimer.onclick = () => supprimerCategorie(key);
+                    actions.appendChild(supprimer);
+                }
                 ligne.append(nom, actions);
                 liste.appendChild(ligne);
             });
+        }
+
+        function supprimerCategorie(key) {
+            const meta = categoryMeta[key];
+            if (!meta || !meta.personnalisee) {
+                alert('Seules les catégories personnalisées peuvent être supprimées.');
+                return;
+            }
+            if (categoriePossedeRecette(key)) {
+                alert('Cette catégorie est utilisée par une recette. Désactive-la plutôt que de la supprimer.');
+                actualiserListeCategoriesAdmin();
+                return;
+            }
+
+            const nom = meta.nom;
+            if (!confirm(`Confirmer la suppression de la catégorie « ${nom} » ? Cette action est définitive sur cet appareil.`)) return;
+
+            // Conserver les métadonnées en mémoire si l'enregistrement échoue.
+            delete categoryMeta[key];
+            if (!sauvegarderNomsCategories()) {
+                categoryMeta[key] = meta;
+                actualiserListeCategoriesAdmin();
+                alert('La catégorie n’a pas pu être supprimée : la sauvegarde a échoué.');
+                return;
+            }
+
+            const option = document.querySelector(`#recipeCategory option[value="${CSS.escape(key)}"]`);
+            if (option) option.remove();
+            const selectCategorie = document.getElementById('recipeCategory');
+            if (selectCategorie && selectCategorie.value === key) selectCategorie.value = '';
+
+            actualiserListeCategoriesAdmin();
+            alert(`La catégorie « ${nom} » a été supprimée.`);
         }
 
         function sauvegarderNomsCategories() {
