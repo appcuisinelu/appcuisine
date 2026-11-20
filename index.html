@@ -2091,7 +2091,8 @@
                 if (option) option.textContent = `${nouveauNom}${meta.personnalisee && !categoriePossedeRecette(key) ? ' (disponible à la création)' : ''}`;
                 actualiserListeCategoriesAdmin();
                 const message = document.getElementById('categorieAdminMessage');
-                if (message) message.textContent = `La catégorie « ${ancienNom} » a été renommée « ${nouveauNom} ».`;
+                if (message) message.textContent = '';
+                alert(`La catégorie « ${ancienNom} » a été renommée « ${nouveauNom} » avec succès.`);
             } catch (e) {
                 alert('Le nouveau nom n’a pas pu être sauvegardé sur cet appareil.');
             }
@@ -2117,11 +2118,14 @@
             }
             try {
                 if (!sauvegarderNomsCategories()) throw new Error('Échec de sauvegarde');
-                message.textContent = `La catégorie « ${nom} » a été ajoutée.`;
+                message.textContent = '';
                 champ.value = '';
                 actualiserListeCategoriesAdmin();
+                alert(`La catégorie « ${nom} » a été ajoutée avec succès.`);
             } catch (e) {
                 delete categoryMeta[key];
+                const optionAjoutee = selectCategorie?.querySelector(`option[value="${CSS.escape(key)}"]`);
+                if (optionAjoutee) optionAjoutee.remove();
                 message.textContent = 'Impossible de sauvegarder cette catégorie sur cet appareil.';
             }
         }
