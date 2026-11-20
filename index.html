@@ -1828,11 +1828,29 @@
             }
         } catch (e) { console.warn('Impossible de charger les recettes sauvegardées.', e); }
 
+        // Dernier état confirmé comme enregistré. Sert de point de retour si le stockage échoue.
+        let derniereDatabaseSauvegardee = JSON.stringify(database);
+
         function sauvegarderDatabase() {
             try {
-                localStorage.setItem('mesRecettesDatabase', JSON.stringify(database));
+                const donnees = JSON.stringify(database);
+                if (typeof donnees !== 'string') throw new Error('Les données ne peuvent pas être converties en JSON.');
+                localStorage.setItem('mesRecettesDatabase', donnees);
+                if (localStorage.getItem('mesRecettesDatabase') !== donnees) throw new Error('La vérification de la sauvegarde a échoué.');
+                derniereDatabaseSauvegardee = donnees;
+                return true;
             } catch (e) {
-                alert("Les recettes n'ont pas pu être sauvegardées sur cet appareil. Vérifiez l'espace de stockage disponible.");
+                // Restaurer le contenu de l'objet global sans remplacer sa référence.
+                try {
+                    const ancienne = JSON.parse(derniereDatabaseSauvegardee);
+                    Object.keys(database).forEach(cle => delete database[cle]);
+                    Object.assign(database, ancienne);
+                } catch (erreurRestauration) {
+                    console.error('Impossible de restaurer le dernier état enregistré.', erreurRestauration);
+                }
+                console.error('Échec de sauvegarde des recettes.', e);
+                alert("Les recettes n'ont pas pu être sauvegardées sur cet appareil. Tes dernières données enregistrées ont été conservées. Vérifie l'espace de stockage disponible, puis réessaie.");
+                return false;
             }
         }
 
@@ -1989,16 +2007,30 @@
         }
 
         function sauvegarderNomsCategories() {
-            const noms = {};
-            Object.entries(categoryMeta).forEach(([key, meta]) => {
-                if (!meta.personnalisee) noms[key] = meta.nom;
-            });
-            localStorage.setItem('mesRecettesNomsCategories', JSON.stringify(noms));
-            const personnalisees = {};
-            Object.entries(categoryMeta).forEach(([key, meta]) => {
-                if (meta.personnalisee) personnalisees[key] = { nom: meta.nom, img: meta.img };
-            });
-            localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
+            const ancienneListe = localStorage.getItem('mesRecettesNomsCategories');
+            const anciennesPersonnalisees = localStorage.getItem('mesRecettesCategoriesPersonnalisees');
+            try {
+                const noms = {};
+                Object.entries(categoryMeta).forEach(([key, meta]) => {
+                    if (!meta.personnalisee) noms[key] = meta.nom;
+                });
+                const personnalisees = {};
+                Object.entries(categoryMeta).forEach(([key, meta]) => {
+                    if (meta.personnalisee) personnalisees[key] = { nom: meta.nom, img: meta.img };
+                });
+                localStorage.setItem('mesRecettesNomsCategories', JSON.stringify(noms));
+                localStorage.setItem('mesRecettesCategoriesPersonnalisees', JSON.stringify(personnalisees));
+                return true;
+            } catch (e) {
+                try {
+                    if (ancienneListe === null) localStorage.removeItem('mesRecettesNomsCategories');
+                    else localStorage.setItem('mesRecettesNomsCategories', ancienneListe);
+                    if (anciennesPersonnalisees === null) localStorage.removeItem('mesRecettesCategoriesPersonnalisees');
+                    else localStorage.setItem('mesRecettesCategoriesPersonnalisees', anciennesPersonnalisees);
+                } catch (erreurRestauration) { console.error('Impossible de restaurer les catégories enregistrées.', erreurRestauration); }
+                console.error('Échec de sauvegarde des catégories.', e);
+                return false;
+            }
         }
 
         function actualiserNomCategorieDansInterface(ancienNom, nouveauNom) {
@@ -2025,6 +2057,8 @@
             if (doublon) { alert('Une catégorie porte déjà ce nom.'); return; }
             if (nouveauNom === ancienNom) return;
 
+            // Garder un état de retour avant de modifier les recettes et leurs variantes.
+            const databaseAvantRenommage = JSON.stringify(database);
             // Met à jour les recettes et leurs variantes sans changer leurs identifiants ni leur classement.
             const mettreAJourRecettes = valeur => {
                 if (!valeur) return;
@@ -2038,8 +2072,21 @@
             actualiserNomCategorieDansInterface(ancienNom, nouveauNom);
 
             try {
-                sauvegarderNomsCategories();
-                sauvegarderDatabase();
+                if (!sauvegarderNomsCategories()) {
+                    const ancienneDatabase = JSON.parse(databaseAvantRenommage);
+                    Object.keys(database).forEach(cle => delete database[cle]);
+                    Object.assign(database, ancienneDatabase);
+                    meta.nom = ancienNom;
+                    actualiserNomCategorieDansInterface(nouveauNom, ancienNom);
+                    alert('Le nouveau nom n’a pas pu être sauvegardé sur cet appareil.');
+                    return;
+                }
+                if (!sauvegarderDatabase()) {
+                    meta.nom = ancienNom;
+                    sauvegarderNomsCategories();
+                    actualiserNomCategorieDansInterface(nouveauNom, ancienNom);
+                    return;
+                }
                 const option = document.querySelector(`#recipeCategory option[value="${CSS.escape(key)}"]`);
                 if (option) option.textContent = `${nouveauNom}${meta.personnalisee && !categoriePossedeRecette(key) ? ' (disponible à la création)' : ''}`;
                 actualiserListeCategoriesAdmin();
@@ -2069,7 +2116,7 @@
                 selectCategorie.appendChild(option);
             }
             try {
-                sauvegarderNomsCategories();
+                if (!sauvegarderNomsCategories()) throw new Error('Échec de sauvegarde');
                 message.textContent = `La catégorie « ${nom} » a été ajoutée.`;
                 champ.value = '';
                 actualiserListeCategoriesAdmin();
@@ -3070,7 +3117,7 @@
                 if (varianteSelectionneeId && recetteParenteAffichee) {
                     const variante = (recetteParenteAffichee.variantes || []).find(v => v.id === varianteSelectionneeId);
                     if (variante) { variante.statut = 'INACTIVE'; variante.dateDesactivation = new Date().toISOString(); }
-                    sauvegarderDatabase();
+                    if (!sauvegarderDatabase()) return;
                     const parent = recetteParenteAffichee;
                     varianteSelectionneeId = null;
                     afficherDetailRecette(parent);
@@ -3085,7 +3132,7 @@
                 for (const profKey in database.famille) {
                     database.famille[profKey] = database.famille[profKey].filter(r => r.id !== recetteActiveEnCours.id);
                 }
-                sauvegarderDatabase();
+                if (!sauvegarderDatabase()) return;
                 fermerDetailRecette();
                 alert("Recette supprimée.");
                 retourAccueil();
@@ -3299,7 +3346,10 @@
             Object.values(database.famille).forEach(parcourir);
 
             if ((localStorage.getItem('profilFamillePreere') || 'Lucie') === ancienNom) localStorage.setItem('profilFamillePreere', nomNettoye);
-            sauvegarderDatabase();
+            if (!sauvegarderDatabase()) {
+                localStorage.setItem('profilFamillePreere', ancienNom);
+                return;
+            }
             // Reconstruire immédiatement les listes avec les noms et l'ordre à jour.
             actualiserOrdreProfils();
             actualiserListeProfilsAdmin();
@@ -3324,7 +3374,7 @@
             if (!confirm(question)) return;
             if (!database.profilsMeta[nom]) database.profilsMeta[nom] = { id: 'profil_' + nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_') };
             database.profilsMeta[nom].actif = activer;
-            sauvegarderDatabase();
+            if (!sauvegarderDatabase()) return;
             actualiserListeProfilsAdmin();
             const profilCourant = localStorage.getItem('profilFamillePreere') || 'Lucie';
             if (!activer && profilCourant === nom) {
@@ -3840,7 +3890,7 @@
                 const variante = (recetteParenteVariante.variantes || []).find(v => v.id === idVarianteEnEdition);
                 if (!variante) { alert("Cette variante est introuvable."); return; }
                 Object.assign(variante, { nomVersion, profil: document.getElementById('variantProfileInput').value, justification: document.getElementById('variantReasonInput').value.trim(), ingredients, etapes, notes: document.getElementById('recipeNotes').value.trim(), statut: 'ACTIVE' });
-                sauvegarderDatabase();
+                if (!sauvegarderDatabase()) return;
                 const parent = recetteParenteVariante; const id = idVarianteEnEdition;
                 modeEditionVariante = false; idVarianteEnEdition = null; recetteParenteVariante = null;
                 fermerFormulaireAjout();
@@ -3871,7 +3921,7 @@
                 };
                 if (!Array.isArray(recetteParenteVariante.variantes)) recetteParenteVariante.variantes = [];
                 recetteParenteVariante.variantes.push(variante);
-                sauvegarderDatabase();
+                if (!sauvegarderDatabase()) return;
                 const parent = recetteParenteVariante;
                 modeCreationVariante = false;
                 recetteParenteVariante = null;
@@ -3931,7 +3981,7 @@
                     database.famille[profilChoisi].push(recetteMiseAJour);
                 }
 
-                sauvegarderDatabase();
+                if (!sauvegarderDatabase()) return;
                 alert("Modifications enregistrées !");
                 fermerFormulaireAjout();
                 idRecetteEnEdition = null;
@@ -3966,7 +4016,7 @@
                     if (!database.famille[membre]) database.famille[membre] = [];
                     database.famille[membre].push(nouvelleRecette);
                 }
-                sauvegarderDatabase();
+                if (!sauvegarderDatabase()) return;
                 alert("Recette enregistrée !");
                 fermerFormulaireAjout();
             }
